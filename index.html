@@ -1,3 +1,4 @@
+<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Build-a-Bot Lab</title>
@@ -55,6 +56,21 @@ body {
 .collected { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px; }
 .collected div { border: 1px solid var(--line); padding: 6px 8px; min-width: 0; }
 .collected div b { display: block; font-family: var(--display); font-size: 9px; font-weight: normal; color: var(--c, var(--amber)); margin-bottom: 2px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-family: var(--display); font-size: 9px; letter-spacing: 1px; color: var(--c, var(--amber)); }
+.field input { font-family: var(--body); font-size: 24px; padding: 6px 10px; background: var(--ink); color: var(--text); border: 2px solid var(--line); max-width: 360px; width: 100%; }
+.field input:focus-visible { outline: 3px solid var(--c, var(--amber)); outline-offset: 2px; }
+.report { background: var(--text); color: var(--ink); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.report .hdr { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 16px; font-family: var(--display); font-size: 10px; line-height: 1.6; }
+.report .hdr strong { font-size: 13px; font-weight: normal; }
+.report .wrap { overflow-x: auto; }
+.report table { color: inherit; font-family: var(--body); border-collapse: collapse; width: 100%; font-size: 19px; line-height: 1.15; }
+.report th { font-family: var(--display); font-size: 8px; text-align: left; padding: 4px 6px; border-bottom: 2px solid var(--ink); }
+.report td { padding: 5px 6px; border-bottom: 1px solid #c9c3d6; vertical-align: top; }
+.report td.ok { color: #007a2e; font-family: var(--display); font-size: 9px; white-space: nowrap; }
+.report td.miss { color: #c4003b; font-family: var(--display); font-size: 9px; white-space: nowrap; }
+.report .picked { color: #c4003b; }
+.report textarea { width: 100%; height: 140px; font-family: var(--body); font-size: 16px; }
 .tryit { font-family: var(--display); font-size: 10px; line-height: 1.8; color: var(--ink); background: var(--c, var(--amber)); padding: 8px 10px; }
 .tray { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
 .slot { border: 2px dashed var(--line); padding: 6px 4px; text-align: center; font-family: var(--display); font-size: 8px; color: var(--dim); line-height: 1.5; min-width: 0; overflow-wrap: anywhere; }
@@ -616,10 +632,17 @@ function title() {
       <li>Read the part's lesson, then answer 2 quick questions to install it.</li>
     </ul>
     <p class="dimtext">No robotics experience needed. About 15–20 minutes.${best ? ` Best score: ${best}.` : ''}</p>
+    <div class="field"><label for="sname">YOUR NAME (SHOWN ON YOUR RESULTS)</label><input id="sname" maxlength="40" autocomplete="name" placeholder="First and last name" value="${esc(store.get('name', ''))}"></div>
     <div class="row"><button class="btn" data-act="start" data-primary>START GAME</button><button class="btn alt" data-act="manual">PARTS MANUAL</button><button class="btn alt" data-act="snd">SOUND: ${soundOn ? 'ON' : 'OFF'}</button></div>`,
-    '#ffa300', { start: newGame, manual: () => manual(title), snd: () => { soundOn = !soundOn; store.set('sound', soundOn); title(); } });
+    '#ffa300', {
+      start: () => { G.name = $('sname').value.trim(); store.set('name', G.name); newGame(); },
+      manual: () => manual(title), snd: () => { soundOn = !soundOn; store.set('sound', soundOn); title(); } });
 }
-function newGame() { G.li = 0; G.parts = []; G.score = 0; G.firstTry = 0; G.asked = 0; brief(); }
+function newGame() {
+  G.li = 0; G.parts = []; G.score = 0; G.firstTry = 0; G.asked = 0; G.results = []; G.crashes = 0;
+  G.started = Date.now(); G.name = G.name ?? store.get('name', '');
+  brief();
+}
 function brief() {
   const L = LEVELS[G.li];
   genLevel(); G.state = 'brief';
@@ -654,7 +677,7 @@ function pause() {
     LEVELS[G.li].color, { go: play, manual: () => manual(() => { G.state = 'play'; pause(); }), quit: title });
 }
 function crash() {
-  G.state = 'crash';
+  G.state = 'crash'; G.crashes++;
   show(`<div class="eyebrow">SYSTEM CRASH</div><h2>THE GLITCHES GOT YOU</h2>
     <p>BOLT rebooted and dropped the parts it was carrying. The lab has been reshuffled. ${has('chassis') ? '' : 'Tip: a sturdier frame (the chassis) will help you survive more hits.'}</p>
     <div class="row"><button class="btn" data-act="retry" data-primary>RETRY LEVEL</button></div>`, '#ff004d', { retry: brief });
@@ -687,6 +710,7 @@ function quiz(i, pre = '') {
   G.state = 'quiz';
   const order = Q.a.map((_, k) => k).sort(() => Math.random() - .5);
   let tries = 0;
+  const rec = { level: L.final ? 'Final inspection' : L.name, q: Q.q, answer: Q.a[0], wrong: [] };
   const render = () => show(`<div class="eyebrow">${L.final ? 'FINAL INSPECTION' : 'INSTALL CHECK · ' + L.name.toUpperCase()} · QUESTION ${i + 1} OF ${L.quiz.length}</div>
     ${pre}<h2>${esc(Q.q)}</h2>
     <div class="answers">${order.map((k, n) => `<button class="ans" data-act="pick" data-k="${k}"><span>${n + 1}</span>${esc(Q.a[k])}</button>`).join('')}</div>
@@ -696,6 +720,7 @@ function quiz(i, pre = '') {
         if (k === 0) {
           if (tries === 1) { G.score += 200; G.firstTry++; }
           G.asked += tries === 1 ? 1 : 0;
+          G.results.push(rec);
           sfx('good');
           modal.querySelectorAll('.ans').forEach(x => { x.disabled = true; if (+x.dataset.k === 0) x.classList.add('right'); });
           const last = i + 1 >= L.quiz.length;
@@ -704,6 +729,7 @@ function quiz(i, pre = '') {
           modal.querySelector('[data-primary]').focus();
         } else {
           if (tries === 1) G.asked++;
+          rec.wrong.push(Q.a[k]);
           sfx('bad'); b.classList.add('wrong'); b.disabled = true;
           $('fb').innerHTML = `<div class="fb bad"><strong>NOT QUITE · HINT</strong>${hl(L.big)} Try another answer.</div>`;
         }
@@ -743,12 +769,47 @@ function finale() {
       <div class="stat"><div>BEST</div><div>${best}</div></div>
       <div class="stat"><div>FIRST-TRY ANSWERS</div><div>${G.firstTry}/${G.asked} (${acc}%)</div></div>
     </div>
+    <h3>RESULTS TO HAND IN</h3>
+    <p class="dimtext">Take a screenshot of the white card below, or copy it as text, and send it to your instructor.</p>
+    ${reportHTML()}
+    <div class="row"><button class="btn" data-act="copy">COPY RESULTS</button></div>
+    <div id="copyfb"></div>
     <h3>THE SIX SYSTEMS</h3>
     <ul>${PARTS.map(l => `<li><b>${esc(l.name)}</b>: ${esc(l.role)}</li>`).join('')}</ul>
     <div class="note">Example: a robot vacuum's <b>bump sensor</b> clicks (sense), its <b>controller</b> decides to turn (think), and its <b>motors</b> spin the wheels (act). The <b>battery</b> powers it all, and the <b>chassis</b> holds it together. Its brushes and suction do the actual cleaning, which makes them its end effector.</div>
     <div class="row"><button class="btn" data-act="again" data-primary>PLAY AGAIN</button><button class="btn alt" data-act="manual">PARTS MANUAL</button></div>`,
-    '#fff1e8', { again: newGame, manual: () => manual(finale) });
+    '#fff1e8', { again: newGame, manual: () => manual(finale), copy: copyReport });
   paintBots();
+}
+function reportMeta() {
+  const mins = Math.max(1, Math.round((Date.now() - G.started) / 60000));
+  const missed = G.results.filter(r => r.wrong.length);
+  return { mins, missed, date: new Date(G.started).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }), who: G.name || '(no name entered)' };
+}
+function reportHTML() {
+  const m = reportMeta(), n = G.results.length;
+  return `<div class="report">
+    <div class="hdr"><strong>${esc(m.who)}</strong><span>BUILD-A-BOT LAB · ${esc(m.date)}</span></div>
+    <div class="hdr"><span>SCORE ${G.score}</span><span>FIRST TRY ${n - m.missed.length}/${n}</span><span>LEVELS 7/7</span><span>TIME ${m.mins} MIN</span><span>CRASHES ${G.crashes}</span></div>
+    <div class="wrap"><table>
+      <thead><tr><th>TOPIC</th><th>QUESTION</th><th>RESULT</th></tr></thead>
+      <tbody>${G.results.map(r => `<tr><td>${esc(r.level)}</td><td>${esc(r.q)}${r.wrong.length ? `<div class="picked">Picked first: ${r.wrong.map(esc).join('; ')}</div><div>Correct: ${esc(r.answer)}</div>` : ''}</td>
+        <td class="${r.wrong.length ? 'miss' : 'ok'}">${r.wrong.length ? `MISSED (${r.wrong.length + 1} TRIES)` : '✓ FIRST TRY'}</td></tr>`).join('')}</tbody>
+    </table></div>
+  </div>`;
+}
+function reportText() {
+  const m = reportMeta(), n = G.results.length;
+  return [`Build-a-Bot Lab results: ${m.who}`, `Date: ${m.date}`,
+    `Score: ${G.score} | First-try correct: ${n - m.missed.length}/${n} | Levels: 7/7 | Time: ${m.mins} min | Crashes: ${G.crashes}`, '',
+    m.missed.length ? 'Missed on first try:' : 'Missed on first try: none',
+    ...m.missed.map(r => `- [${r.level}] ${r.q}\n    picked: ${r.wrong.join('; ')}\n    correct: ${r.answer}`)].join('\n');
+}
+function copyReport() {
+  const text = reportText(), fb = $('copyfb');
+  const fallback = () => { fb.innerHTML = `<div class="report"><p>Copy didn't work here. Select this text and copy it:</p><textarea id="reporttext" readonly></textarea></div>`; const ta = $('reporttext'); ta.value = text; ta.focus(); ta.select(); };
+  try { navigator.clipboard.writeText(text).then(() => { fb.innerHTML = '<p class="dimtext">Copied. Paste it into an email or your class page.</p>'; }, fallback); }
+  catch (e) { fallback(); }
 }
 function unlock(id) { const u = store.get('unlocked', []); if (!u.includes(id)) { u.push(id); store.set('unlocked', u); } }
 function manual(back) {
