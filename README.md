@@ -4,7 +4,9 @@ A retro, 8-bit style browser game that teaches **the six core hardware parts of 
 
 ## Play
 
-Open `index.html` in any modern browser (desktop or phone). No install or build step.
+**Live:** https://mdeanh-robotics-game.netlify.app
+
+Or open `index.html` in any modern browser (desktop or phone). No install or build step.
 
 ```bash
 python3 -m http.server 8765
