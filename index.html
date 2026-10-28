@@ -1,0 +1,631 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Build-a-Bot Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
+<style>
+/* Layout: one arcade-cabinet column. HUD strip, pixel screen, parts tray. Lessons open as a modal terminal card. */
+:root {
+  color-scheme: dark;
+  --ink: #0b0f24;        /* cabinet black-blue */
+  --panel: #161c3d;      /* bezel */
+  --line: #2b3a7a;       /* rules, wall blue */
+  --text: #fff1e8;       /* warm paper white */
+  --dim: #a7a3c2;        /* secondary text */
+  --amber: #ffa300;      /* primary accent */
+  --good: #00e436;
+  --bad: #ff004d;
+  --display: "Press Start 2P", "Courier New", monospace;
+  --body: "VT323", "Courier New", monospace;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  background: var(--ink); color: var(--text); font-family: var(--body); font-size: 22px; line-height: 1.25;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px 24px;
+}
+.cab { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+.marquee { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px 16px; }
+.marquee h1 { font-family: var(--display); font-size: clamp(14px, 2.6vw, 22px); margin: 0; color: var(--amber); letter-spacing: 1px; text-shadow: 3px 3px 0 #7e2553; }
+.marquee small { font-family: var(--display); font-size: 9px; color: var(--dim); letter-spacing: 2px; }
+.hud { display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: var(--display); font-size: 10px; background: var(--panel); border: 2px solid var(--line); padding: 10px 12px; align-items: center; }
+.hud b { color: var(--amber); font-weight: normal; }
+.hud .grow { flex: 1; }
+.bar { display: inline-block; width: 70px; height: 10px; border: 2px solid var(--dim); vertical-align: middle; position: relative; }
+.bar i { position: absolute; inset: 0; width: 100%; background: #ffec27; display: block; }
+.screen { position: relative; background: #000; border: 4px solid var(--line); box-shadow: 0 0 0 4px var(--panel), 0 0 40px rgba(41,173,255,.15); }
+.screen canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; image-rendering: crisp-edges; aspect-ratio: 320 / 176; }
+.screen::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px); }
+.tray { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.slot { border: 2px dashed var(--line); padding: 6px 4px; text-align: center; font-family: var(--display); font-size: 8px; color: var(--dim); line-height: 1.5; min-width: 0; overflow-wrap: anywhere; }
+.slot.on { border-style: solid; color: var(--ink); }
+.help { font-size: 18px; color: var(--dim); display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.help kbd { font-family: var(--display); font-size: 9px; color: var(--text); border: 1px solid var(--dim); padding: 2px 4px; }
+.touch { display: none; justify-content: space-between; align-items: center; gap: 16px; user-select: none; -webkit-user-select: none; touch-action: none; }
+@media (pointer: coarse) { .touch { display: flex; } .help { display: none; } }
+.dpad { display: grid; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(3, 56px); gap: 4px; }
+.dpad button, .boost { font-family: var(--display); font-size: 14px; background: var(--panel); color: var(--text); border: 2px solid var(--line); border-radius: 0; touch-action: none; }
+.dpad button:active, .boost:active { background: var(--line); }
+.boost { width: 96px; height: 96px; border-radius: 50%; color: var(--amber); border-color: var(--amber); }
+
+/* modal terminal card */
+.modal { position: fixed; inset: 0; background: rgba(5,7,18,.88); display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; z-index: 20;
+  padding: max(24px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(24px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.card { width: 100%; max-width: 680px; margin: auto 0; background: var(--panel); border: 4px solid var(--c, var(--amber)); box-shadow: 8px 8px 0 #000; padding: 20px 22px 22px; display: flex; flex-direction: column; gap: 14px; }
+.eyebrow { font-family: var(--display); font-size: 9px; letter-spacing: 2px; color: var(--c, var(--amber)); }
+.card h2 { font-family: var(--display); font-size: clamp(15px, 3vw, 20px); line-height: 1.5; margin: 0; text-wrap: balance; }
+.card h3 { font-family: var(--display); font-size: 10px; letter-spacing: 1px; color: var(--c, var(--amber)); margin: 6px 0 0; }
+.card p { margin: 0; max-width: 62ch; }
+.card ul { margin: 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.card li { padding-left: 18px; position: relative; }
+.card li::before { content: "▸"; position: absolute; left: 0; color: var(--c, var(--amber)); }
+.card li b { color: var(--text); font-weight: normal; text-decoration: underline; text-decoration-color: var(--c, var(--amber)); text-underline-offset: 3px; }
+.note { border-left: 4px solid var(--c, var(--amber)); padding: 6px 12px; background: rgba(0,0,0,.25); color: var(--text); }
+.dimtext { color: var(--dim); }
+.row { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn { font-family: var(--display); font-size: 11px; padding: 12px 14px; background: var(--c, var(--amber)); color: var(--ink); border: 0; cursor: pointer; box-shadow: 4px 4px 0 #000; }
+.btn.alt { background: transparent; color: var(--text); border: 2px solid var(--dim); box-shadow: none; }
+.btn:focus-visible, .ans:focus-visible, .dpad button:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
+.answers { display: flex; flex-direction: column; gap: 8px; }
+.ans { text-align: left; font-family: var(--body); font-size: 22px; padding: 8px 12px; background: var(--ink); color: var(--text); border: 2px solid var(--line); cursor: pointer; display: flex; gap: 12px; align-items: baseline; }
+.ans span { font-family: var(--display); font-size: 10px; color: var(--c, var(--amber)); }
+.ans:hover:not(:disabled) { border-color: var(--c, var(--amber)); }
+.ans.right { border-color: var(--good); background: #0c2a17; }
+.ans.wrong { border-color: var(--bad); background: #2a0c16; }
+.ans:disabled { cursor: default; }
+.fb { padding: 8px 12px; border: 2px solid; }
+.fb.good { border-color: var(--good); } .fb.bad { border-color: var(--bad); }
+.fb strong { font-family: var(--display); font-size: 10px; display: block; margin-bottom: 4px; }
+.fb.good strong { color: var(--good); } .fb.bad strong { color: var(--bad); }
+.bots { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.bots canvas { image-rendering: pixelated; width: 128px; height: 128px; background: var(--ink); border: 2px solid var(--line); max-width: 100%; }
+.arrow { font-family: var(--display); font-size: 16px; color: var(--c, var(--amber)); }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+.mcard { border: 2px solid var(--line); padding: 10px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.mcard .t { font-family: var(--display); font-size: 10px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+.stat { border: 2px solid var(--line); padding: 8px; }
+.stat div:first-child { font-family: var(--display); font-size: 8px; color: var(--dim); letter-spacing: 1px; }
+.stat div:last-child { font-family: var(--display); font-size: 16px; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.title-art { display: flex; justify-content: center; }
+.title-art canvas { width: 192px; height: 192px; image-rendering: pixelated; }
+.blink { animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .blink { animation: none; } }
+@media (max-width: 520px) { .tray { grid-template-columns: repeat(3, minmax(0, 1fr)); } .hud { font-size: 9px; } }
+</style>
+
+<div class="cab">
+  <div class="marquee">
+    <h1>BUILD-A-BOT LAB</h1>
+    <small>MDEANH ROBOTICS · INTRO TO ROBOT PARTS</small>
+  </div>
+  <div class="hud" id="hud">
+    <span id="hLevel">LEVEL 1</span>
+    <span>HP <b id="hHp">♥♥</b></span>
+    <span>PARTS <b id="hChips">0/5</b></span>
+    <span id="hEnergyWrap" hidden>ENERGY <span class="bar"><i id="hEnergy"></i></span></span>
+    <span class="grow"></span>
+    <span>SCORE <b id="hScore">0</b></span>
+  </div>
+  <div class="screen"><canvas id="game" width="320" height="176" aria-label="Game screen: drive BOLT the robot around the lab"></canvas></div>
+  <div class="tray" id="tray"></div>
+  <div class="help">
+    <span><kbd>←↑↓→</kbd> / <kbd>WASD</kbd> drive</span>
+    <span><kbd>SPACE</kbd> boost (after Power)</span>
+    <span><kbd>P</kbd> pause</span>
+    <span><kbd>M</kbd> sound</span>
+    <span><kbd>1-4</kbd> answer quizzes</span>
+  </div>
+  <div class="touch" id="touch">
+    <div class="dpad">
+      <span></span><button data-k="up" aria-label="Up">▲</button><span></span>
+      <button data-k="left" aria-label="Left">◀</button><span></span><button data-k="right" aria-label="Right">▶</button>
+      <span></span><button data-k="down" aria-label="Down">▼</button><span></span>
+    </div>
+    <button class="boost" data-k="boost">BOOST</button>
+  </div>
+</div>
+<div class="modal" id="modal" hidden></div>
+
+<script>
+// ---------- content ----------
+const LEVELS = [
+  { id: 'chassis', name: 'Chassis', role: 'the skeleton', color: '#c2c6d6', chips: 5, bugs: 2, bugSpeed: 20, walls: 20,
+    brief: ['LOOSE PARTS', "BOLT is just a bare circuit board on tiny wheels. One bump from a glitch and it falls apart. Collect 5 frame pieces, then roll back to the striped workbench to install them."],
+    ability: ['ARMOR', '+2 hit points. A frame protects the electronics inside.'],
+    what: "The chassis is a robot's skeleton. It holds every other part in place and protects the fragile electronics from bumps, dust, and water.",
+    types: [['Aluminum', 'light and strong; the most common choice for hobby and research robots'], ['Steel', 'very strong but heavy; used for factory arms that lift car parts'], ['Plastic and 3D prints', 'cheap and quick to change; great for prototypes and home robots'], ['Carbon fiber', 'very light and stiff; used in drones and racing robots']],
+    real: "A Roomba keeps everything inside a round plastic shell so it can slide off furniture legs. NASA's Mars rovers use lightweight metal bodies that keep their electronics warm and protected.",
+    terms: [['Payload', 'the weight a robot can carry beyond its own body'], ['Center of gravity', "the balance point. Keep heavy parts low so the robot doesn't tip over."]],
+    fact: 'Every extra gram in the frame needs more motor force and more battery to move it. Designers are always trading strength against weight.',
+    quiz: [
+      { q: "What does a robot's chassis do?", a: ['Holds the parts together and protects them', "Runs the robot's program", "Stores the robot's energy", 'Measures distance to walls'], why: 'The chassis is the structure. Programs run on the controller, energy lives in the battery, and distance comes from sensors.' },
+      { q: "Why don't engineers build every robot out of thick steel?", a: ['Heavy frames need bigger motors and batteries', "Steel blocks the robot's software", "Steel can't be bolted together", 'Robots are not allowed to be strong'], why: 'Weight costs energy. A heavier frame needs stronger motors and a bigger battery, and those add even more weight.' } ] },
+  { id: 'motors', name: 'Actuators', role: 'the muscles', color: '#ffa300', chips: 6, bugs: 3, bugSpeed: 24, walls: 24,
+    brief: ['STUCK IN LOW GEAR', "BOLT has a frame now, but it can barely crawl. Its little wheels have no real motors. Find 6 motor parts so it can move with purpose."],
+    ability: ['DRIVE', 'Much faster movement. Motors turn electrical energy into motion.'],
+    what: "Actuators are a robot's muscles. They turn energy into movement: spinning a wheel, bending a joint, or squeezing a gripper. Electric motors are the most common kind.",
+    types: [['DC motor', 'spins continuously and fast; drives wheels, fans, and propellers'], ['Servo motor', 'turns to an exact angle and holds it; used in robot joints and steering'], ['Stepper motor', 'moves in tiny, precise steps; found in 3D printers and camera sliders'], ['Hydraulic and pneumatic', 'use pressurized fluid or air to push very hard; found in excavators and heavy lifters']],
+    real: "Hobby robot arms use a small servo in every joint. A sidewalk delivery robot's wheels are each driven by an electric motor.",
+    terms: [['Torque', 'twisting force: how hard a motor can turn something'], ['Gearbox', 'a set of gears that trades speed for torque (slower, but stronger)']],
+    fact: 'A bare motor usually spins too fast and too weakly to move a robot. Nearly every robot wheel or joint has a gearbox between it and the motor.',
+    quiz: [
+      { q: 'A robot arm joint must move to exactly 90° and hold there. Which actuator fits best?', a: ['Servo motor', 'Cooling fan', 'Battery', 'Ultrasonic sensor'], why: 'A servo moves to a commanded angle and holds it. That is exactly what a joint needs.' },
+      { q: 'What does adding a gearbox to a motor usually do?', a: ['Slows it down but makes it stronger (more torque)', 'Makes it faster and stronger at the same time', 'Lets it run without power', 'Turns it into a sensor'], why: "Gears trade speed for torque. You can't get both for free." } ] },
+  { id: 'power', name: 'Power', role: 'the energy supply', color: '#ffec27', chips: 6, bugs: 3, bugSpeed: 28, walls: 26,
+    brief: ['RUNNING ON FUMES', "Real motors are hungry. BOLT's tiny backup cell can't deliver bursts of energy. Collect 6 battery cells to build a proper power pack."],
+    ability: ['BOOST', 'Hold SPACE for a burst of speed. The energy bar recharges when you let go.'],
+    what: 'The power system stores energy and delivers it to every part. Most mobile robots run on rechargeable batteries. Many factory robots plug straight into wall power.',
+    types: [['Lithium-ion / LiPo', 'lots of energy for their weight; used in phones, drones, and most mobile robots'], ['Lead-acid', 'heavy and cheap; used in some large, slow robots and carts'], ['Tethered (plugged in)', 'a cable supplies power nonstop; normal for robot arms bolted to the floor'], ['Voltage regulator', 'converts battery power to the exact voltage each part needs, like 5 V for a small computer']],
+    real: 'A robot vacuum drives itself back to its dock when its battery runs low. Campus delivery robots recharge between runs.',
+    terms: [['Voltage (V)', "the electrical 'push'"], ['Current (A)', 'how much electricity is flowing'], ['Capacity (mAh or Wh)', 'how much energy is stored, which sets how long the robot runs']],
+    fact: 'Motors can pull many times more current than the computer, especially when starting up or stalled. LiPo batteries can catch fire if punctured or overcharged, so handle them with care.',
+    quiz: [
+      { q: "A battery's capacity (mAh or Wh) tells you…", a: ['How much energy it stores, so how long it can run', 'How fast the robot can drive', 'How heavy the robot can lift', 'How far the sensors can see'], why: 'Capacity is stored energy. More capacity means longer run time.' },
+      { q: 'Why do robots use voltage regulators?', a: ['To give each part the voltage it needs', 'To make the battery store more energy', 'To measure the distance to walls', 'To make the motors louder'], why: 'A battery might give 12 V while the computer needs 5 V and some sensors need 3.3 V. Regulators convert between them.' } ] },
+  { id: 'sensors', name: 'Sensors', role: 'the senses', color: '#29adff', chips: 7, bugs: 4, bugSpeed: 30, walls: 28,
+    brief: ['LIGHTS OUT', 'BOLT is nearly blind. It only notices what is right next to it. Search the dark lab for 7 sensor modules.'],
+    ability: ['VISION', 'You can see far across the lab. Sensors are how a robot knows what is around it.'],
+    what: "Sensors are a robot's senses. Some look outward at the world: walls, people, objects. Others look inward at the robot itself: how far its wheels turned, or whether it is tilting.",
+    types: [['Camera', 'sees color and shape; used to recognize objects and people'], ['LiDAR', 'sweeps a laser to measure distances all around and build a map'], ['Ultrasonic', 'times a sound echo to measure distance, like a bat'], ['Bump switch', 'a simple button that clicks when the robot hits something'], ['Encoder', 'counts how far a wheel or joint has turned'], ['IMU', 'accelerometer + gyroscope; senses tilt, turning, and bumps']],
+    real: 'Self-driving cars combine cameras, radar, and LiDAR. Robot vacuums use bump switches, cliff sensors to avoid stairs, and often a LiDAR or camera to map rooms.',
+    terms: [['Sensor fusion', 'combining several sensors to get a better answer than any one alone'], ['Noise', 'the small random errors in every sensor reading']],
+    fact: "No sensor is perfect. Cameras struggle in the dark, ultrasonic sensors get confused by soft surfaces, and GPS works poorly indoors. That's why robots carry more than one.",
+    quiz: [
+      { q: 'Which sensor measures distance by timing a sound echo?', a: ['Ultrasonic sensor', 'Gyroscope', 'Wheel encoder', 'Thermometer'], why: 'An ultrasonic sensor sends a high-pitched chirp and times how long the echo takes to come back.' },
+      { q: 'What does a wheel encoder tell the robot?', a: ['How far and how fast its wheel has turned', 'What color the floor is', 'How much charge is left', 'Where the nearest person is'], why: 'Encoders count wheel rotation, and the robot uses that count to estimate how far it has traveled.' } ] },
+  { id: 'controller', name: 'Controller', role: 'the brain', color: '#00e436', chips: 7, bugs: 5, bugSpeed: 32, walls: 30,
+    brief: ['NO SENSE OF DIRECTION', "BOLT can see, but it can't plan. It doesn't know where to go next. Recover 7 controller boards to give it a brain."],
+    ability: ['PLANNING', 'An arrow points to your next target. The controller turns sensor data into decisions.'],
+    what: "The controller is the robot's brain. It reads the sensors, runs the program, and sends commands to the actuators, over and over, many times per second.",
+    types: [['Microcontroller', 'a small, cheap chip (Arduino, ESP32) that reacts in microseconds; great for motor timing'], ['Single-board computer', 'a full computer (Raspberry Pi, NVIDIA Jetson) that runs an operating system, cameras, and AI'], ['Motor driver', 'a board that takes small control signals and switches the big currents motors need'], ['ROS', 'Robot Operating System: popular free software that lets all of a robot\'s programs talk to each other']],
+    real: 'Many robots use both kinds of computer: a single-board computer does the heavy thinking (vision, mapping) and a microcontroller handles fast, precise motor control.',
+    terms: [['Sense → Think → Act', 'the loop every robot runs: read the sensors, decide, move'], ['Feedback', 'using sensor readings to correct what the robot is doing, like steering back onto a line']],
+    fact: "A controller can't power a motor directly. Its pins carry tiny signals, so a motor driver sits in between and switches the real power from the battery.",
+    quiz: [
+      { q: "Which loop describes how a robot's controller works?", a: ['Sense → Think → Act', 'Charge → Sleep → Repeat', 'Build → Paint → Ship', 'Act → Guess → Stop'], why: 'The controller reads the sensors (sense), decides what to do (think), and commands the actuators (act). Then it repeats.' },
+      { q: 'Why might a robot carry a Raspberry Pi AND a microcontroller?', a: ['The Pi does heavy thinking; the microcontroller handles fast motor timing', 'Two computers make the battery last longer', 'The microcontroller is a backup battery', 'Robots legally need two computers'], why: 'Each does what it is best at: big computing on the Pi, precise real-time control on the microcontroller.' } ] },
+  { id: 'gripper', name: 'End Effector', role: 'the hands', color: '#ff77a8', chips: 8, bugs: 6, bugSpeed: 34, walls: 30,
+    brief: ['NOTHING TO GRAB WITH', 'BOLT can see, plan, and move, but it can only pick things up by bumping right into them. Find 8 gripper parts.'],
+    ability: ['GRIP', 'Grab parts from a distance. The end effector is how a robot handles objects.'],
+    what: "The end effector is the tool at the end of a robot arm, its 'hand.' Engineers choose it for the job: a robot that welds needs a torch, and one that packs boxes needs suction.",
+    types: [['Two-finger gripper', 'pinches objects between two jaws; the classic robot hand'], ['Suction cups', 'grab flat, smooth things like boxes; common in warehouses'], ['Magnetic gripper', 'picks up steel parts in factories'], ['Soft gripper', 'rubbery fingers that handle fruit, eggs, or food gently'], ['Tools', 'welding torches, paint sprayers, and drills can all be end effectors']],
+    real: 'Warehouse picking robots use suction to grab packages. Surgical robots hold tiny instruments that a surgeon controls from a console.',
+    terms: [['Degrees of freedom (DOF)', 'the number of independent ways a robot can move; a human arm has about 7'], ['Grip force', 'how hard the gripper squeezes. Too little drops things, too much crushes them.']],
+    fact: 'Picking up an unfamiliar object is one of the hardest problems in robotics. People do it without thinking, but a robot has to judge shape, weight, and slipperiness.',
+    quiz: [
+      { q: 'A warehouse robot picks up flat cardboard boxes all day. Which end effector fits best?', a: ['Suction cups', 'Welding torch', 'Paint sprayer', 'Ultrasonic sensor'], why: 'Flat, smooth surfaces seal well against suction cups, which makes them fast and reliable for boxes.' },
+      { q: "What does 'degrees of freedom' mean for a robot arm?", a: ['How many independent ways it can move', 'How fast it can drive', 'How many batteries it has', 'How far its camera can see'], why: 'Each joint that can move on its own adds one degree of freedom. More DOF means more flexible motion.' } ] },
+  { id: 'field', name: 'Field Test', role: 'everything together', color: '#fff1e8', chips: 9, bugs: 8, bugSpeed: 36, walls: 32, final: true,
+    brief: ['FIELD TEST', 'Every system is installed. Final field test: collect 9 calibration chips while a swarm of glitches hunts you, then pass the final inspection.'],
+    quiz: [
+      { q: 'A robot vacuum bumps a chair and turns away. Which part detected the chair?', a: ['A sensor (bump switch)', 'The chassis', 'The battery', 'The gearbox'], why: 'Detecting the world is a sensor\'s job. The bump switch clicks, the controller decides to turn, and the motors act.' },
+      { q: "Which part is the robot's 'muscle'?", a: ['Actuators, like motors', 'Sensors', 'The controller', 'The voltage regulator'], why: 'Actuators turn energy into motion.' },
+      { q: 'A robot keeps shutting down halfway through its task. Which system should you upgrade first?', a: ['The power system (battery capacity)', 'The end effector', 'The paint color', 'The camera'], why: 'Running out partway through is a sign the battery doesn\'t store enough energy for the job.' },
+      { q: 'Which part decides what the robot does next?', a: ['The controller', 'The chassis', 'The suction cup', 'The wheels'], why: 'The controller is the brain. It reads sensors and commands actuators.' } ] },
+];
+const PARTS = LEVELS.filter(l => !l.final);
+
+// ---------- setup ----------
+const T = 16, COLS = 20, ROWS = 11, W = COLS * T, H = ROWS * T;
+const cvs = document.getElementById('game'), ctx = cvs.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+const $ = id => document.getElementById(id);
+const modal = $('modal');
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('bab_' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('bab_' + k, JSON.stringify(v)); } catch (e) {} },
+};
+
+const G = {
+  state: 'title', li: 0, parts: [], hp: 2, score: 0, energy: 100, firstTry: 0, asked: 0,
+  map: null, seen: null, player: null, bugs: [], chips: [], got: 0, bench: null, invuln: 0, shake: 0,
+  levelTime: 0, hitThisLevel: false, t: 0, float: [],
+};
+const has = id => G.parts.includes(id);
+const stats = () => ({
+  maxHp: has('chassis') ? 4 : 2,
+  speed: has('motors') ? 74 : 40,
+  vision: has('sensors') ? 9 : 4,
+  grab: has('gripper') ? 28 : 8,
+  boost: has('power'),
+  compass: has('controller'),
+});
+
+// ---------- sound ----------
+let actx = null, soundOn = store.get('sound', true);
+function sfx(kind) {
+  if (!soundOn) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    const seqs = { pick: [[660, .05], [990, .07]], hit: [[180, .08], [90, .15]], good: [[523, .07], [659, .07], [784, .12]],
+      bad: [[220, .12], [160, .18]], install: [[392, .08], [523, .08], [659, .08], [784, .08], [1046, .2]], bench: [[880, .05], [1175, .1]], click: [[440, .03]] };
+    let at = actx.currentTime;
+    for (const [f, d] of seqs[kind] || []) {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = kind === 'hit' ? 'sawtooth' : 'square'; o.frequency.value = f;
+      g.gain.setValueAtTime(.06, at); g.gain.exponentialRampToValueAtTime(.001, at + d);
+      o.connect(g); g.connect(actx.destination); o.start(at); o.stop(at + d); at += d;
+    }
+  } catch (e) {}
+}
+
+// ---------- map ----------
+function genLevel() {
+  const L = LEVELS[G.li];
+  for (let tries = 0; tries < 200; tries++) {
+    const m = [];
+    for (let y = 0; y < ROWS; y++) { m.push([]); for (let x = 0; x < COLS; x++) m[y].push(x === 0 || y === 0 || x === COLS - 1 || y === ROWS - 1 ? 1 : 0); }
+    for (let i = 0; i < L.walls; i++) {
+      let x = 2 + Math.floor(Math.random() * (COLS - 4)), y = 2 + Math.floor(Math.random() * (ROWS - 4));
+      const horiz = Math.random() < .5, len = 1 + Math.floor(Math.random() * 3);
+      for (let k = 0; k < len; k++) { if (m[y] && m[y][x] !== undefined && x < COLS - 1 && y < ROWS - 1) m[y][x] = 1; horiz ? x++ : y++; }
+    }
+    const sx = 1, sy = 5;
+    for (let y = 4; y <= 6; y++) for (let x = 1; x <= 2; x++) m[y][x] = 0;
+    // BFS reachability
+    const dist = m.map(r => r.map(() => -1)); dist[sy][sx] = 0; const q = [[sx, sy]]; const reach = [];
+    while (q.length) { const [x, y] = q.shift(); reach.push([x, y]);
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy;
+        if (m[ny][nx] === 0 && dist[ny][nx] < 0) { dist[ny][nx] = dist[y][x] + 1; q.push([nx, ny]); } } }
+    const floor = m.flat().filter(v => v === 0).length;
+    if (reach.length < floor * .92) continue;
+    // fill unreachable pockets so nothing spawns there
+    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) if (m[y][x] === 0 && dist[y][x] < 0) m[y][x] = 1;
+    const far = reach.filter(([x, y]) => dist[y][x] >= 4).sort(() => Math.random() - .5);
+    if (far.length < L.chips + L.bugs + 4) continue;
+    G.map = m;
+    G.seen = m.map(r => r.map(() => 0));
+    G.player = { x: sx * T + 8, y: sy * T + 8 };
+    G.bench = { x: sx * T + 8, y: (sy - 1) * T + 8 };
+    G.chips = far.slice(0, L.chips).map(([x, y]) => ({ x: x * T + 8, y: y * T + 8, got: false, ph: Math.random() * 6 }));
+    G.bugs = reach.filter(([x, y]) => dist[y][x] >= 7).sort(() => Math.random() - .5).slice(0, L.bugs)
+      .map(([x, y]) => ({ x: x * T + 8, y: y * T + 8, dx: 0, dy: 0, t: 0 }));
+    G.got = 0; G.invuln = 1; G.levelTime = 0; G.hitThisLevel = false; G.energy = 100; G.float = [];
+    G.hp = stats().maxHp;
+    return;
+  }
+}
+const solidAt = (px, py) => { const x = Math.floor(px / T), y = Math.floor(py / T); return x < 0 || y < 0 || x >= COLS || y >= ROWS || G.map[y][x] === 1; };
+const hits = (x, y, h) => solidAt(x - h, y - h) || solidAt(x + h - .01, y - h) || solidAt(x - h, y + h - .01) || solidAt(x + h - .01, y + h - .01);
+function move(e, dx, dy, h) {
+  let blocked = false;
+  if (dx) { e.x += dx; if (hits(e.x, e.y, h)) { e.x -= dx; blocked = true; } }
+  if (dy) { e.y += dy; if (hits(e.x, e.y, h)) { e.y -= dy; blocked = true; } }
+  return blocked;
+}
+
+// ---------- input ----------
+const keys = {};
+const KEYMAP = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', Space: 'boost' };
+addEventListener('keydown', e => {
+  if (!modal.hidden) {
+    if (G.state === 'quiz' && /^Digit[1-4]$/.test(e.code)) { const b = modal.querySelectorAll('.ans')[+e.code.slice(5) - 1]; if (b && !b.disabled) b.click(); e.preventDefault(); return; }
+    if (e.code === 'Enter' || (e.code === 'Space' && document.activeElement === document.body)) {
+      const p = modal.querySelector('[data-primary]'); if (p && document.activeElement?.tagName !== 'BUTTON') { p.click(); e.preventDefault(); }
+    }
+    return;
+  }
+  if (KEYMAP[e.code]) { keys[KEYMAP[e.code]] = true; e.preventDefault(); }
+  if (e.code === 'KeyP' || e.code === 'Escape') pause();
+  if (e.code === 'KeyM') { soundOn = !soundOn; store.set('sound', soundOn); }
+});
+addEventListener('keyup', e => { if (KEYMAP[e.code]) keys[KEYMAP[e.code]] = false; });
+addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+document.querySelectorAll('#touch [data-k]').forEach(b => {
+  const k = b.dataset.k;
+  b.addEventListener('pointerdown', e => { keys[k] = true; b.setPointerCapture(e.pointerId); e.preventDefault(); });
+  const up = () => { keys[k] = false; };
+  b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up); b.addEventListener('lostpointercapture', up);
+});
+
+// ---------- update ----------
+function update(dt) {
+  G.t += dt;
+  if (G.state !== 'play') return;
+  const S = stats(), L = LEVELS[G.li], p = G.player;
+  G.levelTime += dt;
+  let ix = (keys.right ? 1 : 0) - (keys.left ? 1 : 0), iy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
+  if (ix && iy) { ix *= .7071; iy *= .7071; }
+  let sp = S.speed;
+  if (S.boost && keys.boost && G.energy > 0 && (ix || iy)) { sp *= 1.8; G.energy = Math.max(0, G.energy - 50 * dt); }
+  else if (S.boost) G.energy = Math.min(100, G.energy + 22 * dt);
+  move(p, ix * sp * dt, iy * sp * dt, 5.5);
+
+  // what BOLT can see
+  const px = p.x / T, py = p.y / T;
+  for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) if (Math.hypot(x + .5 - px, y + .5 - py) < S.vision) G.seen[y][x] = 1;
+
+  for (const c of G.chips) if (!c.got && Math.hypot(c.x - p.x, c.y - p.y) < S.grab + 6) {
+    c.got = true; G.got++; G.score += 50; sfx('pick'); G.float.push({ x: c.x, y: c.y, s: '+50', t: 1 });
+    if (G.got === G.chips.length) { sfx('bench'); G.float.push({ x: G.bench.x, y: G.bench.y - 10, s: 'RETURN!', t: 2 }); }
+  }
+  if (G.got === G.chips.length && Math.hypot(G.bench.x - p.x, G.bench.y - p.y) < 12) { finishLevel(); return; }
+
+  G.invuln = Math.max(0, G.invuln - dt);
+  for (const b of G.bugs) {
+    const d = Math.hypot(p.x - b.x, p.y - b.y), bs = L.bugSpeed;
+    if (d < 5 * T) { b.dx = Math.sign(p.x - b.x) * (Math.abs(p.x - b.x) > 2 ? 1 : 0); b.dy = Math.sign(p.y - b.y) * (Math.abs(p.y - b.y) > 2 ? 1 : 0); b.t = .4; }
+    else if ((b.t -= dt) <= 0) { const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]]; [b.dx, b.dy] = dirs[Math.floor(Math.random() * 4)]; b.t = 1 + Math.random() * 1.5; }
+    const n = (b.dx && b.dy) ? .7071 : 1;
+    if (move(b, b.dx * bs * n * dt, b.dy * bs * n * dt, 5) && d >= 5 * T) b.t = 0;
+    if (d < 10 && G.invuln <= 0) {
+      G.hp--; G.invuln = 1.5; G.shake = .3; G.hitThisLevel = true; sfx('hit');
+      if (G.hp <= 0) { crash(); return; }
+    }
+  }
+  G.float = G.float.filter(f => (f.t -= dt) > 0);
+  G.shake = Math.max(0, G.shake - dt);
+}
+
+// ---------- drawing ----------
+function drawRobot(g, ox, oy, s, parts, t) {
+  const h = id => parts.includes(id);
+  const px = (x, y, w, hh, c) => { g.fillStyle = c; g.fillRect(ox + x * s, oy + y * s, w * s, hh * s); };
+  if (h('motors')) {
+    const off = Math.floor(t * 8) % 2;
+    for (const [x, y] of [[1, 3], [13, 3], [1, 9], [13, 9]]) { px(x, y, 2, 4, '#1b1b1b'); px(x, y + off, 2, 1, '#5f574f'); px(x, y + 2 + off, 2, 1, '#5f574f'); }
+  } else { px(3, 12, 2, 1, '#5f574f'); px(11, 12, 2, 1, '#5f574f'); }
+  if (h('chassis')) { px(3, 3, 10, 10, '#8a90a8'); for (const [x, y] of [[3, 3], [12, 3], [3, 12], [12, 12]]) px(x, y, 1, 1, '#e4e7f2'); }
+  px(4, 4, 8, 8, '#1f7a4a');
+  px(5, 5, 2, 1, '#e8c15a'); px(5, 6, 1, 1, '#e8c15a'); px(9, 10, 2, 1, '#e8c15a'); px(10, 9, 1, 1, '#e8c15a');
+  if (h('controller')) {
+    px(6, 6, 4, 4, '#111');
+    for (const [x, y] of [[6, 5], [9, 5], [6, 10], [9, 10]]) px(x, y, 1, 1, '#c2c3c7');
+    px(7, 7, 2, 2, ['#00e436', '#29adff', '#ff77a8'][Math.floor(t * 3) % 3]);
+  } else px(7, 7, 2, 2, '#3a4a3a');
+  if (h('power')) { px(5, 13, 6, 2, '#ffec27'); px(7, 13, 2, 2, '#333'); px(11, 13, 1, 1, '#c2c3c7'); }
+  if (h('sensors')) {
+    px(5, 2, 6, 1, '#222'); px(5, 2, 2, 1, '#29adff'); px(9, 2, 2, 1, '#29adff');
+    px(8, 0, 1, 2, '#9a9ab0'); px(8, 0, 1, 1, Math.floor(t * 2) % 2 ? '#ff004d' : '#7e2553');
+  }
+  if (h('gripper')) { px(2, 0, 1, 3, '#e4e7f2'); px(3, 0, 1, 1, '#e4e7f2'); px(13, 0, 1, 3, '#e4e7f2'); px(12, 0, 1, 1, '#e4e7f2'); }
+}
+function drawTile(x, y) {
+  const X = x * T, Y = y * T;
+  if (G.map[y][x] === 1) {
+    ctx.fillStyle = '#2b3a7a'; ctx.fillRect(X, Y, T, T);
+    ctx.fillStyle = '#4a5fb3'; ctx.fillRect(X, Y, T, 3);
+    ctx.fillStyle = '#1a2350'; ctx.fillRect(X, Y + T - 2, T, 2);
+    ctx.fillStyle = '#7d8cd6'; ctx.fillRect(X + 3, Y + 6, 1, 1); ctx.fillRect(X + 12, Y + 6, 1, 1);
+  } else {
+    ctx.fillStyle = (x + y) % 2 ? '#141a38' : '#121734'; ctx.fillRect(X, Y, T, T);
+    ctx.fillStyle = '#232c5c'; ctx.fillRect(X, Y, 1, 1);
+  }
+}
+function render() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = '#05060f'; ctx.fillRect(0, 0, W, H);
+  if (!G.map) { drawAttract(); return; }
+  const sh = G.shake > 0 ? (Math.random() - .5) * 4 : 0;
+  ctx.setTransform(1, 0, 0, 1, Math.round(sh), Math.round(sh));
+  const S = stats(), L = LEVELS[G.li], p = G.player, t = G.t;
+  for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) drawTile(x, y);
+
+  // workbench
+  const ready = G.got === G.chips.length;
+  const bx = G.bench.x - 8, by = G.bench.y - 8;
+  for (let i = 0; i < 4; i++) { ctx.fillStyle = i % 2 ? '#1b1b1b' : (ready && Math.floor(t * 4) % 2 ? '#fff1e8' : '#ffa300'); ctx.fillRect(bx + i * 4, by + 2, 4, 3); }
+  ctx.fillStyle = '#5f574f'; ctx.fillRect(bx + 1, by + 5, 14, 7); ctx.fillStyle = '#c2c3c7'; ctx.fillRect(bx + 5, by + 7, 6, 2);
+
+  const visible = (x, y, extra = 0) => Math.hypot(x - p.x, y - p.y) < S.vision * T + extra;
+  for (const c of G.chips) if (!c.got && visible(c.x, c.y, 4)) {
+    const bob = Math.round(Math.sin(t * 4 + c.ph));
+    ctx.fillStyle = '#05060f'; ctx.fillRect(c.x - 4, c.y - 3 + bob, 8, 7);
+    ctx.fillStyle = L.color; ctx.fillRect(c.x - 3, c.y - 2 + bob, 6, 5);
+    ctx.fillStyle = '#fff1e8'; ctx.fillRect(c.x - 2, c.y - 1 + bob, 1, 1);
+  }
+  for (const b of G.bugs) if (visible(b.x, b.y)) {
+    const j = Math.floor(t * 10) % 2;
+    ctx.fillStyle = '#ff004d'; ctx.fillRect(b.x - 5, b.y - 4 + j, 10, 8);
+    ctx.fillStyle = '#ff77a8'; ctx.fillRect(b.x - 5 + j * 7, b.y - 5, 3, 2); ctx.fillRect(b.x - 6, b.y + 1 - j, 2, 3); ctx.fillRect(b.x + 4, b.y - 1 + j, 2, 3);
+    ctx.fillStyle = '#fff1e8'; ctx.fillRect(b.x - 3, b.y - 2 + j, 2, 2); ctx.fillRect(b.x + 1, b.y - 2 + j, 2, 2);
+  }
+  if (!(G.invuln > 0 && Math.floor(t * 12) % 2)) drawRobot(ctx, Math.round(p.x - 8), Math.round(p.y - 8), 1, G.parts, t);
+
+  // fog: dark beyond sensor range, dimmer where already explored
+  const px = p.x / T, py = p.y / T;
+  for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+    const d = Math.hypot(x + .5 - px, y + .5 - py);
+    const a = Math.min(1, Math.max(0, (d - S.vision + 1.2) / 1.2)) * (G.seen[y][x] ? .55 : .9);
+    if (a > 0) { ctx.fillStyle = `rgba(3,4,12,${a})`; ctx.fillRect(x * T, y * T, T, T); }
+  }
+  // faint twinkle of parts hidden in the dark
+  for (const c of G.chips) if (!c.got && !visible(c.x, c.y, 4) && Math.sin(t * 3 + c.ph * 5) > .93) { ctx.fillStyle = L.color; ctx.fillRect(c.x, c.y, 1, 1); }
+
+  if (S.compass) {
+    let tgt = ready ? G.bench : null, best = 1e9;
+    if (!ready) for (const c of G.chips) if (!c.got) { const d = Math.hypot(c.x - p.x, c.y - p.y); if (d < best) { best = d; tgt = c; } }
+    if (tgt && Math.hypot(tgt.x - p.x, tgt.y - p.y) > 20) {
+      const ang = Math.atan2(tgt.y - p.y, tgt.x - p.x), r = 14;
+      const ax = p.x + Math.cos(ang) * r, ay = p.y + Math.sin(ang) * r;
+      ctx.fillStyle = '#00e436';
+      for (let i = 0; i < 3; i++) ctx.fillRect(Math.round(ax - Math.cos(ang) * i * 2) - 1, Math.round(ay - Math.sin(ang) * i * 2) - 1, 3 - i, 3 - i);
+    }
+  }
+  if (ready) { ctx.fillStyle = '#ffa300'; const yy = by - 6 + Math.round(Math.sin(t * 6) * 2); ctx.fillRect(G.bench.x - 2, yy, 5, 2); ctx.fillRect(G.bench.x - 1, yy + 2, 3, 1); ctx.fillRect(G.bench.x, yy + 3, 1, 1); }
+  ctx.font = '8px "Press Start 2P", monospace'; ctx.textAlign = 'center';
+  for (const f of G.float) { ctx.fillStyle = '#000'; ctx.fillText(f.s, f.x + 1, f.y - (1 - f.t) * 12 + 1); ctx.fillStyle = '#ffec27'; ctx.fillText(f.s, f.x, f.y - (1 - f.t) * 12); }
+}
+function drawAttract() {
+  const t = G.t;
+  for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) { ctx.fillStyle = (x + y) % 2 ? '#141a38' : '#121734'; ctx.fillRect(x * T, y * T, T, T); }
+  const parts = PARTS.map(l => l.id).slice(0, Math.floor(t / 1.2) % 7);
+  ctx.save(); drawRobot(ctx, W / 2 - 40, H / 2 - 40, 5, parts, t); ctx.restore();
+}
+
+// ---------- HUD ----------
+function hud() {
+  const S = stats(), L = LEVELS[G.li];
+  $('hLevel').textContent = G.state === 'title' ? 'INSERT COIN' : `LV${G.li + 1} ${L.name.toUpperCase()}`;
+  $('hHp').textContent = '♥'.repeat(Math.max(0, G.hp)) + '·'.repeat(Math.max(0, S.maxHp - G.hp));
+  $('hChips').textContent = `${G.got}/${G.chips.length || L.chips}`;
+  $('hEnergyWrap').hidden = !S.boost;
+  $('hEnergy').style.width = G.energy + '%';
+  $('hScore').textContent = G.score;
+  const tray = $('tray');
+  const html = PARTS.map(l => has(l.id) ? `<div class="slot on" style="background:${l.color}">${l.name.toUpperCase()}</div>` : `<div class="slot">${l.name.toUpperCase()}<br>?</div>`).join('');
+  if (tray._h !== html) { tray.innerHTML = html; tray._h = html; }
+}
+
+// ---------- screens ----------
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+let actions = {};
+function show(html, color, acts) {
+  modal.innerHTML = `<div class="card" style="--c:${color || '#ffa300'}">${html}</div>`;
+  modal.hidden = false; actions = acts || {};
+  modal.scrollTop = 0;
+  const p = modal.querySelector('[data-primary]'); if (p) p.focus({ preventScroll: true });
+}
+function hide() { modal.hidden = true; modal.innerHTML = ''; }
+modal.addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (b && actions[b.dataset.act]) { sfx('click'); actions[b.dataset.act](b); } });
+function botCanvas(parts) { return `<canvas width="16" height="16" data-bot="${parts.join(',')}"></canvas>`; }
+function paintBots() { modal.querySelectorAll('canvas[data-bot]').forEach(c => { const g = c.getContext('2d'); g.clearRect(0, 0, 16, 16); drawRobot(g, 0, 0, 1, c.dataset.bot ? c.dataset.bot.split(',') : [], G.t); }); }
+
+function title() {
+  G.state = 'title'; G.map = null;
+  const best = store.get('best', 0);
+  show(`<div class="eyebrow">MDEANH ROBOTICS PRESENTS</div>
+    <h2>BUILD-A-BOT LAB</h2>
+    <p>Meet <b>BOLT</b>, a robot that is only a circuit board so far. Drive it through 7 levels of the lab, recover the parts it is missing, and learn what each part does. Every part you install gives BOLT a new ability.</p>
+    <ul>
+      <li>Collect every glowing part in the level, then return to the <b>striped workbench</b>.</li>
+      <li>Dodge the red <b>glitches</b>. They chase you if you get close.</li>
+      <li>Read the part's lesson, then answer 2 quick questions to install it.</li>
+    </ul>
+    <p class="dimtext">No robotics experience needed. About 15–20 minutes.${best ? ` Best score: ${best}.` : ''}</p>
+    <div class="row"><button class="btn" data-act="start" data-primary>START GAME</button><button class="btn alt" data-act="manual">PARTS MANUAL</button><button class="btn alt" data-act="snd">SOUND: ${soundOn ? 'ON' : 'OFF'}</button></div>`,
+    '#ffa300', { start: newGame, manual: () => manual(title), snd: () => { soundOn = !soundOn; store.set('sound', soundOn); title(); } });
+}
+function newGame() { G.li = 0; G.parts = []; G.score = 0; G.firstTry = 0; G.asked = 0; brief(); }
+function brief() {
+  const L = LEVELS[G.li];
+  genLevel(); G.state = 'brief';
+  show(`<div class="eyebrow">LEVEL ${G.li + 1} OF ${LEVELS.length}${L.final ? '' : ' · ' + L.name.toUpperCase()}</div>
+    <h2>${esc(L.brief[0])}</h2>
+    <div class="bots">${botCanvas(G.parts)}<p>${esc(L.brief[1])}</p></div>
+    <div class="row"><button class="btn" data-act="go" data-primary>DRIVE ▸</button></div>`, L.color, { go: play });
+  paintBots();
+}
+function play() { hide(); G.state = 'play'; for (const k in keys) keys[k] = false; }
+function pause() {
+  if (G.state !== 'play') return;
+  G.state = 'paused';
+  show(`<div class="eyebrow">PAUSED</div><h2>BOLT IS WAITING</h2>
+    <div class="row"><button class="btn" data-act="go" data-primary>RESUME</button><button class="btn alt" data-act="manual">PARTS MANUAL</button><button class="btn alt" data-act="quit">QUIT TO TITLE</button></div>`,
+    LEVELS[G.li].color, { go: play, manual: () => manual(() => { G.state = 'play'; pause(); }), quit: title });
+}
+function crash() {
+  G.state = 'crash';
+  show(`<div class="eyebrow">SYSTEM CRASH</div><h2>THE GLITCHES GOT YOU</h2>
+    <p>BOLT rebooted and dropped the parts it was carrying. The lab has been reshuffled. ${has('chassis') ? '' : 'Tip: a sturdier frame (the chassis) will help you survive more hits.'}</p>
+    <div class="row"><button class="btn" data-act="retry" data-primary>RETRY LEVEL</button></div>`, '#ff004d', { retry: brief });
+}
+function finishLevel() {
+  const L = LEVELS[G.li];
+  const timeBonus = Math.max(0, Math.round(300 - G.levelTime * 3)), clean = G.hitThisLevel ? 0 : 150;
+  G.score += timeBonus + clean;
+  G.state = 'lesson'; sfx('bench');
+  const bonus = `<p class="dimtext">Time bonus +${timeBonus}${clean ? ` · No-damage bonus +${clean}` : ''}</p>`;
+  if (L.final) return quiz(0, bonus);
+  show(`<div class="eyebrow">PART RECOVERED · ${L.name.toUpperCase()} = ${L.role.toUpperCase()}</div>
+    <h2>${esc(L.name.toUpperCase())}</h2>
+    ${bonus}
+    <p>${esc(L.what)}</p>
+    <h3>TYPES YOU'LL SEE</h3>
+    <ul>${L.types.map(([a, b]) => `<li><b>${esc(a)}</b>: ${esc(b)}</li>`).join('')}</ul>
+    <h3>IN REAL ROBOTS</h3>
+    <p>${esc(L.real)}</p>
+    <h3>KEY WORDS</h3>
+    <ul>${L.terms.map(([a, b]) => `<li><b>${esc(a)}</b>: ${esc(b)}</li>`).join('')}</ul>
+    <div class="note">${esc(L.fact)}</div>
+    <div class="row"><button class="btn" data-act="q" data-primary>TAKE THE QUIZ ▸</button></div>`, L.color, { q: () => quiz(0) });
+  unlock(L.id);
+}
+function quiz(i, pre = '') {
+  const L = LEVELS[G.li], Q = L.quiz[i];
+  G.state = 'quiz';
+  const order = Q.a.map((_, k) => k).sort(() => Math.random() - .5);
+  let tries = 0;
+  const render = () => show(`<div class="eyebrow">${L.final ? 'FINAL INSPECTION' : 'INSTALL CHECK · ' + L.name.toUpperCase()} · QUESTION ${i + 1} OF ${L.quiz.length}</div>
+    ${pre}<h2>${esc(Q.q)}</h2>
+    <div class="answers">${order.map((k, n) => `<button class="ans" data-act="pick" data-k="${k}"><span>${n + 1}</span>${esc(Q.a[k])}</button>`).join('')}</div>
+    <div id="fb"></div>`, L.color, {
+      pick: b => {
+        const k = +b.dataset.k; tries++;
+        if (k === 0) {
+          if (tries === 1) { G.score += 200; G.firstTry++; }
+          G.asked += tries === 1 ? 1 : 0;
+          sfx('good');
+          modal.querySelectorAll('.ans').forEach(x => { x.disabled = true; if (+x.dataset.k === 0) x.classList.add('right'); });
+          const last = i + 1 >= L.quiz.length;
+          $('fb').innerHTML = `<div class="fb good"><strong>CORRECT${tries === 1 ? ' · +200' : ''}</strong>${esc(Q.why)}</div>
+            <div class="row" style="margin-top:12px"><button class="btn" data-act="next" data-primary>${last ? (L.final ? 'SEE RESULTS ▸' : 'INSTALL PART ▸') : 'NEXT QUESTION ▸'}</button></div>`;
+          modal.querySelector('[data-primary]').focus();
+        } else {
+          if (tries === 1) G.asked++;
+          sfx('bad'); b.classList.add('wrong'); b.disabled = true;
+          $('fb').innerHTML = `<div class="fb bad"><strong>NOT QUITE</strong>Think about what ${L.final ? 'each part' : 'the ' + esc(L.name.toLowerCase())} is for, then try another answer.</div>`;
+        }
+      },
+      next: () => i + 1 < L.quiz.length ? quiz(i + 1) : (L.final ? finale() : install()),
+    });
+  render();
+}
+function install() {
+  const L = LEVELS[G.li], before = [...G.parts];
+  G.parts.push(L.id); G.state = 'install'; sfx('install');
+  show(`<div class="eyebrow">PART INSTALLED · ${G.parts.length} OF ${PARTS.length}</div>
+    <h2>NEW ABILITY: ${esc(L.ability[0])}</h2>
+    <div class="bots">${botCanvas(before)}<span class="arrow">▸</span>${botCanvas(G.parts)}</div>
+    <p>${esc(L.ability[1])}</p>
+    <div class="row"><button class="btn" data-act="go" data-primary>NEXT LEVEL ▸</button></div>`, L.color, { go: () => { G.li++; brief(); } });
+  paintBots();
+}
+function finale() {
+  G.state = 'final';
+  const best = Math.max(store.get('best', 0), G.score); store.set('best', best);
+  const acc = G.asked ? Math.round(100 * G.firstTry / G.asked) : 0;
+  show(`<div class="eyebrow">FIELD TEST PASSED</div>
+    <h2>BOLT IS A COMPLETE ROBOT</h2>
+    <div class="bots">${botCanvas(G.parts)}<p>Every robot, from a robot vacuum to a Mars rover, is built from the same six systems working in one loop: <b>sense → think → act</b>.</p></div>
+    <div class="stats">
+      <div class="stat"><div>SCORE</div><div>${G.score}</div></div>
+      <div class="stat"><div>BEST</div><div>${best}</div></div>
+      <div class="stat"><div>FIRST-TRY ANSWERS</div><div>${G.firstTry}/${G.asked} (${acc}%)</div></div>
+    </div>
+    <h3>THE SIX SYSTEMS</h3>
+    <ul>${PARTS.map(l => `<li><b>${esc(l.name)}</b>: ${esc(l.role)}</li>`).join('')}</ul>
+    <div class="note">Example: a robot vacuum's <b>bump sensor</b> clicks (sense), its <b>controller</b> decides to turn (think), and its <b>motors</b> spin the wheels (act). The <b>battery</b> powers it all, and the <b>chassis</b> holds it together. Its brushes and suction do the actual cleaning, which makes them its end effector.</div>
+    <div class="row"><button class="btn" data-act="again" data-primary>PLAY AGAIN</button><button class="btn alt" data-act="manual">PARTS MANUAL</button></div>`,
+    '#fff1e8', { again: newGame, manual: () => manual(finale) });
+  paintBots();
+}
+function unlock(id) { const u = store.get('unlocked', []); if (!u.includes(id)) { u.push(id); store.set('unlocked', u); } }
+function manual(back) {
+  const u = store.get('unlocked', []);
+  show(`<div class="eyebrow">PARTS MANUAL · ${u.length} OF ${PARTS.length} UNLOCKED</div>
+    <h2>ROBOT PARTS MANUAL</h2>
+    <p class="dimtext">Parts you've recovered in any playthrough stay here for review.</p>
+    <div class="grid">${PARTS.map(l => u.includes(l.id)
+      ? `<div class="mcard" style="border-color:${l.color}"><div class="t" style="color:${l.color}">${esc(l.name.toUpperCase())}</div><div class="dimtext">${esc(l.role)}</div><div>${esc(l.what)}</div><div class="dimtext">${l.terms.map(t => esc(t[0])).join(' · ')}</div></div>`
+      : `<div class="mcard"><div class="t">??????</div><div class="dimtext">Recover this part in the lab to unlock its entry.</div></div>`).join('')}</div>
+    <div class="row"><button class="btn" data-act="back" data-primary>BACK</button></div>`, '#ffa300', { back });
+}
+
+// ---------- loop ----------
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  update(dt); render(); hud();
+  if (!modal.hidden && Math.floor(G.t * 8) !== Math.floor((G.t - dt) * 8)) paintBots();
+  requestAnimationFrame(frame);
+}
+title();
+requestAnimationFrame(frame);
+</script>
