@@ -19,7 +19,7 @@ User chose Pixel Workshop concept 2, then requested more fun action and public N
 32 automated tests passed; source checks and git diff whitespace checks passed. Actual browser scanner mission completed at score 980, upgrade awarded once, reload retains 100 XP and score. Power collect/shield/delivery exercised. All four optional puzzle labs completed to 400 XP. Phone 390x844 Start-button clipping reproduced and fixed, no horizontal overflow; touch scanning/pause and browser error logs checked. See docs/browser-qa.md. No physical hardware is connected or tested.
 
 ## Repository and hosting
-GitHub repository MDeanH/mdeanh-robotics-game already existed, created by a concurrent workflow. Work is on codex/pixel-workshop; preserve main and its starter. Branch is pushed; PR creation is being finalized. Netlify site ID 52fa8bfb-3b0f-4627-94c4-be935970fb69, account slug mdeanh. Use this exact site ID for deployments; CLI originally inferred an unrelated parent project. Local .netlify state is ignored. Earlier Sites registration is unpublished; reference in docs/unpublished-sites-registration.json, never publish it.
+GitHub repository MDeanH/mdeanh-robotics-game already existed, created by a concurrent workflow. Work is on codex/pixel-workshop; preserve main and its starter. Branch is pushed. PR: https://github.com/MDeanH/mdeanh-robotics-game/pull/1. Existing main is preserved. Netlify site ID 52fa8bfb-3b0f-4627-94c4-be935970fb69, account slug mdeanh. Use this exact site ID for deployments; CLI originally inferred an unrelated parent project. Local .netlify state is ignored. Earlier Sites registration is unpublished; reference in docs/unpublished-sites-registration.json, never publish it.
 
 ## Commands
 npm start — localhost preview on 4173.
@@ -32,7 +32,7 @@ Exact student grade band, extended curriculum, more robots, teacher reporting. D
 
 ## Published result
 - Public game: https://mdeanh-robotics-workshop.netlify.app
-- Netlify deploy: 6ae2891847d4efdc963f5a03. Anonymous homepage HTTP 200; SHA-256 of all 16 deployed files matches local dist. Public browser driving and scanner verified; no warning/error logs.
+- Netlify deploy: 6ae289b8b05a2208ace788a2. Anonymous homepage HTTP 200; SHA-256 of all 16 deployed files matches local dist. Public browser driving and scanner verified; no warning/error logs.
 
 ## Next
-Finish GitHub PR handoff. Further product work follows user play feedback.
+Implementation and public hosting request complete. Final laptop layout also verified: dialog client/scroll height both 671 at 1280x720. Further product work follows user play feedback.

@@ -18,3 +18,5 @@ Observed after repair: `clientWidth=390`, `body.scrollWidth=390`, Start bounds w
 
 ## Regression: laptop_arena_keeps_health_visible
 At 1280x720, the initial full-width arena forced an internal dialog scroll and the health HUD could leave view during play. The desktop dialog now sizes its width from the available screen height and uses compact surrounding controls. Verify `dialog.scrollHeight <= dialog.clientHeight` at that breakpoint after publication.
+
+Final public laptop check: 1280x720, dialog clientHeight=671 and scrollHeight=671; health HUD top=121.17. The arena and HUD fit together. Final production deployment is 6ae289b8b05a2208ace788a2.

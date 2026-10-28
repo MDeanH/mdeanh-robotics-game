@@ -45,3 +45,8 @@
 ## 2026-10-28 — compact laptop arena layout
 - Public screenshot at 1280x720 exposed health HUD clipping after canvas focus. Updated desktop dialog width based on available screen height and compacted its surrounding controls. Mobile rules remain unchanged.
 - Source checks and git diff whitespace check pass; runtime/game rules are unchanged from the 32-test passing build. Publishing the layout fix, then measuring the public dialog.
+
+## 2026-10-28 — final public layout verification
+- Final deploy: 6ae289b8b05a2208ace788a2 at https://mdeanh-robotics-workshop.netlify.app.
+- Public browser at 1280x720: dialog clientHeight=671, scrollHeight=671, health HUD top=121.17. Entire health/arena/goal interface fits with no internal scrolling. Live movement and scan passed after reload.
+- Final action screenshot: output/netlify-arcade-final.jpg. Public tab retained as deliverable; viewport override reset and isolated QA tab closed.
