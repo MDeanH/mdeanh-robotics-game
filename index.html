@@ -39,6 +39,23 @@ body {
 .screen { position: relative; background: #000; border: 4px solid var(--line); box-shadow: 0 0 0 4px var(--panel), 0 0 40px rgba(41,173,255,.15); }
 .screen canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; image-rendering: crisp-edges; aspect-ratio: 320 / 176; }
 .screen::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px); }
+.lessonbar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 8px; }
+@media (max-width: 720px) { .lessonbar { grid-template-columns: minmax(0, 1fr); } }
+.idea, .ticker { border: 2px solid var(--line); background: var(--panel); padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.idea { border-color: var(--lc, var(--amber)); }
+.idea em { font-style: normal; color: var(--lc, var(--amber)); }
+.lbl { font-family: var(--display); font-size: 8px; letter-spacing: 2px; color: var(--lc, var(--amber)); }
+.ticker b { font-family: var(--display); font-size: 11px; font-weight: normal; color: var(--lc, var(--amber)); }
+.ticker.pop { animation: pop .5s steps(4); }
+@keyframes pop { 0% { background: var(--lc, var(--amber)); } 100% { background: var(--panel); } }
+@media (prefers-reduced-motion: reduce) { .ticker.pop { animation: none; } }
+.analogy { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: var(--ink); border: 2px solid var(--c, var(--amber)); padding: 12px; }
+.analogy .eq { font-family: var(--display); font-size: clamp(13px, 2.6vw, 18px); line-height: 1.6; }
+.analogy .eq em { font-style: normal; color: var(--c, var(--amber)); }
+.collected { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px; }
+.collected div { border: 1px solid var(--line); padding: 6px 8px; min-width: 0; }
+.collected div b { display: block; font-family: var(--display); font-size: 9px; font-weight: normal; color: var(--c, var(--amber)); margin-bottom: 2px; }
+.tryit { font-family: var(--display); font-size: 10px; line-height: 1.8; color: var(--ink); background: var(--c, var(--amber)); padding: 8px 10px; }
 .tray { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
 .slot { border: 2px dashed var(--line); padding: 6px 4px; text-align: center; font-family: var(--display); font-size: 8px; color: var(--dim); line-height: 1.5; min-width: 0; overflow-wrap: anywhere; }
 .slot.on { border-style: solid; color: var(--ink); }
@@ -81,7 +98,7 @@ body {
 .fb strong { font-family: var(--display); font-size: 10px; display: block; margin-bottom: 4px; }
 .fb.good strong { color: var(--good); } .fb.bad strong { color: var(--bad); }
 .bots { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.bots canvas { image-rendering: pixelated; width: 128px; height: 128px; background: var(--ink); border: 2px solid var(--line); max-width: 100%; }
+.bots canvas, .analogy canvas { image-rendering: pixelated; width: 128px; height: 128px; background: var(--ink); border: 2px solid var(--line); max-width: 100%; }
 .arrow { font-family: var(--display); font-size: 16px; color: var(--c, var(--amber)); }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
 .mcard { border: 2px solid var(--line); padding: 10px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -112,6 +129,10 @@ body {
     <span>SCORE <b id="hScore">0</b></span>
   </div>
   <div class="screen"><canvas id="game" width="320" height="176" aria-label="Game screen: drive BOLT the robot around the lab"></canvas></div>
+  <div class="lessonbar" id="lessonbar">
+    <div class="idea"><span class="lbl">BIG IDEA</span><span id="bigIdea">Every robot is built from six systems.</span></div>
+    <div class="ticker" id="ticker"><span class="lbl" id="tickLbl">MISSION</span><span id="tickText">Press START to begin.</span></div>
+  </div>
   <div class="tray" id="tray"></div>
   <div class="help">
     <span><kbd>←↑↓→</kbd> / <kbd>WASD</kbd> drive</span>
@@ -135,10 +156,11 @@ body {
 // ---------- content ----------
 const LEVELS = [
   { id: 'chassis', name: 'Chassis', role: 'the skeleton', color: '#c2c6d6', chips: 5, bugs: 2, bugSpeed: 20, walls: 20,
+    big: "The CHASSIS is the robot's SKELETON. It holds every part in place and protects it.",
+    items: [["Aluminum frame", "Light and strong. The most common frame metal for robots."], ["Steel bracket", "Very strong but heavy. Used in big factory robot arms."], ["3D-printed shell", "Cheap and fast to redesign. Great for prototypes."], ["Carbon-fiber plate", "Super light and stiff. Used on drones."], ["Bumper", "Absorbs hits so the electronics inside survive."]],
     brief: ['LOOSE PARTS', "BOLT is just a bare circuit board on tiny wheels. One bump from a glitch and it falls apart. Collect 5 frame pieces, then roll back to the striped workbench to install them."],
     ability: ['ARMOR', '+2 hit points. A frame protects the electronics inside.'],
     what: "The chassis is a robot's skeleton. It holds every other part in place and protects the fragile electronics from bumps, dust, and water.",
-    types: [['Aluminum', 'light and strong; the most common choice for hobby and research robots'], ['Steel', 'very strong but heavy; used for factory arms that lift car parts'], ['Plastic and 3D prints', 'cheap and quick to change; great for prototypes and home robots'], ['Carbon fiber', 'very light and stiff; used in drones and racing robots']],
     real: "A Roomba keeps everything inside a round plastic shell so it can slide off furniture legs. NASA's Mars rovers use lightweight metal bodies that keep their electronics warm and protected.",
     terms: [['Payload', 'the weight a robot can carry beyond its own body'], ['Center of gravity', "the balance point. Keep heavy parts low so the robot doesn't tip over."]],
     fact: 'Every extra gram in the frame needs more motor force and more battery to move it. Designers are always trading strength against weight.',
@@ -146,10 +168,11 @@ const LEVELS = [
       { q: "What does a robot's chassis do?", a: ['Holds the parts together and protects them', "Runs the robot's program", "Stores the robot's energy", 'Measures distance to walls'], why: 'The chassis is the structure. Programs run on the controller, energy lives in the battery, and distance comes from sensors.' },
       { q: "Why don't engineers build every robot out of thick steel?", a: ['Heavy frames need bigger motors and batteries', "Steel blocks the robot's software", "Steel can't be bolted together", 'Robots are not allowed to be strong'], why: 'Weight costs energy. A heavier frame needs stronger motors and a bigger battery, and those add even more weight.' } ] },
   { id: 'motors', name: 'Actuators', role: 'the muscles', color: '#ffa300', chips: 6, bugs: 3, bugSpeed: 24, walls: 24,
+    big: "ACTUATORS are the robot's MUSCLES. They turn energy into motion.",
+    items: [["DC motor", "Spins fast and nonstop. Drives wheels and propellers."], ["Servo motor", "Turns to an exact angle and holds it. Used in joints."], ["Stepper motor", "Moves in tiny, exact steps. Used in 3D printers."], ["Gearbox", "Trades speed for torque: slower, but stronger."], ["Hydraulic cylinder", "Uses fluid pressure to push very hard. Found in excavators."], ["Pneumatic piston", "Uses compressed air for fast push-pull motion."]],
     brief: ['STUCK IN LOW GEAR', "BOLT has a frame now, but it can barely crawl. Its little wheels have no real motors. Find 6 motor parts so it can move with purpose."],
     ability: ['DRIVE', 'Much faster movement. Motors turn electrical energy into motion.'],
     what: "Actuators are a robot's muscles. They turn energy into movement: spinning a wheel, bending a joint, or squeezing a gripper. Electric motors are the most common kind.",
-    types: [['DC motor', 'spins continuously and fast; drives wheels, fans, and propellers'], ['Servo motor', 'turns to an exact angle and holds it; used in robot joints and steering'], ['Stepper motor', 'moves in tiny, precise steps; found in 3D printers and camera sliders'], ['Hydraulic and pneumatic', 'use pressurized fluid or air to push very hard; found in excavators and heavy lifters']],
     real: "Hobby robot arms use a small servo in every joint. A sidewalk delivery robot's wheels are each driven by an electric motor.",
     terms: [['Torque', 'twisting force: how hard a motor can turn something'], ['Gearbox', 'a set of gears that trades speed for torque (slower, but stronger)']],
     fact: 'A bare motor usually spins too fast and too weakly to move a robot. Nearly every robot wheel or joint has a gearbox between it and the motor.',
@@ -157,10 +180,11 @@ const LEVELS = [
       { q: 'A robot arm joint must move to exactly 90° and hold there. Which actuator fits best?', a: ['Servo motor', 'Cooling fan', 'Battery', 'Ultrasonic sensor'], why: 'A servo moves to a commanded angle and holds it. That is exactly what a joint needs.' },
       { q: 'What does adding a gearbox to a motor usually do?', a: ['Slows it down but makes it stronger (more torque)', 'Makes it faster and stronger at the same time', 'Lets it run without power', 'Turns it into a sensor'], why: "Gears trade speed for torque. You can't get both for free." } ] },
   { id: 'power', name: 'Power', role: 'the energy supply', color: '#ffec27', chips: 6, bugs: 3, bugSpeed: 28, walls: 26,
+    big: "POWER is the robot's ENERGY SUPPLY. It stores energy and delivers it to every part.",
+    items: [["LiPo battery", "Packs lots of energy for its weight. Powers drones and phones."], ["Lead-acid battery", "Heavy and cheap. Used in big, slow carts."], ["Voltage regulator", "Converts battery voltage to what each part needs, like 5 V."], ["Emergency stop", "Cuts the power instantly. Every real robot needs one."], ["Fuse", "Breaks the circuit if too much current flows, to prevent fires."], ["Charging dock", "Where robot vacuums drive back to recharge."]],
     brief: ['RUNNING ON FUMES', "Real motors are hungry. BOLT's tiny backup cell can't deliver bursts of energy. Collect 6 battery cells to build a proper power pack."],
     ability: ['BOOST', 'Hold SPACE for a burst of speed. The energy bar recharges when you let go.'],
     what: 'The power system stores energy and delivers it to every part. Most mobile robots run on rechargeable batteries. Many factory robots plug straight into wall power.',
-    types: [['Lithium-ion / LiPo', 'lots of energy for their weight; used in phones, drones, and most mobile robots'], ['Lead-acid', 'heavy and cheap; used in some large, slow robots and carts'], ['Tethered (plugged in)', 'a cable supplies power nonstop; normal for robot arms bolted to the floor'], ['Voltage regulator', 'converts battery power to the exact voltage each part needs, like 5 V for a small computer']],
     real: 'A robot vacuum drives itself back to its dock when its battery runs low. Campus delivery robots recharge between runs.',
     terms: [['Voltage (V)', "the electrical 'push'"], ['Current (A)', 'how much electricity is flowing'], ['Capacity (mAh or Wh)', 'how much energy is stored, which sets how long the robot runs']],
     fact: 'Motors can pull many times more current than the computer, especially when starting up or stalled. LiPo batteries can catch fire if punctured or overcharged, so handle them with care.',
@@ -168,10 +192,11 @@ const LEVELS = [
       { q: "A battery's capacity (mAh or Wh) tells you…", a: ['How much energy it stores, so how long it can run', 'How fast the robot can drive', 'How heavy the robot can lift', 'How far the sensors can see'], why: 'Capacity is stored energy. More capacity means longer run time.' },
       { q: 'Why do robots use voltage regulators?', a: ['To give each part the voltage it needs', 'To make the battery store more energy', 'To measure the distance to walls', 'To make the motors louder'], why: 'A battery might give 12 V while the computer needs 5 V and some sensors need 3.3 V. Regulators convert between them.' } ] },
   { id: 'sensors', name: 'Sensors', role: 'the senses', color: '#29adff', chips: 7, bugs: 4, bugSpeed: 30, walls: 28,
+    big: "SENSORS are the robot's SENSES. They measure the world and the robot itself.",
+    items: [["Camera", "Sees color and shape. Used to recognize objects and people."], ["LiDAR", "Sweeps a laser to measure distance all around and build a map."], ["Ultrasonic sensor", "Times a sound echo to measure distance, like a bat."], ["Bump switch", "Clicks when the robot hits something."], ["Wheel encoder", "Counts how far a wheel has turned."], ["IMU", "Accelerometer + gyroscope. Senses tilt and turning."], ["Cliff sensor", "Looks down so a robot vacuum doesn't fall down the stairs."]],
     brief: ['LIGHTS OUT', 'BOLT is nearly blind. It only notices what is right next to it. Search the dark lab for 7 sensor modules.'],
     ability: ['VISION', 'You can see far across the lab. Sensors are how a robot knows what is around it.'],
     what: "Sensors are a robot's senses. Some look outward at the world: walls, people, objects. Others look inward at the robot itself: how far its wheels turned, or whether it is tilting.",
-    types: [['Camera', 'sees color and shape; used to recognize objects and people'], ['LiDAR', 'sweeps a laser to measure distances all around and build a map'], ['Ultrasonic', 'times a sound echo to measure distance, like a bat'], ['Bump switch', 'a simple button that clicks when the robot hits something'], ['Encoder', 'counts how far a wheel or joint has turned'], ['IMU', 'accelerometer + gyroscope; senses tilt, turning, and bumps']],
     real: 'Self-driving cars combine cameras, radar, and LiDAR. Robot vacuums use bump switches, cliff sensors to avoid stairs, and often a LiDAR or camera to map rooms.',
     terms: [['Sensor fusion', 'combining several sensors to get a better answer than any one alone'], ['Noise', 'the small random errors in every sensor reading']],
     fact: "No sensor is perfect. Cameras struggle in the dark, ultrasonic sensors get confused by soft surfaces, and GPS works poorly indoors. That's why robots carry more than one.",
@@ -179,10 +204,11 @@ const LEVELS = [
       { q: 'Which sensor measures distance by timing a sound echo?', a: ['Ultrasonic sensor', 'Gyroscope', 'Wheel encoder', 'Thermometer'], why: 'An ultrasonic sensor sends a high-pitched chirp and times how long the echo takes to come back.' },
       { q: 'What does a wheel encoder tell the robot?', a: ['How far and how fast its wheel has turned', 'What color the floor is', 'How much charge is left', 'Where the nearest person is'], why: 'Encoders count wheel rotation, and the robot uses that count to estimate how far it has traveled.' } ] },
   { id: 'controller', name: 'Controller', role: 'the brain', color: '#00e436', chips: 7, bugs: 5, bugSpeed: 32, walls: 30,
+    big: "The CONTROLLER is the robot's BRAIN. It reads sensors, decides, and commands the motors.",
+    items: [["Microcontroller", "A small chip (like an Arduino) that reacts in microseconds."], ["Raspberry Pi", "A tiny full computer that runs an operating system."], ["NVIDIA Jetson", "A small computer with a GPU for vision and AI."], ["Motor driver", "Turns tiny control signals into the big currents motors need."], ["ROS", "Robot Operating System: software that lets robot programs talk."], ["Program code", "The instructions that decide what the robot does."], ["Feedback loop", "Checks the sensors and corrects mistakes, many times per second."]],
     brief: ['NO SENSE OF DIRECTION', "BOLT can see, but it can't plan. It doesn't know where to go next. Recover 7 controller boards to give it a brain."],
     ability: ['PLANNING', 'An arrow points to your next target. The controller turns sensor data into decisions.'],
     what: "The controller is the robot's brain. It reads the sensors, runs the program, and sends commands to the actuators, over and over, many times per second.",
-    types: [['Microcontroller', 'a small, cheap chip (Arduino, ESP32) that reacts in microseconds; great for motor timing'], ['Single-board computer', 'a full computer (Raspberry Pi, NVIDIA Jetson) that runs an operating system, cameras, and AI'], ['Motor driver', 'a board that takes small control signals and switches the big currents motors need'], ['ROS', 'Robot Operating System: popular free software that lets all of a robot\'s programs talk to each other']],
     real: 'Many robots use both kinds of computer: a single-board computer does the heavy thinking (vision, mapping) and a microcontroller handles fast, precise motor control.',
     terms: [['Sense → Think → Act', 'the loop every robot runs: read the sensors, decide, move'], ['Feedback', 'using sensor readings to correct what the robot is doing, like steering back onto a line']],
     fact: "A controller can't power a motor directly. Its pins carry tiny signals, so a motor driver sits in between and switches the real power from the battery.",
@@ -190,10 +216,11 @@ const LEVELS = [
       { q: "Which loop describes how a robot's controller works?", a: ['Sense → Think → Act', 'Charge → Sleep → Repeat', 'Build → Paint → Ship', 'Act → Guess → Stop'], why: 'The controller reads the sensors (sense), decides what to do (think), and commands the actuators (act). Then it repeats.' },
       { q: 'Why might a robot carry a Raspberry Pi AND a microcontroller?', a: ['The Pi does heavy thinking; the microcontroller handles fast motor timing', 'Two computers make the battery last longer', 'The microcontroller is a backup battery', 'Robots legally need two computers'], why: 'Each does what it is best at: big computing on the Pi, precise real-time control on the microcontroller.' } ] },
   { id: 'gripper', name: 'End Effector', role: 'the hands', color: '#ff77a8', chips: 8, bugs: 6, bugSpeed: 34, walls: 30,
+    big: "The END EFFECTOR is the robot's HANDS: the tool that touches and handles things.",
+    items: [["Two-finger gripper", "Pinches objects between two jaws."], ["Suction cup", "Grabs flat, smooth things like boxes."], ["Magnetic gripper", "Picks up steel parts in factories."], ["Soft gripper", "Rubbery fingers that hold fruit and eggs gently."], ["Wrist joint", "Rotates the tool to the right angle."], ["Force sensor", "Feels how hard the gripper is squeezing."], ["Welding torch", "A tool can be an end effector too."], ["Paint sprayer", "Car factories paint with robot arms."]],
     brief: ['NOTHING TO GRAB WITH', 'BOLT can see, plan, and move, but it can only pick things up by bumping right into them. Find 8 gripper parts.'],
     ability: ['GRIP', 'Grab parts from a distance. The end effector is how a robot handles objects.'],
     what: "The end effector is the tool at the end of a robot arm, its 'hand.' Engineers choose it for the job: a robot that welds needs a torch, and one that packs boxes needs suction.",
-    types: [['Two-finger gripper', 'pinches objects between two jaws; the classic robot hand'], ['Suction cups', 'grab flat, smooth things like boxes; common in warehouses'], ['Magnetic gripper', 'picks up steel parts in factories'], ['Soft gripper', 'rubbery fingers that handle fruit, eggs, or food gently'], ['Tools', 'welding torches, paint sprayers, and drills can all be end effectors']],
     real: 'Warehouse picking robots use suction to grab packages. Surgical robots hold tiny instruments that a surgeon controls from a console.',
     terms: [['Degrees of freedom (DOF)', 'the number of independent ways a robot can move; a human arm has about 7'], ['Grip force', 'how hard the gripper squeezes. Too little drops things, too much crushes them.']],
     fact: 'Picking up an unfamiliar object is one of the hardest problems in robotics. People do it without thinking, but a robot has to judge shape, weight, and slipperiness.',
@@ -201,6 +228,8 @@ const LEVELS = [
       { q: 'A warehouse robot picks up flat cardboard boxes all day. Which end effector fits best?', a: ['Suction cups', 'Welding torch', 'Paint sprayer', 'Ultrasonic sensor'], why: 'Flat, smooth surfaces seal well against suction cups, which makes them fast and reliable for boxes.' },
       { q: "What does 'degrees of freedom' mean for a robot arm?", a: ['How many independent ways it can move', 'How fast it can drive', 'How many batteries it has', 'How far its camera can see'], why: 'Each joint that can move on its own adds one degree of freedom. More DOF means more flexible motion.' } ] },
   { id: 'field', name: 'Field Test', role: 'everything together', color: '#fff1e8', chips: 9, bugs: 8, bugSpeed: 36, walls: 32, final: true,
+    big: "Every robot runs one loop: SENSE → THINK → ACT.",
+    items: [["Chassis check", "SKELETON: holds and protects everything."], ["Actuator check", "MUSCLES: turn energy into motion."], ["Power check", "ENERGY: batteries and regulators."], ["Sensor check", "SENSES: cameras, LiDAR, encoders."], ["Controller check", "BRAIN: reads sensors, decides, commands."], ["Gripper check", "HANDS: the tool that handles objects."], ["SENSE", "Step 1 of every robot loop: read the sensors."], ["THINK", "Step 2: the controller decides what to do."], ["ACT", "Step 3: the actuators move. Then repeat!"]],
     brief: ['FIELD TEST', 'Every system is installed. Final field test: collect 9 calibration chips while a swarm of glitches hunts you, then pass the final inspection.'],
     quiz: [
       { q: 'A robot vacuum bumps a chair and turns away. Which part detected the chair?', a: ['A sensor (bump switch)', 'The chassis', 'The battery', 'The gearbox'], why: 'Detecting the world is a sensor\'s job. The bump switch clicks, the controller decides to turn, and the motors act.' },
@@ -225,6 +254,7 @@ const G = {
   state: 'title', li: 0, parts: [], hp: 2, score: 0, energy: 100, firstTry: 0, asked: 0,
   map: null, seen: null, player: null, bugs: [], chips: [], got: 0, bench: null, invuln: 0, shake: 0,
   levelTime: 0, hitThisLevel: false, t: 0, float: [],
+  fx: [], combo: 0, comboT: 0, countdown: 0, boosting: false, kit: null, flash: 0, flashColor: '#fff',
 };
 const has = id => G.parts.includes(id);
 const stats = () => ({
@@ -238,22 +268,38 @@ const stats = () => ({
 
 // ---------- sound ----------
 let actx = null, soundOn = store.get('sound', true);
+function audio() {
+  actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
+}
+function tone(f, at, d, type = 'square', vol = .06) {
+  const a = audio(), o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.value = f;
+  g.gain.setValueAtTime(vol, at); g.gain.exponentialRampToValueAtTime(.001, at + d);
+  o.connect(g); g.connect(a.destination); o.start(at); o.stop(at + d);
+}
 function sfx(kind) {
   if (!soundOn) return;
   try {
-    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-    if (actx.state === 'suspended') actx.resume();
     const seqs = { pick: [[660, .05], [990, .07]], hit: [[180, .08], [90, .15]], good: [[523, .07], [659, .07], [784, .12]],
-      bad: [[220, .12], [160, .18]], install: [[392, .08], [523, .08], [659, .08], [784, .08], [1046, .2]], bench: [[880, .05], [1175, .1]], click: [[440, .03]] };
-    let at = actx.currentTime;
-    for (const [f, d] of seqs[kind] || []) {
-      const o = actx.createOscillator(), g = actx.createGain();
-      o.type = kind === 'hit' ? 'sawtooth' : 'square'; o.frequency.value = f;
-      g.gain.setValueAtTime(.06, at); g.gain.exponentialRampToValueAtTime(.001, at + d);
-      o.connect(g); g.connect(actx.destination); o.start(at); o.stop(at + d); at += d;
-    }
+      bad: [[220, .12], [160, .18]], install: [[392, .08], [523, .08], [659, .08], [784, .08], [1046, .2]], bench: [[880, .05], [1175, .1]], click: [[440, .03]],
+      zap: [[1400, .04], [700, .04], [1800, .08]], kit: [[523, .06], [784, .06], [1046, .1]], tick: [[440, .08]], go: [[880, .25]] };
+    let at = audio().currentTime;
+    for (const [f, d] of seqs[kind] || []) { tone(f, at, d, kind === 'hit' ? 'sawtooth' : 'square'); at += d; }
   } catch (e) {}
 }
+// chiptune loop: bass line + arpeggio, only while driving
+const BASS = [110, 110, 131, 98, 110, 147, 131, 98], ARP = [0, 3, 7, 12, 7, 3];
+let step = 0;
+setInterval(() => {
+  if (!soundOn || G.state !== 'play' || G.countdown > 0 || !actx) return;
+  try {
+    const s = step++, at = actx.currentTime + .02, root = BASS[(s >> 3) % 8];
+    if (s % 2 === 0) tone(root, at, .12, 'triangle', .07);
+    tone(root * 4 * Math.pow(2, ARP[s % 6] / 12), at, .06, 'square', .012);
+  } catch (e) {}
+}, 130);
 
 // ---------- map ----------
 function genLevel() {
@@ -283,10 +329,12 @@ function genLevel() {
     G.seen = m.map(r => r.map(() => 0));
     G.player = { x: sx * T + 8, y: sy * T + 8 };
     G.bench = { x: sx * T + 8, y: (sy - 1) * T + 8 };
-    G.chips = far.slice(0, L.chips).map(([x, y]) => ({ x: x * T + 8, y: y * T + 8, got: false, ph: Math.random() * 6 }));
+    G.chips = far.slice(0, L.chips).map(([x, y], k) => ({ x: x * T + 8, y: y * T + 8, got: false, ph: Math.random() * 6, k }));
+    const [kx, ky] = far[L.chips];
+    G.kit = { x: kx * T + 8, y: ky * T + 8, got: false };
     G.bugs = reach.filter(([x, y]) => dist[y][x] >= 7).sort(() => Math.random() - .5).slice(0, L.bugs)
-      .map(([x, y]) => ({ x: x * T + 8, y: y * T + 8, dx: 0, dy: 0, t: 0 }));
-    G.got = 0; G.invuln = 1; G.levelTime = 0; G.hitThisLevel = false; G.energy = 100; G.float = [];
+      .map(([x, y]) => ({ x: x * T + 8, y: y * T + 8, dx: 0, dy: 0, t: 0, stun: 0 }));
+    G.got = 0; G.invuln = 1; G.levelTime = 0; G.hitThisLevel = false; G.energy = 100; G.float = []; G.fx = []; G.combo = 0; G.comboT = 0;
     G.hp = stats().maxHp;
     return;
   }
@@ -329,38 +377,84 @@ function update(dt) {
   G.t += dt;
   if (G.state !== 'play') return;
   const S = stats(), L = LEVELS[G.li], p = G.player;
+  G.fx = G.fx.filter(f => { f.x += f.vx * dt; f.y += f.vy * dt; f.vy += 60 * dt; return (f.t -= dt) > 0; });
+  G.float = G.float.filter(f => (f.t -= dt) > 0);
+  G.flash = Math.max(0, G.flash - dt);
+  if (G.countdown > 0) {
+    const before = Math.ceil(G.countdown);
+    G.countdown -= dt;
+    if (Math.ceil(G.countdown) !== before) {
+      sfx(G.countdown <= 0 ? 'go' : 'tick');
+      if (G.countdown <= 0) G.float.push({ x: W / 2, y: H / 2, s: 'GO!', t: .9 });
+    }
+    return;
+  }
   G.levelTime += dt;
+  G.comboT = Math.max(0, G.comboT - dt); if (!G.comboT) G.combo = 0;
   let ix = (keys.right ? 1 : 0) - (keys.left ? 1 : 0), iy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
   if (ix && iy) { ix *= .7071; iy *= .7071; }
   let sp = S.speed;
-  if (S.boost && keys.boost && G.energy > 0 && (ix || iy)) { sp *= 1.8; G.energy = Math.max(0, G.energy - 50 * dt); }
+  G.boosting = S.boost && keys.boost && G.energy > 0 && !!(ix || iy);
+  if (G.boosting) { sp *= 1.8; G.energy = Math.max(0, G.energy - 50 * dt); if (Math.random() < .5) burst(p.x - ix * 6, p.y - iy * 6, '#ffec27', 1, 20); }
   else if (S.boost) G.energy = Math.min(100, G.energy + 22 * dt);
   move(p, ix * sp * dt, iy * sp * dt, 5.5);
+
+  if (G.kit && !G.kit.got && Math.hypot(G.kit.x - p.x, G.kit.y - p.y) < S.grab + 6) {
+    G.kit.got = true; sfx('kit'); burst(G.kit.x, G.kit.y, '#00e436', 14, 60);
+    if (G.hp < S.maxHp) { G.hp++; G.float.push({ x: G.kit.x, y: G.kit.y, s: '+1 HP', t: 1.2 }); }
+    else { G.score += 100; G.float.push({ x: G.kit.x, y: G.kit.y, s: '+100', t: 1.2 }); }
+    setTicker('REPAIR KIT', 'Real robots get maintenance too: tighten bolts, swap worn parts, recharge.', '#00e436');
+  }
 
   // what BOLT can see
   const px = p.x / T, py = p.y / T;
   for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) if (Math.hypot(x + .5 - px, y + .5 - py) < S.vision) G.seen[y][x] = 1;
 
   for (const c of G.chips) if (!c.got && Math.hypot(c.x - p.x, c.y - p.y) < S.grab + 6) {
-    c.got = true; G.got++; G.score += 50; sfx('pick'); G.float.push({ x: c.x, y: c.y, s: '+50', t: 1 });
-    if (G.got === G.chips.length) { sfx('bench'); G.float.push({ x: G.bench.x, y: G.bench.y - 10, s: 'RETURN!', t: 2 }); }
+    c.got = true; G.got++;
+    G.combo = G.comboT > 0 ? G.combo + 1 : 1; G.comboT = 3;
+    const pts = 50 * G.combo; G.score += pts; sfx('pick');
+    burst(c.x, c.y, L.color, 16, 70); G.flash = .12; G.flashColor = L.color;
+    const [name, fact] = L.items[c.k];
+    G.float.push({ x: c.x, y: c.y - 4, s: name.toUpperCase(), t: 1.6 });
+    G.float.push({ x: c.x, y: c.y + 10, s: G.combo > 1 ? `+${pts} COMBO x${G.combo}` : `+${pts}`, t: 1.2 });
+    setTicker(`PART ${G.got}/${G.chips.length}: ${name}`, fact, L.color);
+    if (G.got === G.chips.length) {
+      sfx('bench'); G.float.push({ x: G.bench.x + 20, y: G.bench.y - 10, s: 'RETURN TO BENCH!', t: 3 });
+      setTimeout(() => G.state === 'play' && setTicker('ALL PARTS FOUND', 'Drive back to the flashing workbench to install them on BOLT.', '#ffa300'), 2200);
+    }
   }
   if (G.got === G.chips.length && Math.hypot(G.bench.x - p.x, G.bench.y - p.y) < 12) { finishLevel(); return; }
 
   G.invuln = Math.max(0, G.invuln - dt);
   for (const b of G.bugs) {
     const d = Math.hypot(p.x - b.x, p.y - b.y), bs = L.bugSpeed;
+    if (b.stun > 0) { b.stun -= dt; continue; }
+    if (d < 11 && G.boosting) {
+      b.stun = 4; G.score += 100; sfx('zap'); G.shake = .15; burst(b.x, b.y, '#29adff', 18, 90);
+      G.float.push({ x: b.x, y: b.y, s: 'ZAPPED +100', t: 1.2 });
+      continue;
+    }
     if (d < 5 * T) { b.dx = Math.sign(p.x - b.x) * (Math.abs(p.x - b.x) > 2 ? 1 : 0); b.dy = Math.sign(p.y - b.y) * (Math.abs(p.y - b.y) > 2 ? 1 : 0); b.t = .4; }
     else if ((b.t -= dt) <= 0) { const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]]; [b.dx, b.dy] = dirs[Math.floor(Math.random() * 4)]; b.t = 1 + Math.random() * 1.5; }
     const n = (b.dx && b.dy) ? .7071 : 1;
     if (move(b, b.dx * bs * n * dt, b.dy * bs * n * dt, 5) && d >= 5 * T) b.t = 0;
     if (d < 10 && G.invuln <= 0) {
       G.hp--; G.invuln = 1.5; G.shake = .3; G.hitThisLevel = true; sfx('hit');
+      burst(p.x, p.y, '#ff004d', 12, 80); G.flash = .2; G.flashColor = '#ff004d';
       if (G.hp <= 0) { crash(); return; }
     }
   }
-  G.float = G.float.filter(f => (f.t -= dt) > 0);
   G.shake = Math.max(0, G.shake - dt);
+}
+function burst(x, y, color, n, spd) {
+  for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, v = spd * (.4 + Math.random() * .6); G.fx.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 20, t: .4 + Math.random() * .4, c: color }); }
+}
+function setTicker(label, text, color) {
+  const el = $('ticker');
+  $('tickLbl').textContent = label.toUpperCase(); $('tickText').textContent = text;
+  el.style.setProperty('--lc', color || 'var(--amber)');
+  el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
 }
 
 // ---------- drawing ----------
@@ -420,7 +514,18 @@ function render() {
     ctx.fillStyle = L.color; ctx.fillRect(c.x - 3, c.y - 2 + bob, 6, 5);
     ctx.fillStyle = '#fff1e8'; ctx.fillRect(c.x - 2, c.y - 1 + bob, 1, 1);
   }
-  for (const b of G.bugs) if (visible(b.x, b.y)) {
+  if (G.kit && !G.kit.got && visible(G.kit.x, G.kit.y, 4)) {
+    const k = G.kit, bob = Math.round(Math.sin(t * 3));
+    ctx.fillStyle = '#05060f'; ctx.fillRect(k.x - 5, k.y - 5 + bob, 10, 10);
+    ctx.fillStyle = '#fff1e8'; ctx.fillRect(k.x - 4, k.y - 4 + bob, 8, 8);
+    ctx.fillStyle = '#00e436'; ctx.fillRect(k.x - 1, k.y - 3 + bob, 2, 6); ctx.fillRect(k.x - 3, k.y - 1 + bob, 6, 2);
+  }
+  for (const b of G.bugs) if (visible(b.x, b.y) && b.stun > 0) {
+    ctx.fillStyle = '#5f574f'; ctx.fillRect(b.x - 5, b.y - 3, 10, 7);
+    ctx.fillStyle = '#29adff'; if (Math.floor(t * 8) % 2) ctx.fillRect(b.x - 6 + Math.floor(t * 20) % 12, b.y - 4, 1, 1);
+    ctx.fillStyle = '#c2c3c7'; ctx.fillRect(b.x - 3, b.y - 1, 2, 1); ctx.fillRect(b.x + 1, b.y - 1, 2, 1);
+  }
+  for (const b of G.bugs) if (visible(b.x, b.y) && !(b.stun > 0)) {
     const j = Math.floor(t * 10) % 2;
     ctx.fillStyle = '#ff004d'; ctx.fillRect(b.x - 5, b.y - 4 + j, 10, 8);
     ctx.fillStyle = '#ff77a8'; ctx.fillRect(b.x - 5 + j * 7, b.y - 5, 3, 2); ctx.fillRect(b.x - 6, b.y + 1 - j, 2, 3); ctx.fillRect(b.x + 4, b.y - 1 + j, 2, 3);
@@ -449,8 +554,20 @@ function render() {
     }
   }
   if (ready) { ctx.fillStyle = '#ffa300'; const yy = by - 6 + Math.round(Math.sin(t * 6) * 2); ctx.fillRect(G.bench.x - 2, yy, 5, 2); ctx.fillRect(G.bench.x - 1, yy + 2, 3, 1); ctx.fillRect(G.bench.x, yy + 3, 1, 1); }
+  for (const f of G.fx) { ctx.fillStyle = f.c; ctx.fillRect(Math.round(f.x), Math.round(f.y), 2, 2); }
   ctx.font = '8px "Press Start 2P", monospace'; ctx.textAlign = 'center';
-  for (const f of G.float) { ctx.fillStyle = '#000'; ctx.fillText(f.s, f.x + 1, f.y - (1 - f.t) * 12 + 1); ctx.fillStyle = '#ffec27'; ctx.fillText(f.s, f.x, f.y - (1 - f.t) * 12); }
+  for (const f of G.float) {
+    const w = ctx.measureText(f.s).width / 2, x = Math.min(W - w - 2, Math.max(w + 2, f.x)), y = Math.max(10, f.y - (1.2 - f.t) * 10);
+    ctx.fillStyle = '#000'; ctx.fillText(f.s, x + 1, y + 1); ctx.fillStyle = '#ffec27'; ctx.fillText(f.s, x, y);
+  }
+  if (G.combo > 1 && G.comboT > 0) { ctx.textAlign = 'right'; ctx.fillStyle = '#000'; ctx.fillText(`COMBO x${G.combo}`, W - 5, 13); ctx.fillStyle = '#ff77a8'; ctx.fillText(`COMBO x${G.combo}`, W - 6, 12); }
+  if (G.flash > 0) { ctx.globalAlpha = G.flash * 1.5; ctx.fillStyle = G.flashColor; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
+  if (G.countdown > 0) {
+    const n = Math.ceil(G.countdown), label = n > 3 ? 'READY' : String(n);
+    ctx.fillStyle = 'rgba(3,4,12,.55)'; ctx.fillRect(0, H / 2 - 22, W, 44);
+    ctx.textAlign = 'center'; ctx.font = '16px "Press Start 2P", monospace';
+    ctx.fillStyle = '#000'; ctx.fillText(label, W / 2 + 2, H / 2 + 8); ctx.fillStyle = L.color; ctx.fillText(label, W / 2, H / 2 + 6);
+  }
 }
 function drawAttract() {
   const t = G.t;
@@ -494,7 +611,7 @@ function title() {
     <h2>BUILD-A-BOT LAB</h2>
     <p>Meet <b>BOLT</b>, a robot that is only a circuit board so far. Drive it through 7 levels of the lab, recover the parts it is missing, and learn what each part does. Every part you install gives BOLT a new ability.</p>
     <ul>
-      <li>Collect every glowing part in the level, then return to the <b>striped workbench</b>.</li>
+      <li>Collect every glowing part in the level, then return to the <b>striped workbench</b>. Each part tells you what it is as you grab it.</li>
       <li>Dodge the red <b>glitches</b>. They chase you if you get close.</li>
       <li>Read the part's lesson, then answer 2 quick questions to install it.</li>
     </ul>
@@ -509,10 +626,26 @@ function brief() {
   show(`<div class="eyebrow">LEVEL ${G.li + 1} OF ${LEVELS.length}${L.final ? '' : ' · ' + L.name.toUpperCase()}</div>
     <h2>${esc(L.brief[0])}</h2>
     <div class="bots">${botCanvas(G.parts)}<p>${esc(L.brief[1])}</p></div>
-    <div class="row"><button class="btn" data-act="go" data-primary>DRIVE ▸</button></div>`, L.color, { go: play });
+    <div class="analogy"><div><div class="lbl" style="--lc:${L.color}">THIS LEVEL TEACHES</div><div class="eq">${hl(L.big)}</div></div></div>
+    <ul>
+      <li>Every part you grab shows its <b>name and what it does</b> right under the screen.</li>
+      <li>Grab parts quickly in a row for a <b>combo</b>. The white box with a green <b>+</b> is a repair kit.</li>
+      ${has('power') ? '<li>Hold <b>SPACE</b> to boost. Boost straight into a glitch to <b>zap</b> it.</li>' : ''}
+    </ul>
+    <div class="row"><button class="btn" data-act="go" data-primary>DRIVE ▸</button></div>`, L.color, { go: () => play(true) });
   paintBots();
 }
-function play() { hide(); G.state = 'play'; for (const k in keys) keys[k] = false; }
+// wrap ALL-CAPS key words (CHASSIS, SKELETON, SENSE → THINK → ACT) in the accent color
+const hl = s => esc(s).replace(/\b([A-Z]{2,}(?: [A-Z]{2,})*)\b/g, '<em>$1</em>');
+function play(fresh) {
+  hide(); G.state = 'play'; for (const k in keys) keys[k] = false;
+  if (fresh !== true) return;
+  const L = LEVELS[G.li];
+  G.countdown = 3;
+  $('bigIdea').innerHTML = hl(L.big);
+  $('lessonbar').style.setProperty('--lc', L.color);
+  setTicker('MISSION', `Find ${L.chips} ${L.final ? 'calibration chips' : 'parts for the ' + L.name.toLowerCase()}, then return to the striped workbench.`, L.color);
+}
 function pause() {
   if (G.state !== 'play') return;
   G.state = 'paused';
@@ -533,18 +666,20 @@ function finishLevel() {
   G.state = 'lesson'; sfx('bench');
   const bonus = `<p class="dimtext">Time bonus +${timeBonus}${clean ? ` · No-damage bonus +${clean}` : ''}</p>`;
   if (L.final) return quiz(0, bonus);
-  show(`<div class="eyebrow">PART RECOVERED · ${L.name.toUpperCase()} = ${L.role.toUpperCase()}</div>
-    <h2>${esc(L.name.toUpperCase())}</h2>
+  show(`<div class="eyebrow">LESSON ${G.li + 1} · PART RECOVERED</div>
+    <h2>${esc(L.name.toUpperCase())} = ${esc(L.role.toUpperCase())}</h2>
+    <div class="analogy">${botCanvas([...G.parts, L.id])}<div class="eq">${hl(L.big)}</div></div>
     ${bonus}
     <p>${esc(L.what)}</p>
-    <h3>TYPES YOU'LL SEE</h3>
-    <ul>${L.types.map(([a, b]) => `<li><b>${esc(a)}</b>: ${esc(b)}</li>`).join('')}</ul>
+    <h3>THE ${L.items.length} PARTS YOU JUST COLLECTED</h3>
+    <div class="collected">${L.items.map(([n, f]) => `<div><b>${esc(n)}</b>${esc(f)}</div>`).join('')}</div>
     <h3>IN REAL ROBOTS</h3>
     <p>${esc(L.real)}</p>
     <h3>KEY WORDS</h3>
     <ul>${L.terms.map(([a, b]) => `<li><b>${esc(a)}</b>: ${esc(b)}</li>`).join('')}</ul>
     <div class="note">${esc(L.fact)}</div>
     <div class="row"><button class="btn" data-act="q" data-primary>TAKE THE QUIZ ▸</button></div>`, L.color, { q: () => quiz(0) });
+  paintBots();
   unlock(L.id);
 }
 function quiz(i, pre = '') {
@@ -570,13 +705,21 @@ function quiz(i, pre = '') {
         } else {
           if (tries === 1) G.asked++;
           sfx('bad'); b.classList.add('wrong'); b.disabled = true;
-          $('fb').innerHTML = `<div class="fb bad"><strong>NOT QUITE</strong>Think about what ${L.final ? 'each part' : 'the ' + esc(L.name.toLowerCase())} is for, then try another answer.</div>`;
+          $('fb').innerHTML = `<div class="fb bad"><strong>NOT QUITE · HINT</strong>${hl(L.big)} Try another answer.</div>`;
         }
       },
       next: () => i + 1 < L.quiz.length ? quiz(i + 1) : (L.final ? finale() : install()),
     });
   render();
 }
+const TRY = {
+  chassis: 'Check your HP. BOLT can now take 4 hits instead of 2.',
+  motors: 'Just drive. BOLT is almost twice as fast.',
+  power: 'Hold SPACE while moving to boost. Boost INTO a glitch to zap it!',
+  sensors: 'The dark lab lights up. You can see glitches coming from far away.',
+  controller: 'Follow the green arrow next to BOLT to the nearest part.',
+  gripper: "Drive near a part. You don't have to touch it anymore.",
+};
 function install() {
   const L = LEVELS[G.li], before = [...G.parts];
   G.parts.push(L.id); G.state = 'install'; sfx('install');
@@ -584,6 +727,7 @@ function install() {
     <h2>NEW ABILITY: ${esc(L.ability[0])}</h2>
     <div class="bots">${botCanvas(before)}<span class="arrow">▸</span>${botCanvas(G.parts)}</div>
     <p>${esc(L.ability[1])}</p>
+    <div class="tryit">TRY IT NEXT LEVEL: ${esc(TRY[L.id])}</div>
     <div class="row"><button class="btn" data-act="go" data-primary>NEXT LEVEL ▸</button></div>`, L.color, { go: () => { G.li++; brief(); } });
   paintBots();
 }
