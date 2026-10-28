@@ -41,3 +41,7 @@
 - Anonymous HTTP homepage: 200, game title present, no login redirect. All 16 files in local dist matched live SHA-256 values exactly.
 - Opened public site in browser. Fresh-player start screen, live driving, scanner reveal, and pause verified; browser error/warning log empty. Screenshot saved in ignored output/netlify-arcade.jpg.
 - Netlify reference lookup correction: local CLI method is listAccountsForUser (not listAccounts); getSiteDeploy requires both site_id and deploy_id. No secrets read or saved.
+
+## 2026-10-28 — compact laptop arena layout
+- Public screenshot at 1280x720 exposed health HUD clipping after canvas focus. Updated desktop dialog width based on available screen height and compacted its surrounding controls. Mobile rules remain unchanged.
+- Source checks and git diff whitespace check pass; runtime/game rules are unchanged from the 32-test passing build. Publishing the layout fix, then measuring the public dialog.

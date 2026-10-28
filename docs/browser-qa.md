@@ -15,3 +15,6 @@ Observed after repair: `clientWidth=390`, `body.scrollWidth=390`, Start bounds w
 
 ## Automated counterpart
 `npm test`: deterministic success/failure rules for all four arcade missions and lab puzzles, replay deduplication, storage recovery, upgrades, score persistence. Browser-only layout checks above complement these tests.
+
+## Regression: laptop_arena_keeps_health_visible
+At 1280x720, the initial full-width arena forced an internal dialog scroll and the health HUD could leave view during play. The desktop dialog now sizes its width from the available screen height and uses compact surrounding controls. Verify `dialog.scrollHeight <= dialog.clientHeight` at that breakpoint after publication.
