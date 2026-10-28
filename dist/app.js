@@ -21,7 +21,7 @@ const startLabels = { sensors: 'START WITH THE SENSES', motors: 'MAKE YOUR NEXT 
 const shortFacts = { sensors: 'Measures how far away an object is.', motors: 'Turns electrical energy into movement.', controllers: 'Runs the instructions that guide your robot.', power: 'Supplies energy to the robot’s circuit.' };
 const playLabels = { sensors: 'START LOOT RUN', motors: 'START TURBO RUN', controllers: 'START CHECKPOINT RUSH', power: 'START BATTERY BLITZ' };
 const labTitles = { sensors: 'Scan & steer', motors: 'Wheel work', controllers: 'Code the course', power: 'Close the loop' };
-const unlocks = { sensors: 'WIDE SCAN + RADAR', motors: 'TURBO DRIVE', controllers: 'FASTER ABILITIES + BONUS SCORE', power: 'AN EXTRA HEART' };
+const unlocks = { sensors: 'WIDE SCAN + RADAR', motors: 'FASTER WHEELS', controllers: 'FASTER ABILITIES + BONUS SCORE', power: 'AN EXTRA HEART' };
 
 function playSound(kind = 'click') {
   if (!soundEnabled) return;

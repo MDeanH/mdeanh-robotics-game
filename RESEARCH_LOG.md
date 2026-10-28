@@ -30,3 +30,8 @@
 - Checks after action integration: 32/32 tests pass, 8 ES module source checks pass, git diff --check clean. No physical robot testing applies.
 - Hosting: authenticated Netlify CLI was available. It initially inferred an unrelated parent project; every deployment for this task must use the exact newly created game-site ID. Account list confirms slug mdeanh, display Mdean.
 - Earlier Sites registration is unpublished and is superseded by the user's explicit Netlify request. Do not publish it.
+
+## 2026-10-28 — pre-publication functional review
+- Snapshot: bfca549. Independent reviewer reran 32 passing tests and found no confirmed functional defect in spatial win gates, claim deduplication, pause, new-player startup, and cleanup.
+- Copy adjustment: motor upgrade now says FASTER WHEELS, matching the actual cross-mission speed increase; the motor mission still provides a turbo special.
+- Public Netlify game site created in account mdeanh: site ID 52fa8bfb-3b0f-4627-94c4-be935970fb69; final site name mdeanh-robotics-workshop. Deployment next.
