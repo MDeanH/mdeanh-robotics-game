@@ -17,7 +17,9 @@ Buildless HTML/CSS/ES modules; no accounts, multiplayer, student data collection
 - `dist/index.html`: accessible workshop shell.
 - `dist/style.css`: visual presentation.
 - `dist/app.js`: workshop orchestration.
-- `dist/game.js`: challenge interface.
+- `dist/arcade.js`: animated action-game interface.
+- `dist/arcade-model.js`: deterministic action-game rules.
+- `dist/game.js`: optional Tinker lab interface.
 - `dist/model.js`: deterministic challenge rules.
 - `dist/content.js`: lesson data.
 - `baseline/index.html`: kept minimal parts explorer.
@@ -29,7 +31,7 @@ Buildless HTML/CSS/ES modules; no accounts, multiplayer, student data collection
 - `npm run check` — source checks.
 
 ## Verification and boundaries
-Consult `~/wiki` before hardware or project-state claims. Carry evidence status. This is an illustrative browser game, with no connection to physical robots. Functional review only; no security-focused work. Before commits, complete `DEFINITION_OF_DONE.md` and update the handoff. Use GitHub remote `origin` for the user's named repository; Sites source credentials use the Sites helper without exposing or persisting tokens.
+Consult `~/wiki` before hardware or project-state claims. Carry evidence status. This is an illustrative browser game, with no connection to physical robots. Functional review only; no security-focused work. Before commits, complete `DEFINITION_OF_DONE.md` and update the handoff. Use GitHub remote `origin` for the user's named repository; Public deployment uses the authenticated Netlify CLI with the exact game site ID. The earlier Sites registration is unpublished and superseded; its reference is in docs/unpublished-sites-registration.json.
 
 ## Gotchas
 - The installed Fable5 scaffolder writes `CLAUDE.md`; `AGENTS.md` is this project's canonical agent entry point.

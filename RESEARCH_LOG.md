@@ -14,3 +14,19 @@
 - Red-on-demand: challenge model scan gate mutated in memory by subagent; scan-gate assertion failed (exit 1, true !== false). Actual source unchanged. Meaningful regression harness demonstrated.
 - User steering: requested more game-like/fun experience. Add movement, enemies, collectibles, specials, scoring, and ability unlocks; keep self-paced puzzles as optional Tinker lab.
 - Artwork: built-in image generator transformed selected Pixel Workshop mockup into full-bleed workshop asset; stored in dist/assets/workshop.png. Illustration only.
+
+## 2026-10-28 — integrated browser puzzle proof
+- Browser: in-app preview at 1280 px desktop, local HTTP server.
+- Reproduced failure: sensor route attempted before a scan remained at 0/4 and displayed scan-first feedback.
+- Completed all four optional lab puzzles through actual UI buttons: sensors lanes 2,1,3,2; motors forward/left/right; controller eight-step route; closed battery-return circuit.
+- Result: 4/4 parts and 400 XP, completion dialog rendered. Reload after the first earned controller retained 1/4 and 100 XP. Browser warning/error log empty at that checkpoint.
+- Independent functional integration review: no confirmed defect; 18 tests passed after high-score persistence additions. Native keyboard/touch arcade QA remains pending.
+
+## 2026-10-28 — action arcade and Netlify direction
+- User explicitly requested more game-like, fun play, then public hosting on their Netlify account.
+- Added four real-time missions with keyboard/touch driving, scrapbot enemies, health, scanner/turbo/freeze/shield specials, pickups, combo scoring, return-to-dock wins, upgrades, and browser-local high scores. Puzzle labs remain optional.
+- Browser proof: scanner mission completed through actual movement and scans with moving enemies; collected all 4 chips, docked with 2 hearts, received final score 980, claimed component. Reload retained 1/4 parts and 100 XP; replay start displayed YOUR BEST 980. Power mission collected a cell, shielded, and charged a station in real play. All four complete routes also pass deterministic rules tests.
+- Phone regression test `phone_start_button_fits_game_overlay`: at 390x844, initial start CTA was clipped inside the arena overlay. Fixed ready/win/loss mobile stage minimum height; fresh DOM measurement returned width=390, bodyWidth=390, startButtonVisible=true. Touch scan and pause passed; browser error/warning log empty.
+- Checks after action integration: 32/32 tests pass, 8 ES module source checks pass, git diff --check clean. No physical robot testing applies.
+- Hosting: authenticated Netlify CLI was available. It initially inferred an unrelated parent project; every deployment for this task must use the exact newly created game-site ID. Account list confirms slug mdeanh, display Mdean.
+- Earlier Sites registration is unpublished and is superseded by the user's explicit Netlify request. Do not publish it.

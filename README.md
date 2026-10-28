@@ -23,12 +23,12 @@ npm run check
 
 ## Play the workshop arcade
 
-Choose a mission, collect four parts or checkpoints, and return to the dock. Dodge the scrapbots, protect your hearts, and chain pickups for a bigger score.
+Choose a mission, collect four parts or checkpoints (or power three stations), and return to the dock. Dodge the scrapbots, protect your hearts, and chain pickups for a bigger score.
 
 - **Lights-out loot run:** use the sensor scan to reveal your route through the dark.
 - **Turbo parts run:** steer around trouble and use a motor-powered dash.
 - **Checkpoint rush:** reach the numbered checkpoints in the correct order.
-- **Battery blitz:** make your power-parts pickup and delivery run.
+- **Battery blitz:** carry three energy cells to separate charging stations, using your shield to dodge trouble.
 
 Move with **WASD or the arrow keys**. Press **Space** for the mission ability. Touch controls provide movement and the action button on phones and tablets.
 

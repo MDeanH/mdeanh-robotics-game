@@ -1,7 +1,8 @@
 import { MODULES, getModule } from './content.js';
 import { partIcon } from './icons.js';
 import { mountChallenge } from './game.js';
-import { loadProgress, saveProgress, awardPart, freshProgress, progressXP } from './progress.js';
+import { mountArcade } from './arcade.js';
+import { loadProgress, saveProgress, awardPart, freshProgress, progressXP, recordScore } from './progress.js';
 
 const $ = (id) => document.getElementById(id);
 let storage;
@@ -18,7 +19,9 @@ const challengeDialog = $('challenge-dialog');
 const infoDialog = $('info-dialog');
 const startLabels = { sensors: 'START WITH THE SENSES', motors: 'MAKE YOUR NEXT MOVE', controllers: 'A LITTLE LOGIC GOES FAR', power: 'THE FINAL SPARK' };
 const shortFacts = { sensors: 'Measures how far away an object is.', motors: 'Turns electrical energy into movement.', controllers: 'Runs the instructions that guide your robot.', power: 'Supplies energy to the robot’s circuit.' };
-const playLabels = { sensors: 'PLAY SENSOR CHALLENGE', motors: 'PLAY MOTOR CHALLENGE', controllers: 'PLAY CODING CHALLENGE', power: 'PLAY POWER CHALLENGE' };
+const playLabels = { sensors: 'START LOOT RUN', motors: 'START TURBO RUN', controllers: 'START CHECKPOINT RUSH', power: 'START BATTERY BLITZ' };
+const labTitles = { sensors: 'Scan & steer', motors: 'Wheel work', controllers: 'Code the course', power: 'Close the loop' };
+const unlocks = { sensors: 'WIDE SCAN + RADAR', motors: 'TURBO DRIVE', controllers: 'FASTER ABILITIES + BONUS SCORE', power: 'AN EXTRA HEART' };
 
 function playSound(kind = 'click') {
   if (!soundEnabled) return;
@@ -68,9 +71,10 @@ function render() {
   $('part-icon').innerHTML = partIcon(selected.id);
   $('part-name').textContent = selected.part;
   $('part-description').textContent = shortFacts[selected.id];
-  $('play-label').textContent = count === 4 ? 'MEET YOUR FINISHED ROBOT' : earned ? 'REPLAY CHALLENGE' : playLabels[selected.id];
-  $('reward-label').textContent = earned ? 'PART IN YOUR TOOLBOX ✓' : `+${selected.xp} XP`;
-  $('mission-footnote').textContent = count === 4 ? 'All four parts earned. Your first build is complete!' : earned ? 'You’ve earned this part! Replays are always free.' : 'Complete the challenge to earn this part.';
+  $('play-label').textContent = earned ? 'REPLAY · BEAT YOUR BEST' : playLabels[selected.id];
+  $('reward-label').textContent = progress.bestScores[selected.id] ? `BEST: ${progress.bestScores[selected.id].toLocaleString()}` : `+${selected.xp} XP`;
+  $('mission-footnote').textContent = 'ARROWS / WASD TO DRIVE · SPACE FOR YOUR ABILITY';
+  $('part-description').innerHTML = `${shortFacts[selected.id]}<span class="unlocks-note">${earned ? 'UNLOCKED' : 'UNLOCK'}: ${unlocks[selected.id]}</span>`;
   $('xp-label').textContent = `${progressXP(progress)} XP`;
   $('xp-fill').style.width = `${count * 25}%`;
   $('rank-name').textContent = count === 4 ? 'ROBOT BUILDER' : count >= 2 ? 'BOT APPRENTICE' : 'ROOKIE BUILDER';
@@ -79,8 +83,8 @@ function render() {
   $('progress-parts').setAttribute('aria-label', `${count} of 4 parts earned`);
   $('progress-parts').innerHTML = MODULES.map(item => `<span class="progress-part${progress.completed.includes(item.id) ? ' earned' : ''}" title="${item.name}${progress.completed.includes(item.id) ? ' earned' : ''}" aria-hidden="true"></span>`).join('');
   $('robot-status').textContent = count === 4 ? 'BUILD COMPLETE' : 'IN THE MAKING';
-  $('mentor-message').textContent = count === 4 ? 'You did it, builder. BOT–01 is ready for adventure!' : count > 0 ? `${count} ${count === 1 ? 'part' : 'parts'} earned. Look at your robot coming together!` : 'Every great robot starts with a little curiosity.';
-  $('mentor-detail').textContent = count === 4 ? 'Sensors sense. Controllers decide. Motors act. Power keeps it going.' : 'Pick a part. Play a challenge. Bring BOT–01 to life.';
+  $('mentor-message').textContent = count === 4 ? 'All systems go! How high can you push that score?' : count > 0 ? `${count} ${count === 1 ? 'upgrade' : 'upgrades'} installed. Time to take ${count === 1 ? 'it' : 'them'} for a spin!` : 'Lost parts. Mischievous scrap-bots. One little hero.';
+  $('mentor-detail').textContent = 'Grab the parts. Dodge trouble. Bring it all back to the dock.';
   $('footer-message').innerHTML = count === 4 ? 'First robot built. <b>Next stop: big things.</b>' : 'Small robots. <b>Big ideas.</b>';
   document.querySelector('.scene').classList.toggle('victory-running', count === 4);
 }
@@ -90,30 +94,37 @@ challengeDialog.addEventListener('close', () => {
   gameCleanup?.(); gameCleanup = null; $('challenge-content').replaceChildren();
   dialogOpener?.focus();
 });
-function launchChallenge(id) {
+function launchSession(id, mode = 'arcade') {
   const item = getModule(id);
   if (!item) return;
   dialogOpener = document.activeElement;
-  $('challenge-title').textContent = item.challenge;
-  $('challenge-kicker').textContent = `${item.name.toUpperCase()} / CHALLENGE ROOM`;
+  const arcade = mode === 'arcade';
+  challengeDialog.classList.toggle('arcade-dialog', arcade);
+  $('challenge-title').textContent = arcade ? item.challenge : labTitles[id];
+  $('challenge-kicker').textContent = `${item.name.toUpperCase()} / ${arcade ? 'ARCADE MISSION' : 'TINKER LAB'}`;
   gameCleanup?.();
-  gameCleanup = mountChallenge(id, $('challenge-content'), {
+  gameCleanup = (arcade ? mountArcade : mountChallenge)(id, $('challenge-content'), {
     playSound,
-    onComplete: () => {
+    unlockedParts: progress.completed,
+    bestScore: progress.bestScores[id] || 0,
+    onComplete: (_id, result = {}) => {
       const alreadyEarned = progress.completed.includes(id);
       progress = awardPart(progress, id);
+      if (arcade) progress = recordScore(progress, id, result.score);
       const next = MODULES.find(part => !progress.completed.includes(part.id));
       if (next && !alreadyEarned) progress = { ...progress, selected: next.id };
       persist(); render(); closeChallenge();
       if (!alreadyEarned) {
         playSound('success');
-        notify(`${item.part} earned! +${item.xp} XP`);
+        notify(`${item.part} installed! Unlocked: ${unlocks[id]}`);
         if (progress.completed.length === 4) setTimeout(showCompletion, 100);
-      } else notify('Challenge complete! This part is already in your toolbox.');
+      } else notify(arcade ? `Nice run! Best score: ${(progress.bestScores[id] || 0).toLocaleString()}` : 'Lab complete! Your component is already installed.');
     }
   });
   challengeDialog.showModal();
 }
+const launchChallenge = (id) => launchSession(id, 'lab');
+const launchArcade = (id) => launchSession(id, 'arcade');
 
 function openInfo(title, content) {
   if (infoDialog.open) infoDialog.close();
@@ -124,12 +135,13 @@ function openInfo(title, content) {
 }
 infoDialog.addEventListener('close', () => dialogOpener?.focus());
 function showHelp() {
-  openInfo('Welcome to the workshop.', `<p class="info-copy">Meet BOT–01: a little robot with a lot of potential. Earn its four parts by trying out what each one does.</p><ol class="help-steps"><li><div><b>Pick a part</b><p>Choose sensors, motors, controllers, or power. Click a marker on the workbench or a mission on the board.</p></div></li><li><div><b>Play the challenge</b><p>Scan an obstacle course, steer wheels, program a route, or connect a circuit. Experiment as much as you like; hints and retries are free.</p></div></li><li><div><b>Collect your component</b><p>Finish the challenge and collect your part to earn 100 XP. Get all four to complete your first robot!</p></div></li></ol><p class="info-note">Use Tab to move between controls, Enter or Space to activate them, and Escape to close a panel. All challenges work with touch too. Progress saves in this browser. This is an educational game using simplified models.</p><button class="play-button" id="help-start"><span>LET’S BUILD SOMETHING</span><span aria-hidden="true">→</span></button>`);
+  openInfo('Tiny robot. Big adventure.', `<p class="info-copy">The workshop’s lost its parts, and the scrap-bots are causing chaos. BOT–01 needs a brave driver. That’s you.</p><ol class="help-steps"><li><div><b>Drive, dodge, and discover</b><p>Use WASD or the arrow keys to steer. Grab parts and bonus sparks, dodge the red scrap-bots, and chain pickups for a bigger combo. Touch controls work too.</p></div></li><li><div><b>Put your parts to work</b><p>Press Space for your mission ability: scan the dark, burst into turbo, or make a power delivery. Protect your hearts! Pause whenever you need a breather.</p></div></li><li><div><b>Bring your loot home</b><p>Finish the objective and return to the glowing dock. Each new part adds an upgrade. Build the full robot, then replay to beat your high scores!</p></div></li></ol><p class="info-note">The Tinker lab has extra self-paced puzzles if you want to explore the science. Tab moves between buttons, Enter or Space activates them, and Escape closes panels. Progress and high scores save in this browser. All gameplay uses simplified educational models.</p><button class="play-button" id="help-start"><span>LET’S GO!</span><span aria-hidden="true">→</span></button>`);
   $('help-start').addEventListener('click', () => { infoDialog.close(); $('play-button').focus(); });
 }
 function showNotebook() {
-  openInfo('Your parts notebook.', `<p class="info-copy">Four little parts. One very capable robot. Here’s what each component brings to the build.</p><div class="notebook-grid">${MODULES.map(item => `<article class="notebook-card${progress.completed.includes(item.id) ? ' earned' : ''}"><span class="module-icon">${partIcon(item.id)}</span><span class="notebook-state">${progress.completed.includes(item.id) ? '✓ EARNED' : 'TO DISCOVER'}</span><h3>${item.part}</h3><ul>${item.notebook.map(fact => `<li>${fact}</li>`).join('')}</ul><button class="small-button" data-replay="${item.id}">${progress.completed.includes(item.id) ? 'REPLAY CHALLENGE' : 'PLAY CHALLENGE'}</button></article>`).join('')}</div><div class="notebook-footer"><span>Saved on this device · ${progressXP(progress)} / 400 XP</span><button class="text-button" id="reset-button">Start a new build</button></div><div id="reset-confirm-slot"></div>`);
-  $('info-content').querySelectorAll('[data-replay]').forEach(button => button.addEventListener('click', () => { infoDialog.close(); launchChallenge(button.dataset.replay); }));
+  openInfo('Your parts notebook.', `<p class="info-copy">Four little parts. Four big upgrades. Earn them, install them, and put them to work.</p><div class="notebook-grid">${MODULES.map(item => `<article class="notebook-card${progress.completed.includes(item.id) ? ' earned' : ''}"><span class="module-icon">${partIcon(item.id)}</span><span class="notebook-state">${progress.completed.includes(item.id) ? '✓ INSTALLED' : 'TO DISCOVER'}</span><h3>${item.part}</h3><span class="unlocks-note">${unlocks[item.id]}</span><ul>${item.notebook.map(fact => `<li>${fact}</li>`).join('')}</ul><button class="small-button" data-replay="${item.id}">${progress.completed.includes(item.id) ? 'REPLAY MISSION' : 'PLAY MISSION'}</button><button class="lab-replay-link" data-lab="${item.id}">Try the Tinker lab ↗</button></article>`).join('')}</div><div class="notebook-footer"><span>Saved on this device · ${progressXP(progress)} / 400 XP</span><button class="text-button" id="reset-button">Start a new build</button></div><div id="reset-confirm-slot"></div>`);
+  $('info-content').querySelectorAll('[data-replay]').forEach(button => button.addEventListener('click', () => { infoDialog.close(); launchArcade(button.dataset.replay); }));
+  $('info-content').querySelectorAll('[data-lab]').forEach(button => button.addEventListener('click', () => { infoDialog.close(); launchChallenge(button.dataset.lab); }));
   $('reset-button').addEventListener('click', () => {
     $('reset-confirm-slot').innerHTML = '<div class="reset-confirm"><b>Start again with a fresh robot?</b><p>This clears the four earned parts and XP saved in this browser.</p><div class="reset-actions"><button class="small-button" id="confirm-reset">START NEW BUILD</button><button class="small-button secondary" id="cancel-reset">KEEP MY ROBOT</button></div></div>';
     $('confirm-reset').focus();
@@ -154,7 +166,9 @@ $('hotspots').addEventListener('click', event => {
   selectModule(button.dataset.module);
   $('hotspots').querySelector(`[data-module="${button.dataset.module}"]`)?.focus();
 });
-$('play-button').addEventListener('click', () => { playSound(); progress.completed.length === 4 ? showCompletion() : launchChallenge(progress.selected); });
+$('play-button').addEventListener('click', () => { playSound(); launchArcade(progress.selected); });
+$('scene-play').addEventListener('click', () => { playSound(); launchArcade(progress.selected); });
+$('tinker-button').addEventListener('click', () => launchChallenge(progress.selected));
 $('challenge-close').addEventListener('click', closeChallenge);
 $('info-close').addEventListener('click', () => infoDialog.close());
 $('notebook-button').addEventListener('click', showNotebook);
@@ -170,3 +184,5 @@ $('sound-button').addEventListener('click', () => {
 });
 render();
 $('save-status').textContent = storageAvailable ? 'PROGRESS SAVED LOCALLY' : 'PROGRESS SAVED THIS SESSION';
+// A new player lands on the first arcade mission's start screen.
+if (!progress.completed.length) launchArcade(progress.selected);

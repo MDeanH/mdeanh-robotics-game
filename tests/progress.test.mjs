@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { PART_IDS, STORAGE_KEY, freshProgress, parseProgress, loadProgress, saveProgress, awardPart, progressXP } from '../dist/progress.js';
+import { PART_IDS, STORAGE_KEY, freshProgress, parseProgress, loadProgress, saveProgress, awardPart, progressXP, recordScore } from '../dist/progress.js';
 
 test('each real part awards once and the fourth completes a 400 XP build', () => {
   let state = freshProgress();
@@ -43,4 +43,17 @@ test('unavailable storage leaves the session playable', () => {
   assert.equal(progressXP(earned), 100);
   assert.equal(saveProgress(earned, blocked), false);
   assert.equal(saveProgress(earned, null), false);
+});
+test('replaying a mission improves best score without adding XP', () => {
+  const state = recordScore(awardPart(freshProgress(), 'sensors'), 'sensors', 1200);
+  const replay = recordScore(awardPart(state, 'sensors'), 'sensors', 1600);
+  assert.equal(progressXP(replay), 100);
+  assert.equal(replay.bestScores.sensors, 1600);
+  assert.equal(recordScore(replay, 'sensors', 500), replay);
+  assert.equal(state.bestScores.sensors, 1200);
+});
+test('best scores persist with malformed values discarded', () => {
+  const raw = JSON.stringify({ version: 1, completed: [], selected: 'motors', bestScores: { sensors: 500, motors: -1, controllers: null, power: '1000', other: 999 } });
+  assert.deepEqual(parseProgress(raw).bestScores, { sensors: 500 });
+  assert.equal(recordScore(freshProgress(), 'sensors', Infinity).bestScores.sensors, undefined);
 });

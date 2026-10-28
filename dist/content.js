@@ -56,7 +56,7 @@ export const MODULES = [
     name: 'Power',
     part: 'Battery pack',
     tagline: 'Big energy, tiny robot',
-    description: 'Hunt down four lost parts, dodge the scrapbots, and deliver your haul to the dock. Keep moving: your robot has a battery-powered job to do!',
+    description: 'Carry energy cells to three charging stations. Dodge the scrapbots, pop your shield, and power up the workshop. Then head home to the dock!',
     challenge: 'Battery blitz',
     skill: 'Circuits & energy',
     learned: 'A battery supplies energy, and the motor’s circuit needs a complete path back to the battery.',
