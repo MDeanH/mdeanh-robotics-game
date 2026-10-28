@@ -1,34 +1,56 @@
-# Build-a-Bot Lab — mdeanh Robotics
+# mdeanh Robotics game
 
-A retro, 8-bit style browser game that teaches **the six core hardware parts of a robot** to college students with no robotics background. About 15–20 minutes per playthrough.
+A retro robotics arcade for students, set inside a warm pixel-art workshop. Drive a little robot, grab lost parts, dodge scrapbots, and make a triumphant delivery to the dock. Each mission helps you earn one of the **sensors, motors, controller, and power** components for your build.
 
-## Play
+The first version follows the user-selected **Pixel Workshop** visual concept. It runs in the browser with HTML, CSS, and JavaScript; there is no install or student account required to play.
 
-Open `index.html` in any modern browser (desktop or phone). No install or build step.
+## Run locally
 
-```bash
-python3 -m http.server 8765
+Requires a current Node.js release. There are no package dependencies to install.
+
+```sh
+npm start
 ```
-then visit http://localhost:8765.
 
-## How it works
+Open the local URL printed by the server.
 
-You drive **BOLT**, a robot that starts as a bare circuit board. Each level, you collect the parts for one system, return to the workbench, read a short lesson, and answer two questions to install the part. Every installed part gives BOLT a new in-game ability, so students *feel* what the part does:
+```sh
+npm test
+npm run check
+```
 
-| Level | Part | Role | Ability unlocked |
-|---|---|---|---|
-| 1 | Chassis | skeleton | +2 HP (armor) |
-| 2 | Actuators (motors) | muscles | faster driving |
-| 3 | Power | energy supply | SPACE boost + energy bar |
-| 4 | Sensors | senses | see far through the dark lab |
-| 5 | Controller | brain | arrow points to the next target |
-| 6 | End effector | hands | grab parts from a distance |
-| 7 | Field Test | everything together | final 4-question inspection |
+`npm test` runs the deterministic gameplay rules harness. `npm run check` checks the project source. The independently runnable minimal parts explorer lives in `baseline/index.html`.
 
-Glitches (red) chase you; get hit too often and the level restarts. Lessons stay unlocked in the **Parts Manual** for review.
+## Play the workshop arcade
 
-Controls: arrows / WASD to drive, SPACE boost, P pause, M sound, 1–4 answer quizzes. Touch controls appear on phones.
+Choose a mission, collect four parts or checkpoints, and return to the dock. Dodge the scrapbots, protect your hearts, and chain pickups for a bigger score.
 
-## Project layout
+- **Lights-out loot run:** use the sensor scan to reveal your route through the dark.
+- **Turbo parts run:** steer around trouble and use a motor-powered dash.
+- **Checkpoint rush:** reach the numbered checkpoints in the correct order.
+- **Battery blitz:** make your power-parts pickup and delivery run.
 
-Single file: `index.html` (HTML + CSS + JS, no dependencies besides two Google Fonts). Lesson and quiz content lives in the `LEVELS` array at the top of the script; edit it to change what is taught.
+Move with **WASD or the arrow keys**. Press **Space** for the mission ability. Touch controls provide movement and the action button on phones and tablets.
+
+The optional **Tinker lab** keeps the deeper hands-on puzzles: scan an obstacle course, experiment with wheel speeds, program a route, and close a complete battery–load–return circuit. The Parts notebook explains what each component does.
+
+Earned components and progress are saved only in the current browser; they do not follow a student between devices. Replaying a completed mission does not award duplicate component XP.
+
+## Educational scope
+
+The workshop and its robot are illustrative game models. The arcade’s scan, dash, hearts, score, and pickups are playful mechanics rather than measurements of a real robot. The game does not connect to physical hardware, test a particular component, or guarantee real-world motion. The Tinker lab’s motor model simplifies real wheel behavior; its controller commands represent signals sent through a motor driver. Its circuit puzzle models a complete electrical path.
+
+Lesson descriptions were checked against primary documentation; see [learning sources](docs/learning-sources.md). Documentation review is distinct from hardware verification.
+
+## Project map
+
+- `dist/`: the playable browser game and its assets.
+- `baseline/`: kept minimal parts explorer.
+- `tests/`: functional rules tests.
+- `AGENTS.md`: build invariants and operating instructions.
+- `agent/memory/`: current project state and settled decisions.
+- `RESEARCH_LOG.md`: append-only evidence record.
+
+Expanded grade-specific curriculum, more robots, and teacher reporting are future decisions.
+
+The repository's original single-file starter is preserved at the repository root as `index.html`. The Pixel Workshop lives in `dist/` and is served by `npm start`. This version is developed on `codex/pixel-workshop` to preserve the existing `main` version.

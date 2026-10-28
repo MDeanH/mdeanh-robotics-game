@@ -1,0 +1,12 @@
+{
+  "name": "mdeanh-robotics-game",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A pixel-art robotics arcade for students",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node scripts/check.mjs"
+  }
+}

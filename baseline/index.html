@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Robot Parts Explorer — kept baseline</title>
+  <style>
+    :root{color-scheme:light;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;color:#1a2934;background:#162432}
+    *{box-sizing:border-box}body{margin:0;padding:32px 20px}main{max-width:760px;margin:auto;background:#fff2d7;border:4px solid #0a141e;box-shadow:8px 8px 0 #09141d;padding:28px}header p{color:#715e43}h1{font-size:clamp(24px,5vw,36px);line-height:1.2}nav{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:28px 0}button{font:inherit;text-align:left;border:2px solid #273d46;background:#f9e6bf;padding:16px;cursor:pointer;min-height:58px;box-shadow:3px 3px 0 #c6ae84}button[aria-pressed="true"]{background:#0c817e;color:white;box-shadow:3px 3px 0 #063e42}button:focus-visible{outline:4px solid #e86838;outline-offset:3px}article{background:#fff9eb;border:2px solid #d7c29e;padding:22px;min-height:190px}h2{margin-top:0}article p{line-height:1.7}small{display:block;margin-top:28px;line-height:1.5;color:#715e43}a{color:#087572}
+  </style>
+</head>
+<body>
+<main>
+  <header><p>mdeanh ROBOTICS / KEPT BASELINE</p><h1>Meet your robot’s parts.</h1><p>Select a part to discover its job.</p></header>
+  <nav aria-label="Robot parts">
+    <button type="button" data-part="sensors" aria-pressed="true">01 · Sensors</button>
+    <button type="button" data-part="motors" aria-pressed="false">02 · Motors</button>
+    <button type="button" data-part="controllers" aria-pressed="false">03 · Controllers</button>
+    <button type="button" data-part="power" aria-pressed="false">04 · Power</button>
+  </nav>
+  <article aria-live="polite"><h2 id="part-title">Distance sensor</h2><p id="part-copy">A sensor provides information about the world. An ultrasonic distance sensor uses a sound pulse and its echo to measure how far away an object is.</p></article>
+  <small>This baseline is an independently runnable parts explorer. The main game adds interactive challenges, earned components, and saved progress. All scenes are educational models.</small>
+</main>
+<script>
+  const parts = {
+    sensors: ['Distance sensor','A sensor provides information about the world. An ultrasonic distance sensor uses a sound pulse and its echo to measure how far away an object is.'],
+    motors: ['Drive motors','Motors turn electrical energy into movement. Changing the two wheel speeds helps a two-wheel robot move straight or turn. Real robots can slip or veer.'],
+    controllers: ['Microcontroller','The controller follows a program and handles input and output signals. A motor driver uses its commands to control power to the motors.'],
+    power: ['Battery pack','A battery supplies energy. A motor circuit needs a complete path from the battery, through the motor, and back to the battery.']
+  };
+  document.querySelectorAll('[data-part]').forEach(button => button.addEventListener('click', () => {
+    const [title, copy] = parts[button.dataset.part];
+    document.querySelector('#part-title').textContent = title;
+    document.querySelector('#part-copy').textContent = copy;
+    document.querySelectorAll('[data-part]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+  }));
+</script>
+</body>
+</html>
