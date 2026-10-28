@@ -35,3 +35,9 @@
 - Snapshot: bfca549. Independent reviewer reran 32 passing tests and found no confirmed functional defect in spatial win gates, claim deduplication, pause, new-player startup, and cleanup.
 - Copy adjustment: motor upgrade now says FASTER WHEELS, matching the actual cross-mission speed increase; the motor mission still provides a turbo special.
 - Public Netlify game site created in account mdeanh: site ID 52fa8bfb-3b0f-4627-94c4-be935970fb69; final site name mdeanh-robotics-workshop. Deployment next.
+
+## 2026-10-28 — public Netlify publication
+- Production deploy returned success: 6ae2891847d4efdc963f5a03, site 52fa8bfb-3b0f-4627-94c4-be935970fb69, https://mdeanh-robotics-workshop.netlify.app.
+- Anonymous HTTP homepage: 200, game title present, no login redirect. All 16 files in local dist matched live SHA-256 values exactly.
+- Opened public site in browser. Fresh-player start screen, live driving, scanner reveal, and pause verified; browser error/warning log empty. Screenshot saved in ignored output/netlify-arcade.jpg.
+- Netlify reference lookup correction: local CLI method is listAccountsForUser (not listAccounts); getSiteDeploy requires both site_id and deploy_id. No secrets read or saved.

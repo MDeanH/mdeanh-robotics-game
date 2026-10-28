@@ -1,5 +1,7 @@
 # mdeanh Robotics game
 
+**Play publicly:** https://mdeanh-robotics-workshop.netlify.app
+
 A retro robotics arcade for students, set inside a warm pixel-art workshop. Drive a little robot, grab lost parts, dodge scrapbots, and make a triumphant delivery to the dock. Each mission helps you earn one of the **sensors, motors, controller, and power** components for your build.
 
 The first version follows the user-selected **Pixel Workshop** visual concept. It runs in the browser with HTML, CSS, and JavaScript; there is no install or student account required to play.
