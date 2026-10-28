@@ -50,3 +50,8 @@
 - Final deploy: 6ae289b8b05a2208ace788a2 at https://mdeanh-robotics-workshop.netlify.app.
 - Public browser at 1280x720: dialog clientHeight=671, scrollHeight=671, health HUD top=121.17. Entire health/arena/goal interface fits with no internal scrolling. Live movement and scan passed after reload.
 - Final action screenshot: output/netlify-arcade-final.jpg. Public tab retained as deliverable; viewport override reset and isolated QA tab closed.
+
+## 2026-10-28 — preserve concurrent starter changes
+- PR reported conflicts because main advanced to 6049fda (starter lesson/arcade improvements and separate Netlify hosting).
+- Merged main into codex/pixel-workshop, preserved its updated root index.html, retained its README/config as reference artifacts, and resolved workshop publish path to dist/. No change to remote main or the separately hosted starter.
+- Removed machine-local .netlify/state.json from tracked source; preserved ignored local binding to workshop site 52fa8bfb-3b0f-4627-94c4-be935970fb69. Explicit deployment ID remains required. Rechecked source and functional harness after merge.

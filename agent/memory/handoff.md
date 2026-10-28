@@ -36,3 +36,6 @@ Exact student grade band, extended curriculum, more robots, teacher reporting. D
 
 ## Next
 Implementation and public hosting request complete. Final laptop layout also verified: dialog client/scroll height both 671 at 1280x720. Further product work follows user play feedback.
+
+## Concurrent source preservation
+Merged origin/main at 6049fda into the workshop branch after source conflicts in README and netlify.toml. Root starter index.html includes those recent updates; original README/config retained in docs/original-starter-README.md and baseline/starter-netlify.toml. Workshop deploy stays dist/ and uses its own explicit site ID. Removed tracked machine-local Netlify binding, retaining ignored local state for the workshop. Main and the separately hosted starter are unchanged remotely.

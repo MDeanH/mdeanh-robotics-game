@@ -56,3 +56,5 @@ Lesson descriptions were checked against primary documentation; see [learning so
 Expanded grade-specific curriculum, more robots, and teacher reporting are future decisions.
 
 The repository's original single-file starter is preserved at the repository root as `index.html`. The Pixel Workshop lives in `dist/` and is served by `npm start`. This version is developed on `codex/pixel-workshop` to preserve the existing `main` version.
+
+The recent starter updates from main are retained in the root `index.html`. Its original notes are preserved in `docs/original-starter-README.md` and original deployment configuration in `baseline/starter-netlify.toml`. That separately hosted starter remains at https://mdeanh-robotics-game.netlify.app; the user-selected Pixel Workshop is at the public workshop URL above.
