@@ -37,3 +37,5 @@ Further work follows user play feedback. Open product decisions: student age ban
 
 ## Current room-art update — 2026-10-28
 User selected the supplied warm workshop image as the 3D room reference (docs/visual-direction.md). Source now replaces the orbital room with real3D sunlit windows, tiled floor, wood/green benches, tool pegboards, blue parts bins, plants, task lamps and display rovers. Character-first opening and game rules remain intact. Local WebGL/full mission win2050 and phone390x844 touch/layout checks passed;44 tests and13-module source checks passed. Published and verified as deploy6ae29e81354edf44359d4d47. Final suite45 tests includes a reproduced-and-fixed instanced-prop cleanup regression. Close/reopen through garage and multiple missions passed without browser warnings/errors.
+
+Latest source preservation: merged main's94ac989 root-starter update after the workshop release; retained the starter's root index.html and its latest README in docs/original-starter-README.md. No dist/ or retro game change was part of that merge.
