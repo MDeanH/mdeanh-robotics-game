@@ -4,25 +4,25 @@ Updated 2026-10-28. The third-person 3D game is published and verified. The orig
 ## Non-negotiable game links
 Every NEW GAME gets a NEW Netlify site and public link containing `codex`. Never deploy a different game over an existing game. Preserve existing game URLs. Use explicit site IDs; do not infer a target from a parent or old Netlify binding.
 
-- Third-person game: https://mdeanh-codex-luka-3d.netlify.app — source `dist/`, site `431dd23f-eab9-465d-8714-ae5720b481e4`, deploy `6ae2999ca0a702a8b398ffb2`.
+- Third-person game: https://mdeanh-codex-luka-3d.netlify.app — source `dist/`, site `431dd23f-eab9-465d-8714-ae5720b481e4`, deploy `6ae29e81354edf44359d4d47`.
 - Unchanged retro game: https://mdeanh-codex-retro.netlify.app — source `games/retro/`, site `e46a19a3-cfe9-4241-99dc-f3c5bfae5ca3`, deploy `6ae295e0e9e677336c2719e5`.
 - Original retro URL remains https://mdeanh-robotics-workshop.netlify.app — retro-only site `52fa8bfb-3b0f-4627-94c4-be935970fb69`, restored original deploy `6ae289b8b05a2208ace788a2`.
 - Explicit mapping: `docs/game-sites.json`. Local ignored `.netlify/state.json` points to the third-person site.
 
 ## Current product
-Luka: Systems Online is a third-person 3D adventure. Camera behind the humanoid, explorable orbital lab, solid benches, jump/gravity/landing, sprint, enemies, pickups, waypoint and navigator. Four missions teach sensors, joint actuators, controllers, and power. Fresh visits open directly on the character with no startup popup. Hazards wait for the first game-control interaction. Closing the game opens the garage and module selector.
+Luka: Systems Online is a third-person 3D adventure. Camera behind the humanoid, sunlit robotics workshop inspired by the user’s supplied image, solid benches, jump/gravity/landing, sprint, enemies, pickups, waypoint and navigator. Four missions teach sensors, joint actuators, controllers, and power. Fresh visits open directly on the character with no startup popup. Hazards wait for the first game-control interaction. Closing the game opens the garage and module selector.
 
 WASD/arrows move relative to camera; Space jumps; Shift sprints; E uses mission ability; Q/R and drag turn the camera; P pauses. Phone controls include movement, jump, sprint toggle, ability and drag look. Reward gating, 400 XP campaign, version-1 saves and high scores remain compatible.
 
-Correct reference is the user's owned Luka Remote View at https://luka-a2.netlify.app, not Steadwell. Public estimated A2 geometry is used in the optional garage preview with its license/provenance; the active game avatar is an illustrative animated humanoid. No robot connection or command transport exists. Game physics and model/FK checks are software evidence, not hardware calibration or verification.
+Current room-art reference is the user-supplied warm workshop image (docs/visual-direction.md), rendered as real3D geometry with wooden benches, toolboards, blue bins, plants, lamps and a sunlit window. The character identity reference is the user's owned Luka Remote View at https://luka-a2.netlify.app, not Steadwell. Public estimated A2 geometry is used in the optional garage preview with its license/provenance; the active game avatar is an illustrative animated humanoid. No robot connection or command transport exists. Game physics and model/FK checks are software evidence, not hardware calibration or verification.
 
 ## Verification
-- 44 tests pass: original gameplay/save contracts plus jump, no double-jump, pause freeze, bench landing/walk-off, sprint normalization/boundaries, airborne rover clearance and grounded dock gating. Source checks pass for 11 modules, assets and baseline.
+- 45 tests pass: original gameplay/save contracts plus jump, no double-jump, pause freeze, bench landing/walk-off, sprint normalization/boundaries, airborne rover clearance and grounded dock gating. Source checks pass for 13 modules, assets and baseline.
 - Browser: actual WebGL with data-camera=third-person-perspective. Full Sequence sprint through held WASD and E pulse won2050 with5/5 integrity; claim completed; reload retained best2050 and400XP without duplicate XP.
 - Visible Space jump, Q/R look and Shift+W camera-relative sprint exercised. At1280x720 the game fills the viewport without horizontal overflow.
 - Phone390x844: Start visible y534.5–584.5, no horizontal overflow. Held forward, sprint toggle, jump, pulse, camera drag and pause exercised; navigator advanced100,450→100,159.3.
 - Reproduced near-camera billboard covering the view during a turn/sprint/jump; view-depth label scaling fixes it. Same actual input sequence now keeps robot/room visible. Fresh browser warning/error logs empty.
-- New public game: all26 filesHTTP200 and SHA256-identical to local dist (24,440,844bytes). Actual public scanner mission, camera turning, sprint, two revealed chips, pause and modern title verified; logs empty.
+- New public game: all28 filesHTTP200 and SHA256-identical to local dist (24,469,531bytes). Actual public scanner mission, camera turning, sprint, two revealed chips, pause and modern title verified; logs empty.
 - Retro copy: all16 filesHTTP200 and SHA256-identical to games/retro; original and Codex retro URLs both return pixel-game title. Retro browser screenshot captured.
 - Forced WebGL fallback and reduced-motion preference were reviewed in source, not forced in browser. No hardware test was performed.
 
@@ -36,4 +36,4 @@ GitHub repo: https://github.com/MDeanH/mdeanh-robotics-game. Work branch `codex/
 Further work follows user play feedback. Open product decisions: student age band, deeper in-world lessons, more levels/robots, and teacher reporting.
 
 ## Current room-art update — 2026-10-28
-User selected the supplied warm workshop image as the 3D room reference (docs/visual-direction.md). Source now replaces the orbital room with real3D sunlit windows, tiled floor, wood/green benches, tool pegboards, blue parts bins, plants, task lamps and display rovers. Character-first opening and game rules remain intact. Local WebGL/full mission win2050 and phone390x844 touch/layout checks passed;44 tests and13-module source checks passed. New artwork public deployment is pending; earlier deploy ID above still describes the prior room until final publication metadata is recorded.
+User selected the supplied warm workshop image as the 3D room reference (docs/visual-direction.md). Source now replaces the orbital room with real3D sunlit windows, tiled floor, wood/green benches, tool pegboards, blue parts bins, plants, task lamps and display rovers. Character-first opening and game rules remain intact. Local WebGL/full mission win2050 and phone390x844 touch/layout checks passed;44 tests and13-module source checks passed. Published and verified as deploy6ae29e81354edf44359d4d47. Final suite45 tests includes a reproduced-and-fixed instanced-prop cleanup regression. Close/reopen through garage and multiple missions passed without browser warnings/errors.

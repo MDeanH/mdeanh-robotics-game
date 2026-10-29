@@ -19,3 +19,5 @@ Completed 2026-10-28.
 Direct-opening follow-up completed2026-10-28: startup popup removed;44 tests/source checks pass; fresh local/public browser character view, idle behavior, keyboard controls and empty error logs verified. Only the3D site updated; both changed modules byte-verified.
 
 Workshop-reference source snapshot2026-10-28: user direction/provenance recorded, real3D environment implemented,44 tests/13-module source checks pass, desktop mission win and mobile touch/layout verified. Final functional review and publication verification follow the committed snapshot.
+
+Workshop-reference release completed2026-10-28: source snapshot52ecb90 independently reviewed; confirmed instance cleanup issue reproduced and fixed in c311232 with named red/green regression.45 tests/13-module source checks pass. Real browser desktop win2050, phone touch/layout, close/reopen and public controls verified. Final deploy6ae29e81354edf44359d4d47 all28 filesHTTP200/SHA256-match; both retro URLs preserved. Current visual reference/provenance, handoff and site map updated.

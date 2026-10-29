@@ -154,3 +154,8 @@
 - Independent functional review of52ecb90 confirmed InstancedMesh instanceMatrix/instanceColor buffers lacked explicit mesh disposal when closing a workshop. Shared geometry/material disposal alone does not emit Three's per-instance disposal event.
 - Added shared disposeRenderedScene path used by arena and optional preview. Named regression nested workshop instances release their buffers before shared resources and renderer cleanup failed before the fix: observed only geometry/material/renderer events, missing leaves/tools instance disposal.
 - Traverse instanced meshes and dispose them before shared kit resources and renderer. Same test now passes;45 total tests and13-module source checks pass. Browser close/reopen through garage, Velocity trial and Energy relay completed without warning/error logs.
+
+## 2026-10-28 — workshop public release verified
+- Final deploy6ae29e81354edf44359d4d47 published ONLY to3Dsite431dd23f-eab9-465d-8714-ae5720b481e4. All28 filesHTTP200 and SHA256-match local dist,24,469,531bytes. Evidence output/workshop-deploy-verification.json.
+- Fresh public visit shows the sunlit workshop directly on the character, WebGL renderer, sunlit-robotics-workshop environment and hidden startup overlay. Held W, E scan, Space jump and pause worked; warning/errorlogs empty. Reload leaves fresh direct character view. Screenshot output/sunlit-workshop-public.jpg.
+- Both retro URLs freshly returnHTTP200 and The Pixel Workshop title. Retro source files unchanged. Temporary local QA tab closed and viewport override reset.

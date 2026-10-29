@@ -6,11 +6,11 @@
 
 **Codex-named retro copy:** https://mdeanh-codex-retro.netlify.app — published and byte-verified. Original retro URL remains preserved.
 
-A third-person 3D robotics adventure for students, set in an explorable learning lab. The game puts the camera behind Luka and includes direct movement, jumping, sprinting, and system abilities. Students explore **sensors, motors, controllers, and power** through the game.
+A third-person 3D robotics adventure for students, set in a sunlit robotics workshop. The game puts the camera behind Luka and includes direct movement, jumping, sprinting, and system abilities. Students explore **sensors, motors, controllers, and power** through the game.
 
-**Release status:** published third-person 3D game. All 44 functional tests and source checks pass. Real browser play completed an ordered mission, saved its score, and exercised keyboard/touch movement, jump, sprint, ability, and camera look. All 26 deployed files match local SHA-256 hashes.
+**Release status:** published third-person 3D game. All 45 functional tests and source checks pass. Real browser play completed an ordered mission, saved its score, and exercised keyboard/touch movement, jump, sprint, ability, and camera look. All 28 deployed files match local SHA-256 hashes.
 
-The current version follows the user’s **modern game** direction and the user-owned Luka Remote View reference (https://luka-a2.netlify.app): dark rounded cards, blue-accent system tabs, a neutral-gray humanoid figure, and a figure/status layout. The earlier pixel-art concept is archived as a baseline. It runs in the browser with HTML, CSS, and JavaScript; there is no install or student account required to play.
+The room follows the user-supplied workshop image: warm sunlight, wood benches with green work mats, pegboard tools, blue parts bins, plants, task lamps and display robots, all rendered as 3D geometry. The neutral-gray humanoid and optional model studio retain the Luka identity reference. See [visual direction](docs/visual-direction.md). The earlier pixel-art concept is archived as a baseline. It runs in the browser with HTML, CSS, and JavaScript; there is no install or student account required to play.
 
 ## Run locally
 
@@ -31,7 +31,7 @@ npm run check
 
 ## Play the third-person adventure
 
-The game opens directly on Luka in the explorable lab, without a startup popup. Move or use a control to begin; training bots wait while you look around. Jump and sprint around obstacles, follow the waypoint and navigator, discover components, and return to the home dock. System-learning goals and saved components are retained.
+The game opens directly on Luka in the sunlit workshop, without a startup popup. Move or use a control to begin; training bots wait while you look around. Jump and sprint around obstacles, follow the waypoint and navigator, discover components, and return to the home dock. System-learning goals and saved components are retained.
 
 - **Sensor sweep:** discover hidden components using perception.
 - **Velocity trial:** explore motion and actuation.
@@ -71,4 +71,4 @@ The public A2 visual model is an **estimated T2D0 model**, not calibrated to Mic
 
 ## Game link preservation
 
-Every new game gets a new Netlify site and public link containing `codex`. Never replace an existing game with a new game at its old URL. The retro game remains at its canonical workshop URL above. The new third-person site is `mdeanh-codex-luka-3d`, ID `431dd23f-eab9-465d-8714-ae5720b481e4`; its published deploy is `6ae2999ca0a702a8b398ffb2`. The unchanged Codex-named retro copy is also verified at its separate link above. Its exact preserved source is in `games/retro/`; `docs/game-sites.json` maps each game source to its own site, link, and deploy. Do not deploy the third-person game using the retro site ID or an inherited Netlify binding.
+Every new game gets a new Netlify site and public link containing `codex`. Never replace an existing game with a new game at its old URL. The retro game remains at its canonical workshop URL above. The new third-person site is `mdeanh-codex-luka-3d`, ID `431dd23f-eab9-465d-8714-ae5720b481e4`; its published deploy is `6ae29e81354edf44359d4d47`. The unchanged Codex-named retro copy is also verified at its separate link above. Its exact preserved source is in `games/retro/`; `docs/game-sites.json` maps each game source to its own site, link, and deploy. Do not deploy the third-person game using the retro site ID or an inherited Netlify binding.
