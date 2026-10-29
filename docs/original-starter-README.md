@@ -27,7 +27,9 @@ You drive **BOLT**, a robot that starts as a bare circuit board. Each level, you
 | 6 | End effector | hands | grab parts from a distance |
 | 7 | Field Test | everything together | final 4-question inspection |
 
-Every part you grab is a real component (servo motor, LiDAR, suction cup…) and its one-line explanation appears under the screen; a BIG IDEA bar keeps the level's lesson visible the whole time. Glitches (red) chase you. Once you have Power, boost into them to zap them. Chain quick pickups for combos, and grab the repair kit to heal. Get hit too often and the level restarts. Lessons stay unlocked in the **Parts Manual** for review.
+Grabbing a part briefly pauses the game on a pickup card (name, what it does, and its body analogy, e.g. ACTUATORS = MUSCLES); tap or press Enter to skip. A labeled diagram of BOLT appears before each level, after each install, and at the end, with not-yet-learned parts shown as ???. Every part you grab is a real component (servo motor, LiDAR, suction cup…) and its one-line explanation appears under the screen; a BIG IDEA bar keeps the level's lesson visible the whole time. Glitches (red) chase you. Once you have Power, boost into them to zap them. Chain quick pickups for combos, and grab the repair kit to heal. Get hit too often and the level restarts. Lessons stay unlocked in the **Parts Manual** for review.
+
+**For instructors:** students type their name on the title screen. The final screen shows a report card (name, date, score, first-try accuracy, time, crashes, and every question with what they picked when they missed) that they can screenshot or copy as text to hand in.
 
 Controls: arrows / WASD to drive, SPACE boost, P pause, M sound, 1–4 answer quizzes. Touch controls appear on phones.
 
