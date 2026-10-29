@@ -10,7 +10,7 @@ const PALETTE = {
 const world = (x, y, height = 0) => new THREE.Vector3(x - ARENA.width / 2, height, y - ARENA.height / 2);
 
 function createKit() {
-  const geometries = new Set(), materials = new Set(), textures = new Set(), cache = new Map();
+  const geometries = new Set(), materials = new Set(), textures = new Set(), cache = new Map(), labels = new Map();
   const geometry = value => (geometries.add(value), value);
   const material = value => (materials.add(value), value);
   const texture = value => (textures.add(value), value);
@@ -53,7 +53,7 @@ function createKit() {
     context.fillStyle = color; context.font = '600 49px system-ui, sans-serif'; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(text, 192, 65);
     const map = texture(new THREE.CanvasTexture(canvas)); map.colorSpace = THREE.SRGBColorSpace;
     const object = new THREE.Sprite(material(new THREE.SpriteMaterial({ map, transparent: true, depthWrite: false, depthTest: false })));
-    object.scale.set(width, height, 1); object.renderOrder = 10; return object;
+    object.scale.set(width, height, 1); object.renderOrder = 10; labels.set(object, { width, height }); return object;
   }
   const shadowCanvas = document.createElement('canvas'); shadowCanvas.width = shadowCanvas.height = 128;
   const shadowContext = shadowCanvas.getContext('2d');
@@ -65,7 +65,18 @@ function createKit() {
     const object = mesh(geometry(new THREE.PlaneGeometry(w, d)), material(new THREE.MeshBasicMaterial({ map: shadowTexture, transparent: true, depthWrite: false })), parent, 0, .22, 0, false);
     object.rotation.x = -Math.PI / 2; return object;
   }
-  return { geometry, material, texture, standard, glow, basic, mesh, box, ring, disk, label, contact,
+  const labelPosition = new THREE.Vector3(), viewDirection = new THREE.Vector3();
+  function constrainLabels(camera) {
+    camera.getWorldDirection(viewDirection);
+    for (const [sprite, size] of labels) {
+      sprite.getWorldPosition(labelPosition).sub(camera.position);
+      const depth = labelPosition.dot(viewDirection);
+      // A billboard crossing the chase camera must not expand across the screen.
+      const factor = THREE.MathUtils.clamp((depth - 50) / 150, 0, 1);
+      sprite.scale.set(size.width * factor, size.height * factor, 1);
+    }
+  }
+  return { geometry, material, texture, standard, glow, basic, mesh, box, ring, disk, label, contact, constrainLabels,
     dispose() { textures.forEach(value => value.dispose()); materials.forEach(value => value.dispose()); geometries.forEach(value => value.dispose()); } };
 }
 
@@ -77,7 +88,7 @@ function rendererBase(canvas, { preview = false } = {}) {
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(preview ? 0x0b0d10 : 0x0a111a);
-  const camera = new THREE.OrthographicCamera(-520, 520, 292.5, -292.5, 1, 2200);
+  const camera = preview ? new THREE.OrthographicCamera(-520, 520, 292.5, -292.5, 1, 2200) : new THREE.PerspectiveCamera(62, 16 / 9, 1, 2800);
   scene.add(new THREE.HemisphereLight(0xdfe8ff, 0x1a1d22, 1.6));
   const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(250, 500, 375); key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024); key.shadow.camera.left = -650; key.shadow.camera.right = 650;
@@ -93,9 +104,12 @@ function rendererBase(canvas, { preview = false } = {}) {
     lastWidth = width; lastHeight = height;
     renderer.setSize(width, height, false);
     const aspect = width / height;
-    const viewHeight = preview ? Math.max(330, 285 / aspect) : Math.max(570, 1050 / aspect);
-    camera.left = -viewHeight * aspect / 2; camera.right = viewHeight * aspect / 2;
-    camera.top = viewHeight / 2; camera.bottom = -viewHeight / 2; camera.updateProjectionMatrix();
+    if (preview) {
+      const viewHeight = Math.max(330, 285 / aspect);
+      camera.left = -viewHeight * aspect / 2; camera.right = viewHeight * aspect / 2;
+      camera.top = viewHeight / 2; camera.bottom = -viewHeight / 2;
+    } else camera.aspect = aspect;
+    camera.updateProjectionMatrix();
   }
   const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(resize) : null; observer?.observe(canvas);
   resize();
@@ -138,7 +152,7 @@ function createHumanoid(kit) {
   const upperLeg = kit.standard(0xc8cdd3, .6, .1), lowerLeg = kit.standard(0xbac2ca, .6, .1);
   const handFinish = kit.standard(0xc1c7cd, .6, .1), joint = kit.standard(0x7b8996, .5, .35);
   const dark = kit.standard(0x26313e, .6, .1), blueGlow = kit.glow(0x88aaff, .2);
-  kit.contact(group, 70, 55);
+  const contactShadow = kit.contact(group, 70, 55);
   // Torso, waist and neck are distinct articulated mechanical forms.
   kit.box(30, 30, 19, 7, torso, body, 0, 82, 0);
   kit.box(22, 17, 2, 4, torsoPanel, body, 0, 84, -10.3);
@@ -185,7 +199,7 @@ function createHumanoid(kit) {
   const carrying = new THREE.Group(); carrying.position.set(0, 74, 11.5); body.add(carrying);
   kit.box(18, 16, 8, 3, dark, carrying); kit.box(12, 2, 1.2, .6, blueGlow, carrying, 0, 3, 4.6); carrying.visible = false;
   const stun = kit.label('Ⅱ', '#b5ffec', '#2b5369', 24, 13); stun.position.set(0, 136, 0); body.add(stun); stun.visible = false;
-  group.userData = { body, carrying, stun, limbs: { leftHip: left.hip, rightHip: right.hip, leftKnee: left.knee, rightKnee: right.knee, leftShoulder, rightShoulder } };
+  group.userData = { body, carrying, stun, contactShadow, limbs: { leftHip: left.hip, rightHip: right.hip, leftKnee: left.knee, rightKnee: right.knee, leftShoulder, rightShoulder } };
   return group;
 }
 
@@ -220,6 +234,56 @@ function createFloor(kit, scene) {
   }
 }
 
+/** The training floor sits inside a larger room so the chase camera stays indoors. */
+function createAdventureRoom(kit, scene) {
+  const colliders = [];
+  kit.box(1320, 10, 940, 20, kit.standard(0x131c28, .72, .12), scene, 0, -23, 0);
+  const wall = kit.standard(0x263547, .62, .14), trim = kit.standard(0x465a70, .38, .38);
+  const light = kit.glow(0x9abbff, .65), screen = kit.glow(0x456b9d, .38);
+  for (const x of [-650, 650]) {
+    colliders.push(kit.box(18, 300, 920, 4, wall, scene, x, 135, 0));
+    for (const z of [-300, 20, 330]) {
+      const rack = kit.box(44, 144, 110, 5, kit.standard(0x172638, .4, .32), scene, x - Math.sign(x) * 30, 56, z); colliders.push(rack);
+      for (const y of [14, 36, 58, 80, 102]) {
+        kit.box(3, 10, 76, 1, kit.standard(0x526b84, .32, .4), scene, x - Math.sign(x) * 54, y, z);
+        kit.box(3.5, 2, 35, .5, light, scene, x - Math.sign(x) * 56, y + 5, z - 15);
+      }
+    }
+    kit.box(4, 3, 850, 1, light, scene, x - Math.sign(x) * 10, 188, 0);
+  }
+  // Observation window and its structural frame, with a distant orbital vista.
+  colliders.push(kit.box(1300, 48, 20, 3, wall, scene, 0, 9, -450));
+  colliders.push(kit.box(1300, 84, 20, 3, wall, scene, 0, 258, -450));
+  for (const x of [-635, -400, 400, 635]) colliders.push(kit.box(28, 225, 30, 4, trim, scene, x, 121, -448));
+  const glass = kit.box(770, 190, 4, 1, kit.material(new THREE.MeshBasicMaterial({ color: 0x658eb8, transparent: true, opacity: .1, depthWrite: false, side: THREE.DoubleSide })), scene, 0, 126, -453); colliders.push(glass);
+  for (const x of [-392, 392]) kit.box(3, 194, 6, 1, light, scene, x, 126, -438);
+  kit.box(792, 3, 5, 1, light, scene, 0, 222, -438);
+  const skyCanvas = document.createElement('canvas'); skyCanvas.width = 1024; skyCanvas.height = 512;
+  const sky = skyCanvas.getContext('2d'), fade = sky.createLinearGradient(0, 0, 0, 512);
+  fade.addColorStop(0, '#02050d'); fade.addColorStop(.62, '#132941'); fade.addColorStop(1, '#6b8ca5'); sky.fillStyle = fade; sky.fillRect(0, 0, 1024, 512);
+  for (let i = 0; i < 180; i++) { const x = (i * 137.508) % 1024, y = (i * 83.19) % 340; sky.fillStyle = i % 4 ? '#b7d3ed99' : '#f1f7ff'; sky.beginPath(); sky.arc(x, y, i % 5 ? .75 : 1.25, 0, Math.PI * 2); sky.fill(); }
+  const skyTexture = kit.texture(new THREE.CanvasTexture(skyCanvas)); skyTexture.colorSpace = THREE.SRGBColorSpace;
+  kit.mesh(kit.geometry(new THREE.PlaneGeometry(2100, 1000)), kit.material(new THREE.MeshBasicMaterial({ map: skyTexture })), scene, 0, 230, -1450, false);
+  const planet = kit.mesh(kit.geometry(new THREE.SphereGeometry(150, 48, 32)), kit.standard(0x7196b2, .94, .03), scene, -270, 235, -1040, false);
+  planet.rotation.z = -.2;
+  kit.mesh(kit.geometry(new THREE.SphereGeometry(155, 40, 24)), kit.material(new THREE.MeshBasicMaterial({ color: 0x75b7ef, transparent: true, opacity: .1, side: THREE.BackSide, depthWrite: false })), scene, -270, 235, -1040, false);
+  const moon = kit.mesh(kit.geometry(new THREE.SphereGeometry(44, 28, 18)), kit.standard(0xb6bfcb, .95, .02), scene, 370, 275, -1120, false); moon.rotation.y = .3;
+  // Rear wall, doorway, information screens and high ceiling light rails.
+  colliders.push(kit.box(1300, 300, 18, 4, wall, scene, 0, 135, 450));
+  kit.box(150, 145, 7, 3, kit.standard(0x172331, .4, .32), scene, 0, 57, 437);
+  kit.box(3, 125, 3, .6, light, scene, 0, 57, 432);
+  for (const x of [-220, 220]) {
+    kit.box(125, 82, 8, 6, kit.standard(0x0e1722, .3, .32), scene, x, 112, 432);
+    kit.box(105, 60, 1.5, 2, screen, scene, x, 112, 426.5);
+  }
+  for (const z of [-290, 0, 290]) {
+    kit.box(1250, 15, 18, 3, trim, scene, 0, 340, z);
+    kit.box(690, 3, 14, 1, light, scene, 0, 330, z);
+  }
+  const title = kit.label('ROBOTICS FIELD LAB', '#c2d4e6', '#263b51', 230, 30); title.position.set(0, 256, -428); scene.add(title);
+  return colliders;
+}
+
 function makePickup(kit, id, index) {
   const group = new THREE.Group(), item = new THREE.Group(); group.add(item);
   const ring = kit.ring(18, 1.1, kit.glow(id === 'controllers' ? PALETTE.blue : PALETTE.teal, .45), group, 0, 1.5, 0);
@@ -246,19 +310,46 @@ function makePickup(kit, id, index) {
 /** Pure presentation of the existing model. It never moves, collects, damages or awards. */
 export function createArenaRenderer(canvas, { reducedMotion = false } = {}) {
   const base = rendererBase(canvas), { scene, renderer, camera } = base, kit = createKit();
-  camera.position.set(0, 870, 620); camera.lookAt(0, 0, 0);
+  camera.position.set(0, 96, 205); camera.lookAt(0, 55, 0);
   createFloor(kit, scene);
+  const cameraColliders = createAdventureRoom(kit, scene);
+  scene.updateMatrixWorld(true);
+  canvas.dataset.camera = 'third-person-perspective';
+  let cameraYaw = 0, cameraPitch = .2, cameraInitialized = false;
+  const lookTarget = new THREE.Vector3(), desiredLook = new THREE.Vector3(), desiredCamera = new THREE.Vector3(), cameraDirection = new THREE.Vector3();
+  const cameraRay = new THREE.Raycaster();
+  function avoidCamera(position, target) {
+    position.x = THREE.MathUtils.clamp(position.x, -628, 628);
+    position.z = THREE.MathUtils.clamp(position.z, -426, 426);
+    position.y = THREE.MathUtils.clamp(position.y, 20, 320);
+    cameraDirection.subVectors(position, target); const distance = cameraDirection.length();
+    if (distance < 1) return;
+    cameraDirection.multiplyScalar(1 / distance); cameraRay.set(target, cameraDirection); cameraRay.far = distance;
+    const hits = cameraRay.intersectObjects(cameraColliders, false);
+    if (hits.length) position.copy(target).addScaledVector(cameraDirection, Math.max(24, hits[0].distance - 11));
+  }
+  function updateCamera(state) {
+    const elevation = Math.max(0, state.player.elevation || 0), distance = 205;
+    desiredLook.copy(world(state.player.x, state.player.y, elevation + 48));
+    const horizontal = Math.cos(cameraPitch) * distance;
+    desiredCamera.set(desiredLook.x + Math.sin(cameraYaw) * horizontal, desiredLook.y + Math.sin(cameraPitch) * distance, desiredLook.z + Math.cos(cameraYaw) * horizontal);
+    avoidCamera(desiredCamera, desiredLook);
+    if (!cameraInitialized || reducedMotion) { camera.position.copy(desiredCamera); lookTarget.copy(desiredLook); cameraInitialized = true; }
+    else { camera.position.lerp(desiredCamera, .16); lookTarget.lerp(desiredLook, .2); avoidCamera(camera.position, lookTarget); }
+    camera.lookAt(lookTarget); camera.updateMatrixWorld();
+  }
   const dock = new THREE.Group(); dock.position.copy(world(ARENA.dock.x, ARENA.dock.y)); scene.add(dock);
   kit.disk(43, kit.basic(PALETTE.teal, .16), dock);
   const dockRing = kit.ring(39, 2, kit.glow(PALETTE.teal, .8), dock);
-  const dockLabel = kit.label('HOME', '#1c776f', '#e7fffa', 54, 17); dockLabel.position.set(0, 3, 50); dock.add(dockLabel);
+  const dockLabel = kit.label('HOME DOCK', '#d6eaff', '#1c4062', 60, 15); dockLabel.position.set(0, 130, 0); dock.add(dockLabel);
+  kit.mesh(kit.geometry(new THREE.CylinderGeometry(1.6, 1.6, 80, 12)), kit.basic(0x88bbff, .25), dock, 0, 40, 0, false);
   const player = createHumanoid(kit); player.scale.setScalar(.68); scene.add(player);
   const enemyObjects = [];
   const targetObjects = [];
   const sparkObjects = [];
   const stationObjects = [];
   let currentMission = '', disposed = false;
-  const shield = kit.mesh(kit.geometry(new THREE.SphereGeometry(36, 28, 18)), kit.material(new THREE.MeshBasicMaterial({ color: 0x88aaff, transparent: true, opacity: .15, depthWrite: false, wireframe: false })), scene); shield.visible = false;
+  const shield = kit.mesh(kit.geometry(new THREE.SphereGeometry(50, 28, 18)), kit.material(new THREE.MeshBasicMaterial({ color: 0x88aaff, transparent: true, opacity: .15, depthWrite: false, wireframe: false })), scene); shield.visible = false;
   const pulse = kit.ring(1, .008, kit.basic(0x76b0ff, .7), scene); pulse.visible = false;
   const destination = kit.ring(9, 1, kit.basic(0x97b5ff, .55), scene); destination.visible = false;
   const radar = kit.ring(65, .65, kit.basic(PALETTE.teal, .15), scene);
@@ -267,14 +358,19 @@ export function createArenaRenderer(canvas, { reducedMotion = false } = {}) {
   function setupMission(state) {
     [...targetObjects, ...sparkObjects, ...stationObjects].forEach(object => scene.remove(object));
     targetObjects.length = sparkObjects.length = stationObjects.length = 0;
-    state.targets.forEach((target, i) => { const object = makePickup(kit, state.id, i); object.position.copy(world(target.x, target.y)); scene.add(object); targetObjects.push(object); });
+    state.targets.forEach((target, i) => {
+      const object = makePickup(kit, state.id, i); object.position.copy(world(target.x, target.y)); scene.add(object);
+      const beam = kit.mesh(kit.geometry(new THREE.CylinderGeometry(1.1, 1.1, 100, 12)), kit.basic(state.id === 'motors' ? 0xffce82 : 0x85b4ff, .22), object, 0, 50, 0, false);
+      const tag = kit.label(state.id === 'controllers' ? `CHECKPOINT ${i + 1}` : state.id === 'power' ? 'ENERGY CELL' : state.id === 'motors' ? 'ACTUATOR' : 'SCAN SIGNAL', '#d4e8ff', '#233f5b', 65, 17); tag.position.set(0, 112, 0); object.add(tag);
+      object.userData.beam = beam; object.userData.tag = tag; targetObjects.push(object);
+    });
     state.sparks.forEach(spark => { const group = new THREE.Group(); group.position.copy(world(spark.x, spark.y)); kit.mesh(kit.geometry(new THREE.OctahedronGeometry(4.5, 1)), kit.glow(PALETTE.gold, .5), group, 0, 13, 0); scene.add(group); sparkObjects.push(group); });
     if (state.id === 'power') state.stations.forEach((station, i) => {
       const group = new THREE.Group(); group.position.copy(world(station.x, station.y)); scene.add(group);
       kit.contact(group, 62, 54); kit.box(37, 22, 30, 7, kit.standard(0x51697d, .4, .35), group, 0, 11, 0);
       kit.box(31, 5, 26, 5, kit.standard(0xc6d6df, .35, .3), group, 0, 25, 0);
       const light = kit.box(23, 2, 16, 3, kit.glow(0xf1b568, .45), group, 0, 28.5, 0);
-      const label = kit.label(`0${i + 1}`, '#58718a', '#e5eef5', 27, 15); label.position.set(0, 42, 0); group.add(label);
+      const label = kit.label(`STATION ${i + 1}`, '#c5dbec', '#263f58', 72, 18); label.position.set(0, 82, 0); group.add(label);
       group.userData.light = light; stationObjects.push(group);
     });
     currentMission = state.id;
@@ -283,18 +379,20 @@ export function createArenaRenderer(canvas, { reducedMotion = false } = {}) {
     if (disposed) return;
     base.resize();
     if (state.id !== currentMission || state.targets.length !== targetObjects.length) setupMission(state);
-    const time = state.elapsed || 0;
-    player.position.copy(world(state.player.x, state.player.y));
+    const time = state.elapsed || 0, elevation = Math.max(0, state.player.elevation || 0);
+    player.position.copy(world(state.player.x, state.player.y, elevation));
+    if (player.userData.contactShadow) { player.userData.contactShadow.position.y = (.22 - elevation) / .68; player.userData.contactShadow.material.opacity = Math.max(.18, 1 - elevation / 150); }
     player.userData.body.rotation.y = Math.atan2(-state.player.dx, -state.player.dy);
     player.userData.body.position.y = !reducedMotion && state.player.moving ? Math.sin(time * 16) * .6 : 0;
     player.userData.carrying.visible = Boolean(state.carrying);
     if (player.userData.limbs) {
-      const stride = state.player.moving && !reducedMotion ? Math.sin(time * 10) * .38 : 0;
+      const stride = state.player.moving && !reducedMotion ? Math.sin(time * (state.player.sprinting ? 14 : 10)) * (state.player.sprinting ? .54 : .38) : 0;
+      const airborne = Math.abs(state.player.verticalVelocity || 0) > 4;
       const { leftHip, rightHip, leftShoulder, rightShoulder, leftKnee, rightKnee } = player.userData.limbs;
-      leftHip.rotation.x = stride; rightHip.rotation.x = -stride;
-      leftShoulder.rotation.x = -stride * .65; rightShoulder.rotation.x = stride * .65;
-      leftKnee.rotation.x = Math.max(0, -stride) * .55;
-      rightKnee.rotation.x = Math.max(0, stride) * .55;
+      leftHip.rotation.x = stride + (airborne ? -.26 : 0); rightHip.rotation.x = -stride + (airborne ? -.26 : 0);
+      leftShoulder.rotation.x = -stride * .65 + (airborne ? -.55 : 0); rightShoulder.rotation.x = stride * .65 + (airborne ? -.55 : 0);
+      leftKnee.rotation.x = airborne ? .6 : Math.max(0, -stride) * .55;
+      rightKnee.rotation.x = airborne ? .6 : Math.max(0, stride) * .55;
     }
     while (enemyObjects.length < state.enemies.length) { const enemy = createRover(kit, { enemy: true }); scene.add(enemy); enemyObjects.push(enemy); }
     enemyObjects.forEach((object, i) => {
@@ -315,13 +413,14 @@ export function createArenaRenderer(canvas, { reducedMotion = false } = {}) {
     state.sparks.forEach((spark, i) => { const object = sparkObjects[i]; object.visible = !spark.taken; object.children[0].rotation.y = reducedMotion ? .4 : time * 1.2 + i; object.children[0].position.y = 13 + (!reducedMotion ? Math.sin(time * 3 + i) * 2 : 0); });
     stationObjects.forEach((object, i) => { const charged = state.stations[i]?.charged; object.userData.light.material.color.setHex(charged ? 0x63dfb1 : 0xf1b568); object.userData.light.material.emissive.setHex(charged ? 0x39c69f : 0x916746); });
     const home = objectiveComplete(state); dockRing.material.emissiveIntensity = home ? 1.9 : .6; dockRing.scale.setScalar(home && !reducedMotion ? 1 + Math.sin(time * 4) * .035 : 1);
-    shield.visible = state.shield > 0; shield.position.copy(world(state.player.x, state.player.y, 28));
+    dockLabel.visible = home || Math.hypot(state.player.x - ARENA.dock.x, state.player.y - ARENA.dock.y) > 90;
+    shield.visible = state.shield > 0; shield.position.copy(world(state.player.x, state.player.y, elevation + 40));
     pulse.visible = state.pulse > 0 && !reducedMotion; pulse.position.copy(world(state.player.x, state.player.y, 1.6));
     if (pulse.visible) { pulse.scale.setScalar(Math.max(1, (1 - state.pulse / .65) * state.scanRange)); pulse.material.opacity = state.pulse / .65 * .7; }
     radar.visible = state.upgrades.includes('sensors'); radar.position.copy(world(state.player.x, state.player.y, 1.3));
     destination.visible = Boolean(state.navigationTarget);
     if (state.navigationTarget) destination.position.copy(world(state.navigationTarget.x, state.navigationTarget.y, 1.5));
-    sensorLight.visible = state.id === 'sensors'; sensorLight.position.copy(world(state.player.x, state.player.y, 70));
+    sensorLight.visible = state.id === 'sensors'; sensorLight.position.copy(world(state.player.x, state.player.y, elevation + 78));
     // A cooler ambient palette hints at the sensor mission without concealing hazards.
     scene.background.setHex(state.id === 'sensors' ? 0x07101a : 0x0a131d);
     particles.slice(0, 100).forEach((particle, i) => {
@@ -336,11 +435,29 @@ export function createArenaRenderer(canvas, { reducedMotion = false } = {}) {
       object.material.map = labelTextures.get(key); object.material.needsUpdate = true; object.material.opacity = Math.min(1, (floater.life || 0) * 1.7); object.position.copy(world(floater.x, floater.y, 65)); object.visible = true;
     });
     for (let i = Math.min(floaters.length, 12); i < floatersPool.length; i++) floatersPool[i].visible = false;
-    renderer.render(scene, camera);
+    updateCamera(state); scene.updateMatrixWorld(true); kit.constrainLabels(camera); renderer.render(scene, camera);
   }
   const raycaster = new THREE.Raycaster(), pointer = new THREE.Vector2(), floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), intersection = new THREE.Vector3();
   return {
     render,
+    moveInput(x, y) { return { x: x * Math.cos(cameraYaw) + y * Math.sin(cameraYaw), y: -x * Math.sin(cameraYaw) + y * Math.cos(cameraYaw) }; },
+    rotateCamera(dx, dy) { cameraYaw -= (Number.isFinite(dx) ? dx : 0) * .006; cameraPitch = THREE.MathUtils.clamp(cameraPitch + (Number.isFinite(dy) ? dy : 0) * .004, .06, .8); },
+    getHeading() { return cameraYaw; },
+    resetCamera() { cameraYaw = 0; cameraPitch = .2; cameraInitialized = false; },
+    getGuidance(state) {
+      let target, label;
+      if (objectiveComplete(state)) { target = ARENA.dock; label = 'Return to home dock'; }
+      else if (state.id === 'controllers') { target = state.targets[state.collected]; label = `Checkpoint ${state.collected + 1}`; }
+      else if (state.id === 'power' && state.carrying) {
+        target = state.stations.filter(value => !value.charged).sort((a, b) => Math.hypot(a.x - state.player.x, a.y - state.player.y) - Math.hypot(b.x - state.player.x, b.y - state.player.y))[0]; label = 'Charging station';
+      } else {
+        target = state.targets.filter(value => !value.taken).sort((a, b) => Math.hypot(a.x - state.player.x, a.y - state.player.y) - Math.hypot(b.x - state.player.x, b.y - state.player.y))[0];
+        label = state.id === 'sensors' ? target?.revealed ? 'Sensor module' : 'Unidentified signal' : state.id === 'motors' ? 'Actuator module' : 'Energy cell';
+      }
+      if (!target) { target = ARENA.dock; label = 'Home dock'; }
+      const dx = target.x - state.player.x, dy = target.y - state.player.y;
+      return { label, distance: Math.hypot(dx, dy), bearing: Math.atan2(dx * Math.cos(cameraYaw) - dy * Math.sin(cameraYaw), -dx * Math.sin(cameraYaw) - dy * Math.cos(cameraYaw)) };
+    },
     pointOnFloor(clientX, clientY) {
       if (disposed) return null;
       const bounds = canvas.getBoundingClientRect(); if (!bounds.width || !bounds.height) return null;

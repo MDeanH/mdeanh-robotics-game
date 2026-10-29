@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "A pixel-art robotics arcade for students",
+  "description": "A third-person 3D robotics learning adventure inspired by the owned Luka app",
   "scripts": {
     "start": "node scripts/serve.mjs",
     "test": "node --test tests/*.test.mjs",

@@ -88,3 +88,42 @@
 - Laptop arena: dialog clientHeight=662, scrollHeight=662, Start fully visible; input and turbo exercised in actual 3D scene. Hub at1280px had no horizontal overflow.
 - Visual regression: expanding torus pulse had tube/radius 1.5/1 and became a filled white disk. Changed tube/radius to .008/1 (thin ring); decorative pulse hidden for reduced-motion preference. Gameplay rules unchanged.
 - Source and asset/model contracts: 39 tests pass before the final visual adjustment; full ES module checks pass. No hardware test or model calibration is claimed.
+
+## 2026-10-28 — third-person adventure supersedes the arena release
+- Latest user direction: a third-person 3D adventure with the camera behind Luka, an explorable lab, jumping, sprinting, and camera look. Target controls: WASD move, Space jump, Shift sprint, E ability, Q/R look, drag to look. Implementation and fresh verification are pending.
+- Correct reference remains the user-owned luka-a2.netlify.app and public MDeanH/luka-a2-ultra-model estimated T2D0 geometry. Steadwell is rejected; private iPad assets are not used. No hardware capability or calibration claim follows from this visual work.
+- Previous modern publication succeeded at deploy 6ae2946060d6e5857ff3ac02. Root reported anonymous HTTP 200 and matching SHA-256 for all 26 files (24,418,199 bytes), with actual live WebGL movement/turbo and no warning/error logs. That deploy is superseded pending the third-person release, not evidence that third-person is done.
+- Historical modern QA: 39 passing tests/source checks; 47 hub meshes loaded; Sequence sprint keyboard win at score 1380 with 3/4 integrity; laptop dialog client/scroll height 662 at 1280x720; phone 390x844 no horizontal overflow, energy state score 220, direction hold, shield, pause/resume. Forced fallback/reduced-motion browser tests and hardware tests were not performed.
+- Documentation updated for the new objective and pending release state. No runtime/browser changes made by this documentation pass.
+
+## 2026-10-28 — preserve retro; one new link per new game
+- Latest explicit user directive: KEEP RETRO and EVERY NEW GAME NEW LINK. This is a standing deployment invariant: each new game gets a separate Netlify site/link; no new game replaces an existing game at its canonical URL.
+- Retro canonical is https://mdeanh-robotics-workshop.netlify.app/, site 52fa8bfb-3b0f-4627-94c4-be935970fb69. Root restored retro deploy 6ae289b8b05a2208ace788a2 using restoreSiteDeploy (API exit 0); root is verifying the live result.
+- New third-person site is being created as mdeanh-luka-3d. Confirmed new site ID, URL, deployment, and third-person verification remain pending. All old instructions to publish the new game onto the retro site are superseded.
+- AGENTS, README, handoff, and release checklist updated. No deployment, runtime, or browser action performed in this documentation pass.
+
+## 2026-10-28 — confirmed separate Codex-named game links
+- User requested Codex in the game links while preserving retro. Root confirmed the new third-person site ID 431dd23f-eab9-465d-8714-ae5720b481e4 and renamed it to mdeanh-codex-luka-3d: https://mdeanh-codex-luka-3d.netlify.app. Third-person deployment and verification are still pending.
+- Root verified the restored original retro URL https://mdeanh-robotics-workshop.netlify.app/ returns HTTP 200 with its pixel-game title. This original link stays intact.
+- Root is creating an unchanged Codex-named retro copy at https://mdeanh-codex-retro.netlify.app; site ID and publication evidence pending. A copy never replaces the original URL.
+- Documentation uses the confirmed fresh 3D site ID for future authorized deploy commands and prohibits deploying the new game onto the retro site. No deployment/browser action performed by this documentation pass.
+
+## 2026-10-28 — third-person adventure and separate game links
+- User rejected the overhead game type, explicitly requested 3D, and clarified that every new game must have its own link with codex in the name. This supersedes publishing modernization over the existing retro site.
+- Restored original retro production site 52fa8bfb-3b0f-4627-94c4-be935970fb69 to deployment 6ae289b8b05a2208ace788a2 with Netlify restoreSiteDeploy. Fresh anonymous homepage returned HTTP200 and title The Pixel Workshop. That original URL remains preserved.
+- Created separate modern site 431dd23f-eab9-465d-8714-ae5720b481e4, named mdeanh-codex-luka-3d. Created separate Codex-named copy destination for original retro: e46a19a3-cfe9-4241-99dc-f3c5bfae5ca3, mdeanh-codex-retro. No further modern deployments target the retro site.
+- Added deterministic jump/gravity, solid bench tops, sprint, airborne rover clearance, and grounded dock completion. This is game physics with no physical Luka capability implication.
+- Red case: jumping reaches a bench, lands on its top, and walking off falls back to the floor failed because support used avatar center while side collision used foot radius; the avatar caught at the bench edge. Unified support footprint with side collision radius. Same named test now passes. Five new adventure contracts plus previous39 tests pass:44 total.
+
+## 2026-10-28 — third-person physics review and preserved retro copy
+- Current jump/sprint source-model review: npm test passes 44/44. Additional numeric probe landed from a jump on the bench at x=310.8, elevation=32, grounded=true; walking off left/right/up/down each ended at elevation=0 and grounded=true. No confirmed grounding/collision/pause/win defect found. This is deterministic software evidence, not physical Luka capability.
+- Root published unchanged retro copy: https://mdeanh-codex-retro.netlify.app, site e46a19a3-cfe9-4241-99dc-f3c5bfae5ca3, deploy 6ae295e0e9e677336c2719e5. Final byte verification is pending. Original retro canonical remains preserved.
+- All 16 original retro files are retained separately in games/retro/. docs/game-sites.json maps each source to its explicit site/link/deploy. Ignored local Netlify binding now points to fresh 3D site 431dd23f-eab9-465d-8714-ae5720b481e4; explicit deployment IDs remain required.
+- New third-person browser verification and deployment remain pending. No runtime or browser edits in this review/documentation pass.
+
+## 2026-10-28 — third-person browser verification
+- Actual local renderer=webgl, camera=third-person-perspective, full viewport1280x720 with no horizontal overflow. The robot is seen from behind inside the lab, with visible perspective, room fixtures and orbital window.
+- Completed Sequence sprint using held WASD and E pulse: all four ordered checkpoints, dock return, win2050 with5/5 integrity. Install upgrade completed; replay preserved400XP and personal best2050 after reload.
+- Space produced a visible airborne pose; Q/R camera turning and Shift+W sprint produced camera-relative movement (navigator changed from100,450 to236.1,320.4). Phone390x844 Start fully visible at y534.5–584.5, no horizontal overflow; held touch forward, sprint toggle, jump, pulse, drag look and pause worked. Navigator moved100,450 to100,159.3 through two held touch runs.
+- Found a visual defect when the rotating chase camera passed through the HOME DOCK billboard: its near-plane projection covered most of the screen. Added view-depth scaling for world labels, suppressing billboards crossing the camera. Repeated the same R-turn, sprint, jump and pulse sequence: room and robot stayed visible, no giant label, no warning/error logs. Dock sign also moved above the avatar and is hidden while standing at an inactive home dock.
+- Retro Codex copy: all16 anonymous runtime filesHTTP200 and SHA256-identical to preserved games/retro. New3D deployment is isolated to site431dd23f-eab9-465d-8714-ae5720b481e4. Original retro URL remains restored.

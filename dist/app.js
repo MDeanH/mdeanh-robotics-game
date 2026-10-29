@@ -83,7 +83,7 @@ function render() {
   $('part-description').textContent = shortFacts[selected.id];
   $('play-label').textContent = earned ? 'Replay field trial' : playLabels[selected.id];
   $('reward-label').textContent = progress.bestScores[selected.id] ? `BEST: ${progress.bestScores[selected.id].toLocaleString()}` : `+${selected.xp} XP`;
-  $('mission-footnote').textContent = 'ARROWS / WASD TO DRIVE · SPACE FOR YOUR ABILITY';
+  $('mission-footnote').textContent = 'WASD to move · Space to jump · E for your ability';
   $('part-description').innerHTML = `${shortFacts[selected.id]}<span class="unlocks-note">${earned ? 'UNLOCKED' : 'UNLOCK'}: ${unlocks[selected.id]}</span>`;
   $('xp-label').textContent = `${progressXP(progress)} XP`;
   $('xp-fill').style.width = `${count * 25}%`;
@@ -134,6 +134,7 @@ function launchSession(id, mode = 'arcade') {
     }
   });
   challengeDialog.showModal();
+  if (arcade) $('challenge-content').querySelector('[data-action="start"]')?.focus({ preventScroll: true });
 }
 const launchChallenge = (id) => launchSession(id, 'lab');
 const launchArcade = (id) => launchSession(id, 'arcade');
@@ -147,7 +148,7 @@ function openInfo(title, content) {
 }
 infoDialog.addEventListener('close', () => dialogOpener?.focus());
 function showHelp() {
-  openInfo('Welcome to Robot Lab.', `<p class="info-copy">Meet your humanoid, your training rover. Discover how four core systems work together through hands-on arena missions.</p><ol class="help-steps"><li><div><b>Drive, dodge, and discover</b><p>Use WASD or the arrow keys to steer. Grab parts and bonus sparks, avoid rogue training bots, and chain pickups for a bigger combo. Touch controls work too.</p></div></li><li><div><b>Put your parts to work</b><p>Press Space for your mission ability: scan the dark, burst into turbo, or make a power delivery. Protect your hearts! Pause whenever you need a breather.</p></div></li><li><div><b>Bring your loot home</b><p>Finish the objective and return to the glowing dock. Each new part adds an upgrade. Build the full robot, then replay to beat your high scores!</p></div></li></ol><p class="info-note">The Simulation lab has extra self-paced puzzles if you want to explore the science. Tab moves between buttons, Enter or Space activates them, and Escape closes panels. Progress and high scores save in this browser. All gameplay uses simplified educational models.</p><button class="play-button" id="help-start"><span>Launch your discovery</span><span aria-hidden="true">→</span></button>`);
+  openInfo('Your adventure starts here.', `<p class="info-copy">Explore a 3D world as Luka. Run, jump, and discover how four robot systems work together through hands-on adventures.</p><ol class="help-steps"><li><div><b>Run, jump, and discover</b><p>Use WASD or the arrow keys to move relative to your camera. Press Space to jump and hold Shift to sprint. Drag the world to look around, or use Q and R. Follow your waypoint and navigation map to the next objective.</p></div></li><li><div><b>Put your parts to work</b><p>Press E for your mission ability: scan the dark, burst into turbo, or make a power delivery. Protect your integrity! Pause whenever you need a breather.</p></div></li><li><div><b>Bring your loot home</b><p>Finish the objective and return to the glowing dock. Each new part adds an upgrade. Build the full robot, then replay to beat your high scores!</p></div></li></ol><p class="info-note">The Simulation lab has extra self-paced puzzles if you want to explore the science. Tab moves between buttons, Enter or Space activates them, and Escape closes panels. Progress and high scores save in this browser. All gameplay uses simplified educational models.</p><button class="play-button" id="help-start"><span>Launch your discovery</span><span aria-hidden="true">→</span></button>`);
   $('help-start').addEventListener('click', () => { infoDialog.close(); $('play-button').focus(); });
 }
 function showNotebook() {
@@ -196,8 +197,8 @@ $('sound-button').addEventListener('click', () => {
 });
 render();
 $('save-status').textContent = storageAvailable ? 'PROGRESS SAVED LOCALLY' : 'PROGRESS SAVED THIS SESSION';
-// The cockpit opens on the model explorer; missions launch from the selected system.
-startPreview();
+// The modern game opens on a third-person adventure title screen; the garage remains available on close.
+launchArcade(progress.selected);
 document.addEventListener('visibilitychange', () => document.hidden ? stopPreview() : startPreview());
 window.addEventListener('pagehide', () => { stopPreview(); gameCleanup?.(); });
 window.addEventListener('pageshow', event => { if (event.persisted) location.reload(); });

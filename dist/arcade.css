@@ -1,191 +1,183 @@
-.arcade-dialog {
-  width: min(1100px,calc(177.78svh - 520px),calc(100% - 28px));
-  max-height: calc(100svh - 32px);
-  padding: 14px 20px 16px;
-  border-radius: 10px;
-  border: 1px solid #ffffff24;
-  background: #14171c;
-  color: #e6edf3;
-  box-shadow: 0 35px 120px #04101e66, inset 0 1px 0 #ffffff0f;
-}
-.arcade-dialog::backdrop { background: #061020c9; backdrop-filter: blur(12px); }
-.arcade-dialog .dialog-top { min-height: 29px; }
-.arcade-dialog .dialog-top .eyebrow { color: #7f9dbf; font-size: 8px; letter-spacing: 1.4px; }
-.arcade-dialog > h2 { font-size: 20px; line-height: 1.2; font-weight: 700; letter-spacing: -.4px; color: #dce7ef; margin: 2px 0 12px; }
-.arcade-dialog .close-button { width: 29px; height: 29px; border-radius: 10px; color: #89a1bc; background: #172533; border: 1px solid #ffffff0c; }
-.arcade-dialog .close-button:hover { color: #d8e7ff; background: #233f56; }
-.arcade-shell { background: #14171c; color: #f1f6ff; border: 1px solid #ffffff0a; border-radius: 8px; overflow: hidden; font-family: var(--body,system-ui,sans-serif); max-width: 1060px; margin: auto; touch-action: manipulation; box-shadow: 0 12px 25px #03102220; }
-.arcade-shell button { font-family: inherit; cursor: pointer; touch-action: manipulation; }
-.arcade-shell button:focus-visible, .arcade-canvas:focus-visible { outline: 3px solid #4aa3ff; outline-offset: -4px; }
+/* Full-window third-person adventure. The world is the interface's foundation. */
+.arcade-dialog { width: calc(100vw - 20px); height: calc(100svh - 20px); max-width: none; max-height: none; padding: 0; margin: auto; overflow: hidden; border: 1px solid #28394a; border-radius: 15px; background: #08121c; color: #edf4fb; box-shadow: 0 25px 100px #0008; }
+.arcade-dialog::backdrop { background: #050a12dd; backdrop-filter: blur(8px); }
+.arcade-dialog > .dialog-top { display: flex; justify-content: flex-end; position: absolute; top: 13px; left: 18px; right: 15px; z-index: 40; min-height: 36px; pointer-events: none; }
+.arcade-dialog > .dialog-top > .eyebrow { display: none; }
+.arcade-dialog .close-button { pointer-events: auto; width: 35px; height: 35px; background: #0d2030ba; color: #a4b9cf; border: 1px solid #bdd6ed20; border-radius: 11px; backdrop-filter: blur(10px); }
+.arcade-dialog .close-button:hover { background: #24435f; color: #fff; }
+.arcade-dialog > h2 { position: absolute; top: 20px; left: 23px; z-index: 35; margin: 0; max-width: calc(100% - 88px); color: #dceaf6; font-size: 17px; font-weight: 650; line-height: 1.3; letter-spacing: -.25px; text-shadow: 0 2px 10px #0007; pointer-events: none; }
+.arcade-dialog #challenge-content { height: 100%; width: 100%; }
+.arcade-shell { position: relative; width: 100%; height: 100%; max-width: none; margin: 0; overflow: hidden; isolation: isolate; font-family: var(--body,system-ui,sans-serif); color: #e3effa; background: #08121c; touch-action: none; }
+.arcade-shell button { cursor: pointer; touch-action: manipulation; font-family: inherit; }
 .arcade-shell button:disabled { cursor: default; }
-.arcade-hud { display: flex; align-items: center; gap: 24px; height: 55px; padding: 8px 19px; background: #14171cf5; border-bottom: 1px solid #ffffff09; }
-.arcade-hud small { display: block; font-size: 7px; font-weight: 650; letter-spacing: 1.1px; color: #6685a5; margin-bottom: 3px; }
-.arcade-health { display: block; font-size: 23px; font-weight: 500; letter-spacing: 2px; line-height: 1; color: #fa9a99; white-space: nowrap; text-shadow: 0 0 16px #ff8c8a19; }
-.arcade-health-block { min-width: 100px; }
-.arcade-score-block { min-width: 80px; }
-.arcade-score { display: block; font-size: 24px; font-weight: 750; line-height: 1; letter-spacing: -.5px; color: #edf7ff; font-variant-numeric: tabular-nums; }
-.arcade-combo { margin-left: auto; color: #7b9dbd; font-size: 9px; font-weight: 700; letter-spacing: .5px; white-space: nowrap; }
-.arcade-combo-hot { color: #f9bd76; text-shadow: 0 0 18px #f9bd762f; }
-.arcade-pause-button { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 30px; padding: 6px 11px; border-radius: 9px; border: 1px solid #ffffff0d; background: #172a3a; color: #9ab4d0; font-size: 11px; }
-.arcade-pause-button span { font-size: 8px; font-weight: 650; letter-spacing: .6px; }
-.arcade-pause-button:hover { background: #203d52; color: #dfedff; }
+.arcade-shell button:focus-visible, .arcade-canvas:focus-visible { outline: 2px solid #79baff; outline-offset: 3px; }
+.arcade-stage { position: absolute; inset: 0; overflow: hidden; background: #101b28; }
+.arcade-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; aspect-ratio: auto; outline: none; image-rendering: auto; cursor: grab; touch-action: none; }
+.arcade-canvas.adventure-looking { cursor: grabbing; }
+.adventure-vignette { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(180deg,#06142475,transparent 28%,transparent 63%,#07182ba3); }
+.arcade-hud { position: absolute; top: 58px; left: 22px; z-index: 3; display: flex; align-items: center; gap: 23px; height: 55px; max-width: calc(100% - 235px); padding: 8px 14px; border: 1px solid #b9d1e81f; border-radius: 13px; background: #0d2032c9; backdrop-filter: blur(14px); box-shadow: 0 6px 24px #03112015; }
+.arcade-hud small { display: block; margin-bottom: 3px; color: #7f9bb6; font-size: 8px; font-weight: 550; letter-spacing: .5px; }
+.arcade-health-block { min-width: 89px; }
+.arcade-health { display: block; color: #f2acaa; font-size: 22px; font-weight: 500; letter-spacing: 1.6px; line-height: 1; white-space: nowrap; }
+.arcade-score-block { min-width: 64px; }
+.arcade-score { display: block; color: #e7f4ff; font-size: 23px; font-weight: 700; line-height: 1; letter-spacing: -.4px; font-variant-numeric: tabular-nums; }
+.arcade-combo { color: #83a5c0; font-size: 10px; font-weight: 550; white-space: nowrap; }
+.arcade-combo-hot { color: #f3c994; }
+.arcade-pause-button { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 31px; padding: 6px 10px; border: 1px solid #88b0d137; border-radius: 8px; color: #a5c1da; background: #24435da6; font-size: 12px; }
+.arcade-pause-button span { font-size: 9px; }
+.arcade-pause-button:hover { background: #345e80; color: #f0f8ff; }
 .arcade-pause-button:disabled { opacity: .4; }
-.arcade-stage { position: relative; isolation: isolate; background: #080c11; line-height: 0; }
-.arcade-canvas { display: block; width: 100%; height: auto; aspect-ratio: 16/9; outline: 0; image-rendering: auto; }
-.arcade-overlay { position: absolute; inset: 0; z-index: 3; display: flex; align-items: center; justify-content: center; background: #070a10af; backdrop-filter: blur(5px); padding: 15px; line-height: 1.5; }
-.arcade-overlay[hidden] { display: none; }
-.arcade-overlay-card { width: 100%; max-width: 460px; max-height: 100%; overflow: auto; scrollbar-width: thin; padding: 19px 25px; border-radius: 9px; border: 1px solid #ffffff19; background: #14171cf2; box-shadow: 0 20px 60px #0613222b, inset 0 1px 0 #ffffff08; backdrop-filter: blur(14px); text-align: center; }
-.arcade-eyebrow { display: block; color: #7fabc8; font-size: 8px; font-weight: 700; letter-spacing: 1.6px; }
-.arcade-hero-robot { width: 66px; height: 66px; margin: 9px auto 5px; filter: drop-shadow(0 7px 15px #08152d35); }
-.arcade-overlay h3 { color: #f5f9ff; font-family: inherit; font-size: 27px; font-weight: 800; line-height: 1.13; letter-spacing: -.8px; margin: 5px 0 11px; }
-.arcade-overlay p { max-width: 395px; margin: 0 auto 12px; color: #8fa9c0; font-size: 11px; line-height: 1.75; }
-.arcade-start-controls { display: flex; justify-content: center; gap: 28px; margin: 12px 0; }
-.arcade-start-controls > span { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.arcade-start-controls kbd { display: inline-block; background: #223d59; border: 1px solid #416383; box-shadow: 0 2px 0 #0b1c32; border-radius: 5px; color: #c9dfef; padding: 3px 7px; font-size: 9px; font-weight: 600; min-height: 19px; }
-.arcade-start-controls small { color: #607f9d; font-size: 6px; font-weight: 700; letter-spacing: 1.2px; }
-.arcade-main-button { display: flex; align-items: center; justify-content: center; gap: 21px; min-height: 43px; min-width: 205px; padding: 11px 22px; margin: 13px auto 0; background: #5aa9ff; color: #fff; border: 1px solid #75b8ff; border-radius: 7px; box-shadow: 0 7px 24px #3269f032, inset 0 1px 0 #ffffff19; font-size: 10px; font-weight: 750; letter-spacing: .3px; }
-.arcade-main-button:hover { background: #88c1ff; box-shadow: 0 10px 27px #3269f04d; transform: translateY(-2px); }
-.arcade-main-button:active { transform: translateY(0); }
-.arcade-main-button span { font-size: 13px; }
-.arcade-overlay-card > small { display: block; color: #52728e; margin-top: 10px; font-size: 8px; line-height: 1.5; }
-.arcade-plain-button { display: block; padding: 7px 9px; min-height: 31px; margin: 7px auto 0; color: #7697b6; font-size: 9px; background: none; border: 0; text-decoration: underline; text-underline-offset: 4px; }
-.arcade-plain-button:hover { color: #d3e6fc; }
-.arcade-upgrade-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin: 8px 0; }
-.arcade-upgrade-list > span { color: #89cbb8; background: #1e454e; border: 1px solid #396e70; border-radius: 30px; padding: 4px 7px; font-size: 6px; font-weight: 650; letter-spacing: .3px; }
-.arcade-small-card { max-width: 400px; padding-block: 24px; }
-.arcade-small-card .arcade-hero-robot { width: 55px; height: 55px; }
-.arcade-small-card h3 { font-size: 24px; }
-.arcade-final-score { margin: 13px auto; }
-.arcade-final-score small { display: block; color: #7896b0; font-size: 7px; font-weight: 650; letter-spacing: 1px; }
-.arcade-final-score strong { display: block; color: #fff; font-size: 38px; line-height: 1.25; letter-spacing: -1px; font-weight: 800; font-variant-numeric: tabular-nums; margin-top: 4px; }
-.arcade-earned { padding: 11px 14px; max-width: 290px; margin: 10px auto 0; border: 1px solid #23585b; border-radius: 11px; background: #143e43; color: #72aeb0; font-size: 6px; font-weight: 700; letter-spacing: 1px; }
-.arcade-earned strong { display: block; font-size: 12px; color: #a1e4d5; letter-spacing: 0; margin-top: 4px; }
-.arcade-win-card .arcade-hero-robot { width: 48px; height: 48px; margin: 1px auto 4px; }
-.arcade-win-card h3 { font-size: 23px; margin-bottom: 8px; }
-.arcade-win-card .arcade-final-score { margin: 4px auto 8px; }
-.arcade-win-card p { margin-bottom: 7px; font-size: 10px; }
-.arcade-win-card .arcade-main-button { margin-top: 10px; }
-.arcade-mission-bar { display: flex; align-items: center; gap: 15px; min-height: 52px; padding: 7px 14px; color: #c0d4e6; background: #171e27; border-top: 1px solid #ffffff0a; }
-.arcade-goal { color: #a9c3da; font-size: 10px; line-height: 1.5; font-weight: 650; }
-.arcade-return-goal { color: #67d3b2; }
-.arcade-special { display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 35px; min-width: 137px; padding: 5px 10px; margin-left: auto; border: 1px solid #2d8c9b; border-radius: 10px; background: #183b5d; color: #bdf7ed; font-size: 9px; font-weight: 750; letter-spacing: .4px; }
-.arcade-special:hover:not(:disabled) { background: #245781; color: #fff; box-shadow: 0 5px 15px #0b687c25; }
-.arcade-special:disabled { background: #182a36; border-color: #233d4e; color: #5d8094; }
-.arcade-special-icon { font-size: 19px; line-height: 1; }
-.arcade-special kbd { background: #136d79; border: 1px solid #308b92; color: #7fc3c5; padding: 2px 4px; border-radius: 4px; font-size: 7px; }
-.arcade-status { min-height: 28px; padding: 6px 14px; margin: 0; border-top: 1px solid #ffffff05; background: #10151c; color: #587997; font-size: 9px; line-height: 1.6; }
-.arcade-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 25px; padding: 5px 13px; color: #3c5e7a; background: #10151a; font-size: 6px; line-height: 1.7; letter-spacing: .3px; }
-.arcade-footer kbd { font: inherit; font-weight: 650; color: #5d7c97; border: 1px solid #28455e; border-radius: 3px; padding: 1px 3px; white-space: nowrap; }
-.arcade-footer b { font-weight: 500; padding: 0 4px; color: #244764; }
-.arcade-footer > span:last-child { color: #2d506c; white-space: nowrap; }
-.arcade-touch-controls { display: none; align-items: center; gap: 10px; padding: 10px 13px; background: #131c28; border-top: 1px solid #ffffff08; }
-.arcade-dpad { display: grid; grid-template: repeat(2,44px)/repeat(3,44px); gap: 4px; touch-action: none; }
-.arcade-pad-button { padding: 0; border: 1px solid #385775; border-radius: 7px; background: #254560; box-shadow: 0 3px 6px #04152b18, inset 0 1px 0 #ffffff08; color: #a2c2df; font-size: 23px; font-weight: 500; user-select: none; -webkit-user-select: none; touch-action: none; }
+.adventure-objective { position: absolute; top: 136px; left: 24px; z-index: 3; max-width: 365px; text-shadow: 0 2px 9px #041526c9; }
+.adventure-mission-tag { display: block; color: #7ca7c9; font-size: 9px; font-weight: 650; letter-spacing: 1px; text-transform: uppercase; }
+.arcade-goal { display: block; margin-top: 5px; color: #e1edf8; font-size: 17px; font-weight: 650; line-height: 1.4; letter-spacing: -.2px; }
+.arcade-return-goal { color: #9edbbc; }
+.adventure-guidance { display: flex; align-items: center; gap: 8px; margin-top: 10px; color: #9ab9d1; font-size: 11px; }
+.adventure-waypoint-arrow { display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid #e9ca8066; border-radius: 50%; color: #f2d58e; background: #342c1c99; font-size: 17px; font-weight: 600; transform-origin: center; }
+.adventure-waypoint-label { color: #c8dbe9; }
+.adventure-waypoint-range { color: #617f99; font-size: 9px; }
+.adventure-navigation { position: absolute; top: 59px; right: 23px; z-index: 3; width: 170px; padding: 10px; border: 1px solid #a4c2e02b; border-radius: 12px; background: #0c2034c2; backdrop-filter: blur(14px); box-shadow: 0 8px 25px #06132622; }
+.adventure-map-title { display: flex; justify-content: space-between; align-items: center; padding: 0 1px 7px; color: #7296b5; font-size: 8px; letter-spacing: .6px; }
+.adventure-map-title span:last-child { color: #456b8d; }
+.adventure-minimap { display: block; width: 100%; height: auto; overflow: visible; }
+.adventure-minimap .map-floor { fill: #102b41; stroke: #35546d; stroke-width: 5; }
+.adventure-minimap .map-obstacle { fill: #3c5062; stroke: #627184; stroke-width: 3; }
+.adventure-minimap .map-dock { fill: #225a4e; stroke: #73bca8; stroke-width: 5; }
+.adventure-minimap .map-target { fill: #a3bfd9; }
+.adventure-minimap .map-enemy { fill: #e3837e; }
+.adventure-minimap .map-station { fill: #646a57; stroke: #b2b990; stroke-width: 4; }
+.adventure-minimap .map-station-charged { fill: #4d8b70; stroke: #9bd3b3; }
+.adventure-minimap .map-objective { fill: #d6b76e22; stroke: #efd295; stroke-width: 7; }
+.adventure-minimap .map-guide-line { fill: none; stroke: #d8bb7d; stroke-width: 4; stroke-dasharray: 13 13; }
+.adventure-minimap .map-player circle { fill: #5bb2f1; stroke: #d7eeff; stroke-width: 4; }
+.adventure-minimap .map-player path { fill: #e2f3ff; }
+.adventure-view-label { display: block; margin-top: 6px; text-align: center; color: #426886; font-size: 8px; }
+.adventure-crosshair { position: absolute; left: 50%; top: 45%; z-index: 2; width: 9px; height: 9px; border: 1px solid #c3e4ff55; border-radius: 50%; transform: translate(-50%,-50%); pointer-events: none; }
+.adventure-crosshair i { display: block; margin: 3px; width: 1px; height: 1px; border-radius: 50%; background: #dfedff66; }
+.arcade-mission-bar { position: absolute; right: 23px; bottom: 23px; z-index: 4; display: flex; align-items: center; gap: 8px; padding: 9px; border: 1px solid #95b8d42b; border-radius: 13px; background: #0e2338cf; backdrop-filter: blur(14px); }
+.adventure-jump, .arcade-special { display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 37px; min-width: 113px; padding: 7px 11px; border: 1px solid #5d89b04d; border-radius: 9px; color: #b6d6f0; background: #234c719e; font-size: 11px; font-weight: 600; }
+.adventure-jump > span { color: #c4d9e9; font-size: 18px; line-height: 1; }
+.arcade-special { background: #275d8a; border-color: #5d9cc7; }
+.adventure-jump:hover:not(:disabled), .arcade-special:hover:not(:disabled) { color: #f3f9ff; background: #3676a6; }
+.adventure-jump:disabled, .arcade-special:disabled { color: #476987; background: #1b354b; border-color: #345570; }
+.arcade-special-icon { font-size: 18px; line-height: 1; }
+.arcade-mission-bar kbd { padding: 2px 4px; color: #739abd; background: #153d61; border: 1px solid #477397; border-radius: 4px; font-size: 8px; font-family: inherit; }
+.adventure-reset-camera { color: #627f98; background: none; border: 0; padding: 8px; font-size: 9px; }
+.adventure-reset-camera:hover { color: #b3cde2; }
+.arcade-status { position: absolute; left: 24px; bottom: 68px; z-index: 3; max-width: min(480px,55%); margin: 0; padding: 8px 11px; border-left: 2px solid #6fa3ce6b; border-radius: 0 5px 5px 0; background: #0b1e308c; color: #9ab5cc; font-size: 11px; line-height: 1.6; backdrop-filter: blur(8px); }
+.arcade-footer { display: flex; gap: 12px; justify-content: space-between; position: absolute; left: 24px; bottom: 23px; z-index: 3; max-width: calc(100% - 455px); color: #577993; font-size: 8px; line-height: 1.9; text-shadow: 0 2px 6px #0007; }
+.arcade-footer kbd { font: inherit; color: #8eabc3; padding: 2px 4px; border: 1px solid #466a8550; border-radius: 4px; background: #0b2438b3; white-space: nowrap; }
+.arcade-footer b { color: #3f627e; padding: 0 2px; font-weight: 400; }
+.arcade-footer > span:last-child { display: none; }
+.arcade-touch-controls { display: none; position: absolute; left: 16px; right: 16px; bottom: 19px; z-index: 6; align-items: flex-end; justify-content: space-between; gap: 12px; pointer-events: none; }
+.arcade-touch-controls button { pointer-events: auto; }
+.arcade-dpad { display: grid; grid-template: repeat(2,44px)/repeat(3,44px); gap: 4px; touch-action: none; pointer-events: none; }
+.arcade-pad-button { padding: 0; color: #bed8ed; background: #1f4667c9; border: 1px solid #91b3cd52; border-radius: 12px; backdrop-filter: blur(12px); font-size: 22px; user-select: none; -webkit-user-select: none; touch-action: none; box-shadow: 0 5px 15px #04132322; }
 .arcade-pad-up { grid-column: 2; grid-row: 1; }
 .arcade-pad-left { grid-column: 1; grid-row: 2; }
 .arcade-pad-down { grid-column: 2; grid-row: 2; }
 .arcade-pad-right { grid-column: 3; grid-row: 2; }
-.arcade-pad-pressed { background: #5aa9ff; border-color: #729ffc; color: #fff; box-shadow: 0 3px 13px #3269f030; }
-.arcade-touch-controls > span { font-size: 9px; line-height: 1.65; color: #567a98; }
-.arcade-touch-special { width: 66px; height: 66px; margin-left: auto; flex-shrink: 0; border: 1px solid #59a7b4; border-radius: 50%; background: #28649a; color: #c6f9f2; box-shadow: 0 6px 16px #071a3033, inset 0 1px 0 #ffffff20; font-size: 9px; font-weight: 750; letter-spacing: .5px; user-select: none; -webkit-user-select: none; }
-.arcade-touch-special:hover { background: #3a85bf; }
-.arcade-bubble { display: none; }
-.arcade-shell kbd { font-family: inherit; }
+.arcade-pad-pressed { color: #eef8ff; background: #397faacb; border-color: #b5dcf5; }
+.adventure-touch-look { flex: 1; margin-bottom: 11px; color: #5a839f; text-align: center; font-size: 8px; line-height: 1.6; text-shadow: 0 2px 5px #000; pointer-events: none; }
+.adventure-touch-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.adventure-touch-actions > div { display: flex; gap: 9px; }
+.adventure-touch-jump, .arcade-touch-special { width: 59px; height: 59px; flex-shrink: 0; margin: 0; color: #c6e4fb; background: #285a80dd; border: 1px solid #76abce; border-radius: 50%; backdrop-filter: blur(12px); font-size: 10px; font-weight: 650; user-select: none; -webkit-user-select: none; box-shadow: 0 5px 18px #03121e33; }
+.arcade-touch-special { background: #347cafdd; border-color: #9bc4df; }
+.adventure-touch-sprint { min-height: 27px; padding: 5px 10px; color: #7ea2bd; background: #10283cbd; border: 1px solid #4b769b6b; border-radius: 8px; font-size: 9px; }
+.adventure-sprint-active { color: #b6eadb; border-color: #7bb2a0; background: #1a5045d9; }
+.arcade-overlay { position: absolute; inset: 0; z-index: 25; display: flex; align-items: center; justify-content: center; padding: 25px; background: linear-gradient(90deg,#06111a70,#06111a33 45%,#06111a70); backdrop-filter: blur(2px); line-height: 1.5; }
+.arcade-overlay[hidden] { display: none; }
+.arcade-overlay-card { width: 100%; max-width: 485px; max-height: 100%; overflow: auto; scrollbar-width: thin; padding: 27px 32px; border: 1px solid #b5d4ee22; border-radius: 21px; background: #102234db; box-shadow: 0 25px 85px #03111c55, inset 0 1px 0 #ffffff08; backdrop-filter: blur(18px); text-align: center; }
+.arcade-eyebrow { display: block; color: #8cb7d5; font-size: 10px; font-weight: 600; letter-spacing: 1.2px; }
+.arcade-hero-robot { width: 79px; height: 79px; margin: 15px auto 10px; filter: drop-shadow(0 9px 18px #03132066); }
 .arcade-shell svg { display: block; width: 100%; height: 100%; }
-@media(pointer:coarse) {
-  .arcade-touch-controls { display: flex; }
-  .arcade-footer > span:first-child { display: none; }
-}
+.arcade-overlay h3 { margin: 8px 0 13px; color: #eaf5ff; font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 1.1; }
+.arcade-overlay p { max-width: 415px; margin: 0 auto 13px; color: #9db4c8; font-size: 13px; line-height: 1.8; }
+.arcade-overlay .adventure-start-hint { color: #6788a5; font-size: 11px; line-height: 1.7; margin-bottom: 17px; }
+.arcade-start-controls { display: flex; align-items: flex-start; justify-content: center; gap: 22px; margin: 17px 0; }
+.arcade-start-controls > span { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.arcade-start-controls kbd { padding: 4px 7px; border: 1px solid #769bb95e; border-radius: 6px; color: #b3d0e6; background: #294c6899; font-size: 10px; font-family: inherit; min-width: 31px; }
+.arcade-start-controls small { color: #537797; font-size: 8px; }
+.arcade-main-button { display: flex; align-items: center; justify-content: center; gap: 23px; min-height: 47px; min-width: 220px; padding: 12px 22px; margin: 17px auto 0; color: #071c2d; background: #77bcf7; border: 1px solid #b5dbfa; border-radius: 12px; box-shadow: 0 8px 25px #08264833; font-size: 12px; font-weight: 700; }
+.arcade-main-button:hover { background: #a1d2fa; transform: translateY(-1px); }
+.arcade-main-button:active { transform: translateY(1px); }
+.arcade-main-button span { font-size: 16px; }
+.arcade-overlay-card > small { display: block; margin-top: 13px; color: #4f718f; font-size: 9px; line-height: 1.6; }
+.arcade-plain-button { display: block; margin: 8px auto 0; padding: 7px 10px; min-height: 31px; border: 0; background: none; color: #7598b4; font-size: 10px; text-decoration: underline; text-underline-offset: 4px; }
+.arcade-plain-button:hover { color: #c2ddf0; }
+.arcade-upgrade-list { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 12px 0; }
+.arcade-upgrade-list > span { padding: 4px 7px; color: #8cbda9; border: 1px solid #416d626b; border-radius: 20px; background: #1c403b96; font-size: 8px; }
+.arcade-small-card { max-width: 410px; padding: 30px; }
+.arcade-small-card h3 { font-size: 28px; }
+.arcade-small-card .arcade-hero-robot { width: 62px; height: 62px; margin: 10px auto; }
+.arcade-final-score { margin: 16px auto; }
+.arcade-final-score small { display: block; color: #7091ac; font-size: 9px; }
+.arcade-final-score strong { display: block; margin-top: 6px; color: #e9f5ff; font-size: 45px; font-weight: 750; line-height: 1.1; letter-spacing: -1.3px; font-variant-numeric: tabular-nums; }
+.arcade-earned { margin: 14px auto 0; max-width: 300px; padding: 12px; color: #6caa98; border: 1px solid #416c6159; border-radius: 11px; background: #1b3e3699; font-size: 9px; }
+.arcade-earned strong { display: block; margin-top: 5px; color: #9cd8c1; font-size: 14px; font-weight: 600; }
+.arcade-win-card .arcade-hero-robot { display: none; }
+.arcade-win-card h3 { font-size: 29px; }
+.arcade-win-card p { font-size: 12px; }
+.arcade-shell:not([data-mode="playing"]) :is(.arcade-hud,.adventure-objective,.adventure-navigation,.adventure-crosshair,.arcade-mission-bar,.arcade-touch-controls,.arcade-status,.arcade-footer) { visibility: hidden; pointer-events: none; }
+@media(pointer:coarse) { .arcade-touch-controls { display: flex; }.arcade-mission-bar,.arcade-footer { display: none; }.arcade-status { bottom: 139px; max-width: min(420px,calc(100% - 40px)); } }
+@media(max-width:850px) { .arcade-combo { display: none; }.arcade-hud { max-width: calc(100% - 230px); gap: 17px; }.arcade-footer { max-width: calc(100% - 390px); font-size: 7px; }.adventure-reset-camera { display: none; }.adventure-objective { max-width: 300px; }.arcade-goal { font-size: 15px; }.arcade-overlay-card { max-width: 450px; padding: 25px; } }
 @media(max-width:680px) {
-  .arcade-dialog { width: calc(100% - 14px); max-height: calc(100svh - 14px); padding: 11px; border-radius: 9px; }
-  .arcade-dialog .dialog-top { min-height: 28px; }
-  .arcade-dialog .dialog-top .eyebrow { font-size: 7px; letter-spacing: .9px; }
-  .arcade-dialog > h2 { font-size: 16px; line-height: 1.25; margin: 4px 0 11px; }
-  .arcade-dialog .close-button { width: 28px; height: 28px; border-radius: 9px; }
-  .arcade-shell { border-radius: 7px; }
-  .arcade-hud { gap: 13px; height: 51px; padding: 7px 11px; }
-  .arcade-hud small { font-size: 6px; letter-spacing: .7px; }
-  .arcade-health-block { min-width: 86px; }
+  .arcade-dialog { width: calc(100vw - 8px); height: calc(100svh - 8px); border-radius: 11px; }
+  .arcade-dialog > .dialog-top { top: 9px; right: 10px; left: 13px; }
+  .arcade-dialog > h2 { top: 18px; left: 15px; max-width: calc(100% - 75px); font-size: 15px; }
+  .arcade-dialog .close-button { width: 33px; height: 33px; border-radius: 9px; }
+  .arcade-hud { top: 57px; left: 13px; right: 13px; height: 51px; max-width: none; gap: 15px; padding: 8px 11px; border-radius: 11px; }
+  .arcade-hud small { font-size: 7px; }
+  .arcade-health-block { min-width: 80px; }
   .arcade-health { font-size: 21px; letter-spacing: 1px; }
-  .arcade-score-block { min-width: 58px; }
+  .arcade-score-block { min-width: 57px; }
   .arcade-score { font-size: 21px; }
-  .arcade-combo { font-size: 7px; letter-spacing: .1px; }
-  .arcade-pause-button { padding: 5px 8px; min-height: 29px; border-radius: 8px; }
+  .arcade-pause-button { margin-left: auto; padding: 5px 8px; min-height: 30px; }
   .arcade-pause-button span { display: none; }
-  .arcade-canvas { aspect-ratio: 16/10; }
-  .arcade-shell[data-mode="ready"] .arcade-stage, .arcade-shell[data-mode="won"] .arcade-stage, .arcade-shell[data-mode="lost"] .arcade-stage { min-height: 310px; }
-  .arcade-overlay { padding: 10px; }
-  .arcade-overlay-card { padding: 18px 15px; border-radius: 8px; }
-  .arcade-eyebrow { font-size: 7px; letter-spacing: 1px; }
-  .arcade-hero-robot { width: 48px; height: 48px; margin: 6px auto; }
-  .arcade-overlay h3 { font-size: 23px; margin: 5px 0 10px; letter-spacing: -.7px; }
-  .arcade-overlay p { font-size: 10px; line-height: 1.7; margin-bottom: 10px; }
-  .arcade-start-controls { display: none; }
+  .adventure-objective { top: 124px; left: 15px; max-width: calc(100% - 145px); }
+  .adventure-mission-tag { font-size: 7px; }
+  .arcade-goal { font-size: 12px; line-height: 1.5; margin-top: 5px; }
+  .adventure-guidance { gap: 6px; margin-top: 8px; font-size: 9px; flex-wrap: wrap; }
+  .adventure-waypoint-arrow { width: 21px; height: 21px; font-size: 15px; }
+  .adventure-waypoint-label { max-width: 125px; }
+  .adventure-waypoint-range { display: none; }
+  .adventure-navigation { top: 124px; right: 13px; width: 112px; padding: 7px; border-radius: 9px; }
+  .adventure-map-title { padding: 0 0 5px; font-size: 6px; }
+  .adventure-view-label { margin-top: 4px; font-size: 6px; }
+  .adventure-crosshair { width: 7px; height: 7px; top: 43%; }
+  .adventure-crosshair i { margin: 2px; }
+  .arcade-mission-bar, .arcade-footer { display: none; }
+  .arcade-touch-controls { display: flex; left: 13px; right: 13px; bottom: 20px; gap: 9px; }
+  .arcade-dpad { grid-template: repeat(2,43px)/repeat(3,43px); gap: 4px; }
+  .arcade-pad-button { border-radius: 12px; font-size: 21px; }
+  .adventure-touch-look { display: none; }
+  .adventure-touch-actions { gap: 7px; }
+  .adventure-touch-actions > div { gap: 8px; }
+  .adventure-touch-jump, .arcade-touch-special { width: 56px; height: 56px; font-size: 9px; }
+  .adventure-touch-sprint { min-height: 26px; padding: 4px 9px; font-size: 8px; }
+  .arcade-status { bottom: 137px; left: 15px; max-width: calc(100% - 30px); padding: 6px 9px; font-size: 9px; line-height: 1.6; }
+  .arcade-overlay { padding: 20px; }
+  .arcade-overlay-card { max-width: 390px; padding: 23px 20px; border-radius: 19px; }
+  .arcade-eyebrow { font-size: 9px; letter-spacing: .8px; }
+  .arcade-hero-robot { width: 65px; height: 65px; margin: 13px auto 9px; }
+  .arcade-overlay h3 { font-size: 28px; margin: 7px 0 13px; }
+  .arcade-overlay p { font-size: 11px; line-height: 1.75; }
+  .arcade-overlay .adventure-start-hint { font-size: 10px; margin-bottom: 15px; }
+  .arcade-start-controls { gap: 15px; margin: 14px 0; }
+  .arcade-start-controls kbd { padding: 4px 6px; font-size: 9px; }
+  .arcade-start-controls small { font-size: 7px; }
+  .arcade-main-button { min-height: 44px; min-width: 200px; font-size: 11px; margin-top: 15px; }
+  .arcade-overlay-card > small { font-size: 8px; margin-top: 12px; }
   .arcade-upgrade-list { display: none; }
-  .arcade-main-button { min-height: 43px; min-width: 190px; font-size: 10px; margin-top: 12px; }
-  .arcade-overlay-card > small { font-size: 7px; margin-top: 9px; }
-  .arcade-small-card { padding: 24px 15px; }
-  .arcade-small-card .arcade-hero-robot { width: 43px; height: 43px; }
-  .arcade-mission-bar { padding: 8px 10px; gap: 8px; min-height: 55px; }
-  .arcade-goal { font-size: 8px; max-width: 60%; line-height: 1.6; }
-  .arcade-special { min-width: 105px; min-height: 35px; padding: 5px 8px; gap: 6px; font-size: 8px; border-radius: 9px; }
-  .arcade-special-icon { font-size: 17px; }
-  .arcade-special kbd { display: none; }
-  .arcade-status { font-size: 8px; padding: 7px 10px; min-height: 31px; line-height: 1.65; }
-  .arcade-touch-controls { display: flex; gap: 10px; padding: 10px 11px; }
-  .arcade-touch-controls > span { font-size: 8px; }
-  .arcade-footer { justify-content: center; padding: 7px 10px; font-size: 6px; }
-  .arcade-footer > span:first-child { display: none; }
-  .arcade-final-score strong { font-size: 33px; }
-  .arcade-final-score small { font-size: 6px; }
-  .arcade-win-card .arcade-hero-robot { display: none; }
-  .arcade-win-card h3 { font-size: 22px; }
-  .arcade-win-card p { font-size: 9px; }
-  .arcade-win-card .arcade-final-score { margin: 8px 0; }
-  .arcade-earned { padding: 10px; margin-top: 10px; font-size: 6px; }
-  .arcade-earned strong { font-size: 11px; }
-  .arcade-plain-button { font-size: 8px; min-height: 29px; margin-top: 5px; }
+  .arcade-small-card { padding: 25px 20px; }
+  .arcade-small-card h3 { font-size: 26px; }
+  .arcade-final-score strong { font-size: 38px; }
+  .arcade-final-score small { font-size: 8px; }
+  .arcade-earned { font-size: 8px; padding: 11px; }
+  .arcade-earned strong { font-size: 13px; }
+  .arcade-win-card h3 { font-size: 27px; }
 }
-@media(max-width:380px) {
-  .arcade-hud { gap: 11px; }
-  .arcade-combo { display: none; }
-  .arcade-pause-button { margin-left: auto; }
-  .arcade-touch-controls > span { display: none; }
-  .arcade-touch-controls { padding: 10px 14px; }
-  .arcade-touch-special { width: 63px; height: 63px; }
-  .arcade-overlay-card { padding: 17px 12px; }
-  .arcade-overlay h3 { font-size: 21px; }
-}
-@media(prefers-reduced-motion:reduce) {
-  .arcade-shell *, .arcade-overlay, .arcade-main-button { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-  .arcade-overlay { backdrop-filter: none; }
-}
+@media(max-width:360px) { .arcade-dpad { grid-template: repeat(2,40px)/repeat(3,40px); gap: 3px; }.adventure-touch-jump,.arcade-touch-special { width: 51px; height: 51px; }.adventure-touch-actions > div { gap: 7px; }.arcade-overlay { padding: 15px; }.arcade-overlay-card { padding: 20px 17px; }.arcade-start-controls { gap: 12px; }.arcade-overlay h3 { font-size: 26px; } }
+@media(max-height:600px) and (min-width:681px) { .arcade-overlay-card { max-width: 570px; padding: 18px 25px; }.arcade-hero-robot { display: none; }.arcade-overlay h3 { font-size: 27px; margin: 6px 0 9px; }.arcade-overlay p { font-size: 11px; margin-bottom: 9px; max-width: none; }.arcade-overlay .adventure-start-hint { font-size: 10px; margin-bottom: 9px; }.arcade-start-controls { margin: 11px 0; }.arcade-main-button { margin-top: 12px; }.adventure-navigation { width: 145px; }.adventure-objective { top: 127px; max-width: 320px; }.arcade-status { font-size: 10px; } }
+@media(prefers-reduced-motion:reduce) { .arcade-shell *, .arcade-overlay { animation: none !important; transition: none !important; scroll-behavior: auto !important; }.arcade-overlay { backdrop-filter: none; } }
 
-.arcade-main-button{color:#031021;border-color:#75b8ff;box-shadow:none}.arcade-main-button:hover{box-shadow:none}.arcade-overlay-card{box-shadow:0 14px 45px #0005}.arcade-overlay-card .arcade-eyebrow{color:#3b9b9a}.arcade-hud small,.arcade-footer,.arcade-start-controls small{font-family:var(--mono,monospace)}
-
-/* Match Luka Remote View's neutral cards, blue actions and system typography. */
-.arcade-dialog { background: #14171c; border-color: #344050; border-radius: 14px; }
-.arcade-shell { background: #14171c; border-color: #262b33; border-radius: 12px; }
-.arcade-hud { background: #11161d; border-bottom-color: #262b33; }
-.arcade-hud small { color: #7a8b9f; font-family: var(--body,system-ui); font-size: 8px; letter-spacing: .5px; }
-.arcade-score { color: #e8ebef; }
-.arcade-combo { color: #7d91a8; }
-.arcade-overlay-card { background: #141b25f2; border-color: #344254; border-radius: 14px; box-shadow: 0 15px 40px #0005; }
-.arcade-overlay-card .arcade-eyebrow { color: #809ab6; }
-.arcade-overlay h3 { color: #e8ebef; font-weight: 650; }
-.arcade-overlay p { color: #8a9caf; font-size: 12px; }
-.arcade-main-button { color: #031021; background: #5aa9ff; border-color: #75b8ff; border-radius: 9px; }
-.arcade-main-button:hover { background: #88c1ff; }
-.arcade-mission-bar { background: #151e2a; border-top-color: #29384b; }
-.arcade-status { color: #768da6; background: #111924; }
-.arcade-footer { color: #526a83; background: #10171f; }
-.arcade-footer > span:last-child { color: #465e77; }
-.arcade-pause-button { background: #202d3f; border-color: #35475e; color: #9aabc1; }
-.arcade-special { background: #1b3f65; border-color: #3b72a7; color: #9fc8ec; }
-.arcade-special:hover:not(:disabled) { background: #28547e; }
-.arcade-special:disabled { color: #6a8198; background: #243145; border-color: #354b64; }
-.arcade-touch-controls { background: #151e29; border-color: #29384b; }
-.arcade-pad-button { background: #263c56; border-color: #456385; color: #a2bdd9; }
-.arcade-pad-pressed { background: #3a75ae; border-color: #7db8ef; }
-.arcade-touch-special { background: #2d6a9f; border-color: #659ace; color: #c0ddf5; }
-@media(max-width:680px) { .arcade-overlay p { font-size: 10px; }.arcade-dialog { border-radius: 12px; } }
+.arcade-shell .adventure-minimap { height: auto; aspect-ratio: 16 / 9; }
