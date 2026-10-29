@@ -31,6 +31,8 @@ Grabbing a part briefly pauses the game on a pickup card (name, what it does, an
 
 **For instructors:** students type their name on the title screen. The final screen shows a report card (name, date, score, first-try accuracy, time, crashes, and every question with what they picked when they missed) that they can screenshot or copy as text to hand in.
 
+**Hackathon winners:** the trophy button in the header (and on the title screen) opens a celebration for the winners of today's Retro Game Hackathon, with fireworks, a fanfare, and BOLT holding a trophy. It works from any screen, even mid-level, and BACK returns you to exactly where you were. To name the winning teams, add them to the `WINNERS` array in `index.html`, e.g. `{ place: '1st place', team: 'Team Pixel', game: 'Moon Miner' }`.
+
 Controls: arrows / WASD to drive, SPACE boost, P pause, M sound, 1–4 answer quizzes. Touch controls appear on phones.
 
 ## Project layout

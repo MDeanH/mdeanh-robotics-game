@@ -79,6 +79,19 @@ body {
 .slot:not(.on) .icon { opacity: .4; filter: grayscale(1); }
 .strip { display: flex; flex-wrap: wrap; gap: 4px; }
 .strip .icon { width: 26px; height: 26px; }
+.mright { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; }
+.trophybtn { font-family: var(--display); font-size: 9px; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 8px; padding: 5px 10px 5px 6px;
+  background: var(--panel); color: #ffec27; border: 2px solid #ffec27; box-shadow: 3px 3px 0 #000; cursor: pointer; animation: shine 1.4s steps(2) infinite; }
+.trophybtn .icon { width: 24px; height: 24px; }
+.trophybtn:hover { background: var(--line); }
+.trophybtn:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
+@keyframes shine { 50% { border-color: var(--amber); } }
+.party-title { color: #ffec27; text-shadow: 3px 3px 0 #7e2553; font-size: clamp(16px, 4vw, 26px) !important; animation: rainbow 1.2s steps(3) infinite; }
+@keyframes rainbow { 0% { color: #ffec27; } 33% { color: #ff77a8; } 66% { color: #29adff; } }
+.partycv { display: block; width: 100%; height: auto; aspect-ratio: 200 / 120; image-rendering: pixelated; border: 2px solid var(--line); background: #0b0f24; }
+.wlist li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.wlist .place { font-family: var(--display); font-size: 9px; color: var(--ink); background: #ffec27; padding: 3px 6px; }
+@media (prefers-reduced-motion: reduce) { .trophybtn, .party-title { animation: none; } }
 .diagram { display: block; width: 100%; max-width: 560px; height: auto; aspect-ratio: 320 / 176; image-rendering: pixelated; border: 2px solid var(--line); background: #0b0f24; }
 .slot .role { display: block; color: var(--dim); }
 .slot.on .role { color: var(--ink); }
@@ -160,7 +173,10 @@ body {
 <div class="cab">
   <div class="marquee">
     <h1>BUILD-A-BOT LAB</h1>
-    <small>MDEANH ROBOTICS · INTRO TO ROBOT PARTS</small>
+    <div class="mright">
+      <small>MDEANH ROBOTICS · INTRO TO ROBOT PARTS</small>
+      <button class="trophybtn" id="winnersBtn" type="button">HACKATHON WINNERS</button>
+    </div>
   </div>
   <div class="hud" id="hud">
     <span id="hLevel">LEVEL 1</span>
@@ -327,6 +343,7 @@ const ICONS = {
   "SENSE": ['............', '....kkkk....', '..kkwwwwkk..', '.kwwBBBBwwk.', '.kwBwBBBBwk.', 'kwwBBkkBBwwk', 'kwwBBkkBBwwk', '.kwBBBBBBwk.', '.kwwBBBBwwk.', '..kkwwwwkk..', '....kkkk....', '............'],
   "THINK": ['....kkkkk...', '..kkPPPPPkk.', '.kPwPPpPPPPk', 'kPwPPpPPPpPk', 'kPPPPpPPpPPk', 'kPpPPPpPPpPk', 'kPPpPPPpPpPk', 'kPPPpppPPPPk', '.kPPPPkpPpk.', '..kkkkkPPk..', '......kPPk..', '.......kk...'],
   "ACT": ['...kkkk.....', '..kwwwwk....', '.kwkkkkwk.k.', 'kwkk.k.kwkwk', '.kkykok.kwwk', '.kkyookkwwwk', 'kyyokoookkk.', '.kokkkok....', 'koookoook...', '.kkoookk....', '..kokok.....', '...k.k......'],
+  "Trophy": ['..kkkkkkkk..', 'kkkwyyyyokkk', 'kykwyyyyokok', 'kykwywyyokok', 'kkywyyyyookk', '.kkwyyyyokk.', '..kkyyyook..', '...kkookkk..', '..kkkookkk..', '..kbyyyybk..', '..kbbbbbbk..', '..kkkkkkkk..'],
 };
 // the final level's review chips and the tray reuse one emblem per part family
 const EMBLEM = { chassis: 'Aluminum frame', motors: 'Servo motor', power: 'LiPo battery', sensors: 'Camera', controller: 'Microcontroller', gripper: 'Two-finger gripper' };
@@ -460,6 +477,7 @@ const keys = {};
 const KEYMAP = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', Space: 'boost' };
 addEventListener('keydown', e => {
   if (!modal.hidden) {
+    if (G.state === 'party' && e.code === 'Escape') { actions.back && actions.back(); e.preventDefault(); return; }
     if (G.state === 'quiz' && /^Digit[1-4]$/.test(e.code)) { const b = modal.querySelectorAll('.ans')[+e.code.slice(5) - 1]; if (b && !b.disabled) b.click(); e.preventDefault(); return; }
     if (e.code === 'Enter' || (e.code === 'Space' && document.activeElement === document.body)) {
       const p = modal.querySelector('[data-primary]'); if (p && document.activeElement?.tagName !== 'BUTTON') { p.click(); e.preventDefault(); }
@@ -783,8 +801,10 @@ function title() {
     </ul>
     <p class="dimtext">No robotics experience needed. About 15–20 minutes.${best ? ` Best score: ${best}.` : ''}</p>
     <div class="field"><label for="sname">YOUR NAME (SHOWN ON YOUR RESULTS)</label><input id="sname" maxlength="40" autocomplete="name" placeholder="First and last name" value="${esc(store.get('name', ''))}"></div>
-    <div class="row"><button class="btn" data-act="start" data-primary>START GAME</button><button class="btn alt" data-act="manual">PARTS MANUAL</button><button class="btn alt" data-act="snd">SOUND: ${soundOn ? 'ON' : 'OFF'}</button></div>`,
+    <div class="row"><button class="btn" data-act="start" data-primary>START GAME</button><button class="btn alt" data-act="manual">PARTS MANUAL</button><button class="btn alt" data-act="snd">SOUND: ${soundOn ? 'ON' : 'OFF'}</button></div>
+    <div class="row"><button class="btn alt" data-act="winners" style="color:#ffec27;border-color:#ffec27">${iconImg('Trophy').replace('class="icon"', 'class="icon" style="width:20px;height:20px;vertical-align:middle;margin-right:8px"')}CONGRATULATE TODAY'S HACKATHON WINNERS</button></div>`,
     '#ffa300', {
+      winners: celebrate,
       start: () => { G.name = $('sname').value.trim(); store.set('name', G.name); newGame(); },
       manual: () => manual(title), snd: () => { soundOn = !soundOn; store.set('sound', soundOn); title(); } });
 }
@@ -978,11 +998,81 @@ function manual(back) {
     <div class="row"><button class="btn" data-act="back" data-primary>BACK</button></div>`, '#ffa300', { back });
 }
 
+// ---------- hackathon winners ----------
+const HACKATHON = { name: 'Retro Game Hackathon', date: 'October 28, 2026' };
+// Add each winning team here and it shows on the celebration screen, e.g.
+// { place: '1st place', team: 'Team Pixel', game: 'Moon Miner' }
+const WINNERS = [];
+const CONFETTI = ['#ff004d', '#ffa300', '#ffec27', '#00e436', '#29adff', '#ff77a8', '#fff1e8'];
+const reducedMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+let partyFx = [], partyNext = 0;
+function fanfare() {
+  if (!soundOn) return;
+  try {
+    let at = audio().currentTime + .02;
+    for (const [f, d] of [[523, .12], [659, .12], [784, .12], [1046, .26], [784, .12], [1046, .55]]) { tone(f, at, d, 'square', .07); tone(f / 2, at, d, 'triangle', .06); at += d; }
+  } catch (e) {}
+}
+function partyBurst(n) {
+  for (let i = 0; i < n; i++) {
+    const x = 20 + Math.random() * 160, y = 10 + Math.random() * 36, c = CONFETTI[Math.floor(Math.random() * CONFETTI.length)];
+    for (let k = 0; k < 22; k++) { const a = k / 22 * 6.283, v = 22 + Math.random() * 26; partyFx.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: .7 + Math.random() * .5, c, delay: i * .22 }); }
+  }
+}
+// opens over whatever is on screen (title, a lesson, mid-level) and BACK puts it all back
+function celebrate() {
+  if (G.state === 'party') return;
+  modal.querySelectorAll('input').forEach(i => i.setAttribute('value', i.value));
+  const saved = { open: !modal.hidden, html: modal.innerHTML, actions, state: G.state };
+  for (const k in keys) keys[k] = false;
+  G.state = 'party'; partyFx = []; partyNext = .4;
+  const back = () => {
+    G.state = saved.state; partyFx = [];
+    if (!saved.open) { hide(); return; }
+    modal.innerHTML = saved.html; actions = saved.actions; modal.hidden = false;
+    paintBots();
+    const p = modal.querySelector('[data-primary]'); if (p) p.focus({ preventScroll: true });
+  };
+  show(`<div class="eyebrow">${esc(HACKATHON.name.toUpperCase())} · ${esc(HACKATHON.date.toUpperCase())}</div>
+    <h2 class="party-title">CONGRATULATIONS, WINNERS!</h2>
+    <canvas class="partycv" id="partycv" width="200" height="120" aria-label="BOLT the robot lifting a trophy while fireworks go off"></canvas>
+    ${WINNERS.length ? `<ul class="wlist">${WINNERS.map(w => `<li><span class="place">${esc(w.place)}</span><b>${esc(w.team)}</b>${w.game ? `<span class="dimtext">${esc(w.game)}</span>` : ''}</li>`).join('')}</ul>` : ''}
+    <p>To today's winning teams: you took an idea to a playable retro game in a single day. That takes skill, teamwork, and a lot of grit.</p>
+    <p class="dimtext">BOLT and everyone at mdeanh Robotics are cheering for you.</p>
+    <div class="row"><button class="btn" data-act="cheer" data-primary>CHEER AGAIN</button><button class="btn alt" data-act="back">${saved.state === 'play' ? 'BACK TO THE GAME' : 'BACK'}</button></div>`,
+    '#ffec27', { cheer: () => { fanfare(); partyBurst(5); }, back });
+  fanfare(); partyBurst(4);
+  drawParty(0);
+}
+function drawParty(dt) {
+  const cv = $('partycv'); if (!cv) return;
+  const g = cv.getContext('2d'), still = reducedMotion(), all = PARTS.map(l => l.id), t = still ? 0 : G.t;
+  g.imageSmoothingEnabled = false;
+  g.fillStyle = '#0b0f24'; g.fillRect(0, 0, 200, 120);
+  for (let i = 0; i < 24; i++) { g.fillStyle = (i + Math.floor(t * 3)) % 5 ? '#2b3a7a' : '#fff1e8'; g.fillRect((i * 53) % 197, (i * 29) % 56, 1, 1); }
+  if (!still) {
+    if ((partyNext -= dt) <= 0) { partyBurst(1); partyNext = .6 + Math.random() * .6; }
+    partyFx = partyFx.filter(p => { if (p.delay > 0) { p.delay -= dt; return true; } p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 40 * dt; p.vx *= .985; return (p.t -= dt) > 0; });
+    for (const p of partyFx) if (!(p.delay > 0)) { g.fillStyle = p.c; g.fillRect(Math.round(p.x), Math.round(p.y), 2, 2); }
+  }
+  g.fillStyle = '#141a38'; g.fillRect(0, 108, 200, 12);
+  g.fillStyle = '#232c5c'; for (let x = 0; x < 200; x += 16) g.fillRect(x, 108, 1, 1);
+  const hop = (ph, h) => Math.round(Math.abs(Math.sin(t * 4 + ph)) * h);
+  drawRobot(g, 34, 108 - 32 - hop(1.6, 6), 2, all, G.t);
+  drawRobot(g, 134, 108 - 32 - hop(.8, 6), 2, all, G.t);
+  const by = 108 - 48 - hop(0, 10);
+  drawRobot(g, 76, by, 3, all, G.t);
+  g.drawImage(icon('Trophy').cv, 0, 0, 12, 12, 82, by - 34, 36, 36);
+}
+$('winnersBtn').insertAdjacentHTML('afterbegin', iconImg('Trophy'));
+$('winnersBtn').addEventListener('click', () => { sfx('click'); celebrate(); });
+
 // ---------- loop ----------
 let last = performance.now();
 function frame(now) {
   const dt = Math.min(.05, (now - last) / 1000); last = now;
   update(dt); render(); hud();
+  if (G.state === 'party') drawParty(dt);
   if (!modal.hidden && Math.floor(G.t * 8) !== Math.floor((G.t - dt) * 8)) paintBots();
   requestAnimationFrame(frame);
 }
