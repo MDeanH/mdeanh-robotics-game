@@ -4,13 +4,13 @@ Updated 2026-10-28. The third-person 3D game is published and verified. The orig
 ## Non-negotiable game links
 Every NEW GAME gets a NEW Netlify site and public link containing `codex`. Never deploy a different game over an existing game. Preserve existing game URLs. Use explicit site IDs; do not infer a target from a parent or old Netlify binding.
 
-- Third-person game: https://mdeanh-codex-luka-3d.netlify.app — source `dist/`, site `431dd23f-eab9-465d-8714-ae5720b481e4`, deploy `6ae297c0a2e6a58e53d9d88c`.
+- Third-person game: https://mdeanh-codex-luka-3d.netlify.app — source `dist/`, site `431dd23f-eab9-465d-8714-ae5720b481e4`, deploy `6ae2999ca0a702a8b398ffb2`.
 - Unchanged retro game: https://mdeanh-codex-retro.netlify.app — source `games/retro/`, site `e46a19a3-cfe9-4241-99dc-f3c5bfae5ca3`, deploy `6ae295e0e9e677336c2719e5`.
 - Original retro URL remains https://mdeanh-robotics-workshop.netlify.app — retro-only site `52fa8bfb-3b0f-4627-94c4-be935970fb69`, restored original deploy `6ae289b8b05a2208ace788a2`.
 - Explicit mapping: `docs/game-sites.json`. Local ignored `.netlify/state.json` points to the third-person site.
 
 ## Current product
-Luka: Systems Online is a third-person 3D adventure. Camera behind the humanoid, explorable orbital lab, solid benches, jump/gravity/landing, sprint, enemies, pickups, waypoint and navigator. Four missions teach sensors, joint actuators, controllers, and power. Fresh visits open the 3D ready screen; closing it opens the garage and module selector.
+Luka: Systems Online is a third-person 3D adventure. Camera behind the humanoid, explorable orbital lab, solid benches, jump/gravity/landing, sprint, enemies, pickups, waypoint and navigator. Four missions teach sensors, joint actuators, controllers, and power. Fresh visits open directly on the character with no startup popup. Hazards wait for the first game-control interaction. Closing the game opens the garage and module selector.
 
 WASD/arrows move relative to camera; Space jumps; Shift sprints; E uses mission ability; Q/R and drag turn the camera; P pauses. Phone controls include movement, jump, sprint toggle, ability and drag look. Reward gating, 400 XP campaign, version-1 saves and high scores remain compatible.
 

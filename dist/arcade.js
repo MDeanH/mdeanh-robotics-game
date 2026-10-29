@@ -21,6 +21,7 @@ export function mountArcade(id, container, { onComplete = () => {}, playSound = 
   const mission = ARCADE_MISSIONS[id];
   if (!mission) throw new Error(`Unknown robotics mission: ${id}`);
   let state = createArcadeState(id, unlockedParts);
+  let inputEngaged = false;
   let disposed = false, awardSent = false, frameId, previousTime = 0, overlayMode = '', lastMessage = '', lastProgress = '', lastMapTime = -1;
   let particles = [], floaters = [], nudge = null, lookPointer = null, touchSprinting = false;
   const keys = new Set();
@@ -103,11 +104,7 @@ export function mountArcade(id, container, { onComplete = () => {}, playSound = 
     overlayMode = state.mode;
     overlay.hidden = state.mode === 'playing';
     if (state.mode === 'playing') { overlay.innerHTML = ''; return; }
-    const controls = '<div class="arcade-start-controls"><span><kbd>WASD</kbd><small>Move</small></span><span><kbd>Space</kbd><small>Jump</small></span><span><kbd>E</kbd><small>Ability</small></span><span><kbd>Shift</kbd><small>Sprint</small></span></div>';
-    if (state.mode === 'ready') {
-      const upgradeNames = { motors: 'Faster movement', sensors: 'Wide scanner', controllers: 'Quicker abilities', power: 'Extra integrity' };
-      overlay.innerHTML = `<div class="arcade-overlay-card"><span class="arcade-eyebrow">Luka: Systems Online</span><div class="arcade-hero-robot">${partIcon('robot')}</div><h3>${mission.title}</h3><p>${mission.instruction}</p><p class="adventure-start-hint">Run, jump, and explore as Luka. Drag to look around, or use Q / R. Follow your waypoint to find the next objective.</p>${controls}${state.upgrades.length ? `<div class="arcade-upgrade-list">${state.upgrades.map(part => `<span>+ ${upgradeNames[part]}</span>`).join('')}</div>` : ''}<button class="arcade-main-button" type="button" data-action="start">Start adventure <span aria-hidden="true">→</span></button><small>${bestScore ? `Personal best ${Number(bestScore).toLocaleString()} · ` : ''}Third-person adventure · Field trial ${missionNumber(id)}</small></div>`;
-    } else if (state.mode === 'paused') {
+    if (state.mode === 'paused') {
       overlay.innerHTML = '<div class="arcade-overlay-card arcade-small-card"><span class="arcade-eyebrow">Adventure paused</span><h3>Take a moment.</h3><p>Your mission is right where you left it.</p><button class="arcade-main-button" type="button" data-action="resume">Resume adventure <span aria-hidden="true">→</span></button><button class="arcade-plain-button" type="button" data-action="reset-camera">Reset camera behind Luka</button><button class="arcade-plain-button" type="button" data-action="restart">Restart this mission</button></div>';
     } else if (state.mode === 'lost') {
       overlay.innerHTML = `<div class="arcade-overlay-card arcade-small-card"><span class="arcade-eyebrow">Ready for another attempt?</span><div class="arcade-hero-robot">${partIcon('robot')}</div><h3>Let’s try that again.</h3><p>The training bots caught up. Restart with full integrity and keep your mission abilities ready.</p><div class="arcade-final-score"><small>This run</small><strong>${state.score.toLocaleString()}</strong></div><button class="arcade-main-button" type="button" data-action="restart">Restart adventure <span aria-hidden="true">↻</span></button><small>Jump to get past trouble. Sprint to open up some space.</small></div>`;
@@ -127,27 +124,26 @@ export function mountArcade(id, container, { onComplete = () => {}, playSound = 
     state.navigationTarget = null;
     shell.querySelectorAll('.arcade-pad-pressed').forEach(button => button.classList.remove('arcade-pad-pressed'));
   }
-  function begin() { if (startArcade(state)) { playSound('click'); clearInput(); renderer.resetCamera?.(); setOverlay(); canvas.focus({ preventScroll: true }); } }
-  function resume() { if (state.mode === 'paused') { pauseArcade(state); clearInput(); setOverlay(); canvas.focus({ preventScroll: true }); } }
-  function restart() { state = createArcadeState(id, unlockedParts); particles = []; floaters = []; lastMapTime = -1; clearInput(); renderer.resetCamera?.(); overlayMode = ''; startArcade(state); setOverlay(); canvas.focus({ preventScroll: true }); playSound('click'); }
-  function doSpecial() { if (activateAbility(state)) playSound('click'); }
-  function doJump() { if (jumpArcade(state)) playSound('jump'); }
-  function togglePause() { if (pauseArcade(state)) { clearInput(); setOverlay(); if (state.mode === 'playing') canvas.focus({ preventScroll: true }); } }
+  function resume() { if (state.mode === 'paused') { inputEngaged = true; pauseArcade(state); clearInput(); setOverlay(); canvas.focus({ preventScroll: true }); } }
+  function restart() { state = createArcadeState(id, unlockedParts); inputEngaged = true; particles = []; floaters = []; lastMapTime = -1; clearInput(); renderer.resetCamera?.(); overlayMode = ''; startArcade(state); setOverlay(); canvas.focus({ preventScroll: true }); playSound('click'); }
+  function doSpecial() { inputEngaged = true; if (activateAbility(state)) playSound('click'); }
+  function doJump() { inputEngaged = true; if (jumpArcade(state)) playSound('jump'); }
+  function togglePause() { if (pauseArcade(state)) { inputEngaged = true; clearInput(); setOverlay(); if (state.mode === 'playing') canvas.focus({ preventScroll: true }); } }
 
   function onClick(event) {
     const button = event.target.closest('button');
     if (!button || !shell.contains(button)) return;
     const action = button.dataset.action;
-    if (action === 'start') begin();
-    else if (action === 'resume') resume();
+    if (action === 'resume') resume();
     else if (action === 'restart') restart();
     else if (action === 'pause') togglePause();
     else if (action === 'special') doSpecial();
     else if (action === 'jump') doJump();
-    else if (action === 'sprint' && state.mode === 'playing') touchSprinting = !touchSprinting;
-    else if (action === 'reset-camera') renderer.resetCamera?.();
+    else if (action === 'sprint' && state.mode === 'playing') { inputEngaged = true; touchSprinting = !touchSprinting; }
+    else if (action === 'reset-camera') { inputEngaged = true; renderer.resetCamera?.(); }
     else if (action === 'collect' && !awardSent && claimArcadeReward(state)) { awardSent = true; onComplete(id, { score: state.score }); }
     else if (button.dataset.direction && event.detail === 0 && state.mode === 'playing') {
+      inputEngaged = true;
       const [x, y] = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[button.dataset.direction];
       nudge = { x, y, remaining: .17 };
     }
@@ -158,7 +154,7 @@ export function mountArcade(id, container, { onComplete = () => {}, playSound = 
     const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
     if (key === 'p' && !event.repeat && ['playing', 'paused'].includes(state.mode)) { event.preventDefault(); togglePause(); return; }
     if (state.mode !== 'playing') return;
-    if (movementKeys.includes(key) || ['Shift', 'q', 'r'].includes(key)) { event.preventDefault(); keys.add(key); }
+    if (movementKeys.includes(key) || ['Shift', 'q', 'r'].includes(key)) { inputEngaged = true; event.preventDefault(); keys.add(key); }
     if (key === ' ' && event.target.closest?.('button')) return;
     if (key === ' ' && !event.repeat) { event.preventDefault(); doJump(); }
     if (key === 'e' && !event.repeat) { event.preventDefault(); doSpecial(); }
@@ -168,6 +164,7 @@ export function mountArcade(id, container, { onComplete = () => {}, playSound = 
     if (state.mode !== 'playing') return;
     if (event.target === canvas) {
       if (lookPointer) return;
+      inputEngaged = true;
       event.preventDefault(); canvas.focus({ preventScroll: true });
       lookPointer = { id: event.pointerId, x: event.clientX, y: event.clientY };
       canvas.setPointerCapture?.(event.pointerId);
@@ -176,6 +173,7 @@ export function mountArcade(id, container, { onComplete = () => {}, playSound = 
     }
     const button = event.target.closest('[data-direction]');
     if (!button) return;
+    inputEngaged = true;
     event.preventDefault(); pressedPointers.set(event.pointerId, { direction: button.dataset.direction, button });
     button.classList.add('arcade-pad-pressed'); button.setPointerCapture?.(event.pointerId);
   }
@@ -190,7 +188,7 @@ export function mountArcade(id, container, { onComplete = () => {}, playSound = 
     if (pointer) { pointer.button.classList.remove('arcade-pad-pressed'); releaseCapture(pointer.button, event.pointerId); }
     pressedPointers.delete(event.pointerId);
   }
-  function autoPause() { if (state.mode === 'playing') { pauseArcade(state); clearInput(); canvas.classList.remove('adventure-looking'); setOverlay(); } }
+  function autoPause() { if (inputEngaged && state.mode === 'playing') { pauseArcade(state); clearInput(); canvas.classList.remove('adventure-looking'); setOverlay(); } }
   function onVisibility() { if (document.hidden) autoPause(); }
   shell.addEventListener('click', onClick); shell.addEventListener('keydown', onKeyDown);
   shell.addEventListener('pointerdown', onPointerDown); shell.addEventListener('pointermove', onPointerMove); shell.addEventListener('pointerup', onPointerUp); shell.addEventListener('pointercancel', onPointerUp); shell.addEventListener('lostpointercapture', onPointerUp);
@@ -215,7 +213,7 @@ export function mountArcade(id, container, { onComplete = () => {}, playSound = 
     if (nudge) { x += nudge.x; y += nudge.y; nudge.remaining -= dt; if (nudge.remaining <= 0) nudge = null; }
     if (state.mode === 'playing') renderer.rotateCamera?.(((keys.has('r') ? 1 : 0) - (keys.has('q') ? 1 : 0)) * 300 * dt, 0);
     const worldMove = renderer.moveInput?.(x, y) || { x, y };
-    tickArcade(state, { ...worldMove, sprint: keys.has('Shift') || touchSprinting }, dt);
+    if (inputEngaged) tickArcade(state, { ...worldMove, sprint: keys.has('Shift') || touchSprinting }, dt);
     processEvents();
     if (state.mode === 'playing') {
       for (const particle of particles) { particle.life -= dt; particle.x += particle.vx * dt; particle.y += particle.vy * dt; particle.vy += 90 * dt; }
@@ -225,6 +223,9 @@ export function mountArcade(id, container, { onComplete = () => {}, playSound = 
     }
     updateHud(); renderer.render(state, particles, floaters); setOverlay(); frameId = requestAnimationFrame(animate);
   }
+  // Show the character immediately, with no title popup or automatic sound.
+  // Hazards wait until the player uses a control.
+  startArcade(state);
   updateHud(); renderer.render(state, particles, floaters); setOverlay(); frameId = requestAnimationFrame(animate);
   return () => {
     disposed = true; clearInput(); cancelAnimationFrame(frameId); renderer.dispose();

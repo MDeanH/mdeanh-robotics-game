@@ -15,3 +15,5 @@ Completed 2026-10-28.
 - [x] Actual public third-person WebGL play verified with empty warning/error logs and screenshot evidence.
 - [x] Reduced-motion/fallback limitations stated honestly: source-reviewed, not forced in browser. No hardware tests claimed.
 - [x] Append-only research log, durable project facts, README and handoff reflect final release and user link directive.
+
+Direct-opening follow-up completed2026-10-28: startup popup removed;44 tests/source checks pass; fresh local/public browser character view, idle behavior, keyboard controls and empty error logs verified. Only the3D site updated; both changed modules byte-verified.

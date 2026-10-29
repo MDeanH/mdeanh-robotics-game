@@ -133,3 +133,8 @@
 - Published final third-person build ONLY to site431dd23f-eab9-465d-8714-ae5720b481e4: deploy6ae297c0a2e6a58e53d9d88c, https://mdeanh-codex-luka-3d.netlify.app/. All26 filesHTTP200, SHA256-match localdist,24,440,844bytes. Evidence output/third-person-deploy-verification.json.
 - Public browser fresh visit opened Luka: Systems Online ready screen. Started scanner mission, turned camera, sprinted, used E to reveal2chips, paused. ActualWebGL and third-person-perspective DOM signals; no horizontal overflow, no warning/errorlogs. Saved screenshot output/codex-luka-3d-public.jpg.
 - Both retro URLs freshly returnedHTTP200 and The Pixel Workshop title after final3Dpublication. Codex retro screenshot and all16 matchingfiles confirm preservation. No newgame was deployed to retro after restoration.
+
+## 2026-10-28 — direct character opening
+- User requested opening on the character instead of the popup. Removed the startup card and enter playing presentation on mount; app focuses the canvas after opening. Simulation waits for the first game-control input, with no automatic sound or pre-interaction pause overlay.
+- All44 existing functional tests and source checks pass. Actual local fresh visit showed playing mode, hidden overlay, zero start buttons, canvas focus and stable idle enemies. Held W, Space jump and P pause still worked. Independent functional review found no blocking issue.
+- Published only to existing3D site431dd23f-eab9-465d-8714-ae5720b481e4, deploy6ae2999ca0a702a8b398ffb2. Fresh public visit shows character directly, overlayHidden=true, zero start buttons, canvas focus, full integrity and no warning/error logs. Both changed JS filesHTTP200/SHA256-match local. Screenshot output/direct-character-public.jpg. Retro files/sites unchanged.

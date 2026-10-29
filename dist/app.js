@@ -134,7 +134,7 @@ function launchSession(id, mode = 'arcade') {
     }
   });
   challengeDialog.showModal();
-  if (arcade) $('challenge-content').querySelector('[data-action="start"]')?.focus({ preventScroll: true });
+  if (arcade) $('challenge-content').querySelector('.arcade-canvas')?.focus({ preventScroll: true });
 }
 const launchChallenge = (id) => launchSession(id, 'lab');
 const launchArcade = (id) => launchSession(id, 'arcade');
@@ -197,7 +197,7 @@ $('sound-button').addEventListener('click', () => {
 });
 render();
 $('save-status').textContent = storageAvailable ? 'PROGRESS SAVED LOCALLY' : 'PROGRESS SAVED THIS SESSION';
-// The modern game opens on a third-person adventure title screen; the garage remains available on close.
+// Open directly on the character; the garage remains available on close.
 launchArcade(progress.selected);
 document.addEventListener('visibilitychange', () => document.hidden ? stopPreview() : startPreview());
 window.addEventListener('pagehide', () => { stopPreview(); gameCleanup?.(); });
