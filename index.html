@@ -56,6 +56,19 @@ body {
 .collected { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px; }
 .collected div { border: 1px solid var(--line); padding: 6px 8px; min-width: 0; }
 .collected div b { display: block; font-family: var(--display); font-size: 9px; font-weight: normal; color: var(--c, var(--amber)); margin-bottom: 2px; }
+.pickup { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(88%, 480px); z-index: 4; cursor: pointer;
+  background: var(--panel); border: 4px solid var(--pc, var(--amber)); box-shadow: 6px 6px 0 #000; padding: clamp(8px, 2vw, 16px);
+  display: flex; flex-direction: column; gap: clamp(2px, .8vw, 6px); text-align: center; }
+.pickup .k, .pickup .r { font-family: var(--display); font-size: clamp(6px, 1.3vw, 9px); letter-spacing: 2px; color: var(--pc, var(--amber)); }
+.pickup .n { font-family: var(--display); font-size: clamp(11px, 2.8vw, 20px); line-height: 1.4; }
+.pickup .f { font-size: clamp(15px, 2.6vw, 24px); line-height: 1.15; }
+.pickup .r { color: var(--dim); letter-spacing: 1px; }
+.pickup .r em { font-style: normal; color: var(--pc, var(--amber)); }
+.pickup .tb { height: 4px; background: var(--pc, var(--amber)); transform-origin: left; animation: drain 2.6s linear forwards; }
+@keyframes drain { to { transform: scaleX(0); } }
+.diagram { display: block; width: 100%; max-width: 560px; height: auto; aspect-ratio: 320 / 176; image-rendering: pixelated; border: 2px solid var(--line); background: #0b0f24; }
+.slot .role { display: block; color: var(--dim); }
+.slot.on .role { color: var(--ink); }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field label { font-family: var(--display); font-size: 9px; letter-spacing: 1px; color: var(--c, var(--amber)); }
 .field input { font-family: var(--body); font-size: 24px; padding: 6px 10px; background: var(--ink); color: var(--text); border: 2px solid var(--line); max-width: 360px; width: 100%; }
@@ -144,7 +157,7 @@ body {
     <span class="grow"></span>
     <span>SCORE <b id="hScore">0</b></span>
   </div>
-  <div class="screen"><canvas id="game" width="320" height="176" aria-label="Game screen: drive BOLT the robot around the lab"></canvas></div>
+  <div class="screen"><canvas id="game" width="320" height="176" aria-label="Game screen: drive BOLT the robot around the lab"></canvas><div class="pickup" id="pickup" hidden aria-live="polite"></div></div>
   <div class="lessonbar" id="lessonbar">
     <div class="idea"><span class="lbl">BIG IDEA</span><span id="bigIdea">Every robot is built from six systems.</span></div>
     <div class="ticker" id="ticker"><span class="lbl" id="tickLbl">MISSION</span><span id="tickText">Press START to begin.</span></div>
@@ -350,7 +363,7 @@ function genLevel() {
     G.kit = { x: kx * T + 8, y: ky * T + 8, got: false };
     G.bugs = reach.filter(([x, y]) => dist[y][x] >= 7).sort(() => Math.random() - .5).slice(0, L.bugs)
       .map(([x, y]) => ({ x: x * T + 8, y: y * T + 8, dx: 0, dy: 0, t: 0, stun: 0 }));
-    G.got = 0; G.invuln = 1; G.levelTime = 0; G.hitThisLevel = false; G.energy = 100; G.float = []; G.fx = []; G.combo = 0; G.comboT = 0;
+    G.got = 0; G.invuln = 1; G.levelTime = 0; G.hitThisLevel = false; G.energy = 100; G.float = []; G.fx = []; G.combo = 0; G.comboT = 0; G.pause = 0; $('pickup').hidden = true;
     G.hp = stats().maxHp;
     return;
   }
@@ -375,6 +388,7 @@ addEventListener('keydown', e => {
     }
     return;
   }
+  if (G.pause > 0 && (e.code === 'Enter' || e.code === 'Space') && !e.repeat) { G.pause = .01; e.preventDefault(); return; }
   if (KEYMAP[e.code]) { keys[KEYMAP[e.code]] = true; e.preventDefault(); }
   if (e.code === 'KeyP' || e.code === 'Escape') pause();
   if (e.code === 'KeyM') { soundOn = !soundOn; store.set('sound', soundOn); }
@@ -396,6 +410,7 @@ function update(dt) {
   G.fx = G.fx.filter(f => { f.x += f.vx * dt; f.y += f.vy * dt; f.vy += 60 * dt; return (f.t -= dt) > 0; });
   G.float = G.float.filter(f => (f.t -= dt) > 0);
   G.flash = Math.max(0, G.flash - dt);
+  if (G.pause > 0) { G.pause -= dt; if (G.pause <= 0) $('pickup').hidden = true; return; }
   if (G.countdown > 0) {
     const before = Math.ceil(G.countdown);
     G.countdown -= dt;
@@ -435,6 +450,7 @@ function update(dt) {
     G.float.push({ x: c.x, y: c.y - 4, s: name.toUpperCase(), t: 1.6 });
     G.float.push({ x: c.x, y: c.y + 10, s: G.combo > 1 ? `+${pts} COMBO x${G.combo}` : `+${pts}`, t: 1.2 });
     setTicker(`PART ${G.got}/${G.chips.length}: ${name}`, fact, L.color);
+    showPickup(L, name, fact);
     if (G.got === G.chips.length) {
       sfx('bench'); G.float.push({ x: G.bench.x + 20, y: G.bench.y - 10, s: 'RETURN TO BENCH!', t: 3 });
       setTimeout(() => G.state === 'play' && setTicker('ALL PARTS FOUND', 'Drive back to the flashing workbench to install them on BOLT.', '#ffa300'), 2200);
@@ -466,6 +482,19 @@ function update(dt) {
 function burst(x, y, color, n, spd) {
   for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, v = spd * (.4 + Math.random() * .6); G.fx.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 20, t: .4 + Math.random() * .4, c: color }); }
 }
+const SHORT = { chassis: 'SKELETON', motors: 'MUSCLES', power: 'ENERGY', sensors: 'SENSES', controller: 'BRAIN', gripper: 'HANDS' };
+// freeze the action for a moment so every part gets read, not just collected
+function showPickup(L, name, fact) {
+  const el = $('pickup');
+  el.style.setProperty('--pc', L.color);
+  el.innerHTML = `<div class="k">YOU FOUND · ${L.final ? 'REVIEW CHIP' : esc(L.name.toUpperCase()) + ' PART'} ${G.got}/${G.chips.length}</div>
+    <div class="n">${esc(name.toUpperCase())}</div>
+    <div class="f">${esc(fact)}</div>
+    <div class="r">${L.final ? hl(L.big) : `${esc(L.name.toUpperCase())} = THE ROBOT'S <em>${SHORT[L.id]}</em>`}</div>
+    <div class="tb"></div>`;
+  el.hidden = false; G.pause = 2.6;
+}
+$('pickup').addEventListener('click', () => { G.pause = .01; });
 function setTicker(label, text, color) {
   const el = $('ticker');
   $('tickLbl').textContent = label.toUpperCase(); $('tickText').textContent = text;
@@ -602,7 +631,7 @@ function hud() {
   $('hEnergy').style.width = G.energy + '%';
   $('hScore').textContent = G.score;
   const tray = $('tray');
-  const html = PARTS.map(l => has(l.id) ? `<div class="slot on" style="background:${l.color}">${l.name.toUpperCase()}</div>` : `<div class="slot">${l.name.toUpperCase()}<br>?</div>`).join('');
+  const html = PARTS.map(l => `<div class="slot${has(l.id) ? ' on' : ''}"${has(l.id) ? ` style="background:${l.color}"` : ''}>${l.name.toUpperCase()}<span class="role">= ${SHORT[l.id]}</span></div>`).join('');
   if (tray._h !== html) { tray.innerHTML = html; tray._h = html; }
 }
 
@@ -618,7 +647,45 @@ function show(html, color, acts) {
 function hide() { modal.hidden = true; modal.innerHTML = ''; }
 modal.addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (b && actions[b.dataset.act]) { sfx('click'); actions[b.dataset.act](b); } });
 function botCanvas(parts) { return `<canvas width="16" height="16" data-bot="${parts.join(',')}"></canvas>`; }
-function paintBots() { modal.querySelectorAll('canvas[data-bot]').forEach(c => { const g = c.getContext('2d'); g.clearRect(0, 0, 16, 16); drawRobot(g, 0, 0, 1, c.dataset.bot ? c.dataset.bot.split(',') : [], G.t); }); }
+function diagram(parts, focus) { return `<canvas class="diagram" width="320" height="176" data-diagram="${parts.join(',')}" data-focus="${focus || ''}" aria-label="Diagram of BOLT with each robot part labeled"></canvas>`; }
+function paintBots() {
+  modal.querySelectorAll('canvas[data-bot]').forEach(c => { const g = c.getContext('2d'); g.clearRect(0, 0, 16, 16); drawRobot(g, 0, 0, 1, c.dataset.bot ? c.dataset.bot.split(',') : [], G.t); });
+  modal.querySelectorAll('canvas[data-diagram]').forEach(c => drawDiagram(c.getContext('2d'), c.dataset.diagram ? c.dataset.diagram.split(',') : [], c.dataset.focus, G.t));
+}
+// where each part sits on BOLT's 16px sprite, and which label slot (side, row) points at it
+const DIAG = { gripper: [2, 0, 'L', 0], sensors: [8, 0, 'R', 0], chassis: [3, 7, 'L', 1], controller: [9, 8, 'R', 1], power: [6, 14, 'L', 2], motors: [14, 10, 'R', 2] };
+function drawDiagram(g, parts, focus, t) {
+  const s = 7, ox = 104, oy = 32;
+  g.imageSmoothingEnabled = false;
+  g.fillStyle = '#0b0f24'; g.fillRect(0, 0, 320, 176);
+  drawRobot(g, ox, oy, s, parts, t);
+  g.font = '8px "Press Start 2P", monospace'; g.textBaseline = 'top';
+  for (const l of PARTS) {
+    const [ax, ay, side, row] = DIAG[l.id], on = parts.includes(l.id), isF = l.id === focus;
+    const col = on || isF ? l.color : '#4a4f6e';
+    const y = 18 + row * 58, tx = side === 'L' ? 6 : 314, lx = side === 'L' ? 104 : 216;
+    const px = ox + ax * s + 3, py = oy + ay * s + 3;
+    // elbow leader line: across at label height, then up/down to the part
+    g.fillStyle = col;
+    const dash = on ? 1 : 2;
+    for (let x = Math.min(lx, px); x <= Math.max(lx, px); x++) if (dash === 1 || x % 4 < 2) g.fillRect(x, y + 4, 1, 1);
+    for (let yy = Math.min(y + 4, py); yy <= Math.max(y + 4, py); yy++) if (dash === 1 || yy % 4 < 2) g.fillRect(px, yy, 1, 1);
+    g.fillRect(px - 1, py - 1, 3, 3);
+    g.textAlign = side === 'L' ? 'left' : 'right';
+    const name = on || isF ? l.name.toUpperCase() : '???';
+    if (isF) {
+      const w = g.measureText(name).width;
+      g.fillStyle = Math.floor(t * 2) % 2 ? l.color : '#fff1e8';
+      g.fillRect(side === 'L' ? tx - 2 : tx - w - 2, y - 2, w + 4, 12);
+      g.fillStyle = '#0b0f24';
+    } else g.fillStyle = col;
+    g.fillText(name, tx, y);
+    g.fillStyle = on || isF ? '#fff1e8' : '#4a4f6e';
+    g.fillText('= ' + SHORT[l.id], tx, y + 13);
+    if (isF && !on) { g.fillStyle = l.color; g.fillText('THIS LEVEL', tx, y + 26); }
+    if (isF && on) { g.fillStyle = l.color; g.fillText('NEW!', tx, y + 26); }
+  }
+}
 
 function title() {
   G.state = 'title'; G.map = null;
@@ -648,7 +715,8 @@ function brief() {
   genLevel(); G.state = 'brief';
   show(`<div class="eyebrow">LEVEL ${G.li + 1} OF ${LEVELS.length}${L.final ? '' : ' · ' + L.name.toUpperCase()}</div>
     <h2>${esc(L.brief[0])}</h2>
-    <div class="bots">${botCanvas(G.parts)}<p>${esc(L.brief[1])}</p></div>
+    <p>${esc(L.brief[1])}</p>
+    ${diagram(G.parts, L.final ? '' : L.id)}
     <div class="analogy"><div><div class="lbl" style="--lc:${L.color}">THIS LEVEL TEACHES</div><div class="eq">${hl(L.big)}</div></div></div>
     <ul>
       <li>Every part you grab shows its <b>name and what it does</b> right under the screen.</li>
@@ -747,12 +815,13 @@ const TRY = {
   gripper: "Drive near a part. You don't have to touch it anymore.",
 };
 function install() {
-  const L = LEVELS[G.li], before = [...G.parts];
+  const L = LEVELS[G.li];
   G.parts.push(L.id); G.state = 'install'; sfx('install');
   show(`<div class="eyebrow">PART INSTALLED · ${G.parts.length} OF ${PARTS.length}</div>
     <h2>NEW ABILITY: ${esc(L.ability[0])}</h2>
-    <div class="bots">${botCanvas(before)}<span class="arrow">▸</span>${botCanvas(G.parts)}</div>
+    ${diagram(G.parts, L.id)}
     <p>${esc(L.ability[1])}</p>
+    <div class="analogy"><div><div class="lbl" style="--lc:${L.color}">REMEMBER</div><div class="eq">${hl(L.big)}</div></div></div>
     <div class="tryit">TRY IT NEXT LEVEL: ${esc(TRY[L.id])}</div>
     <div class="row"><button class="btn" data-act="go" data-primary>NEXT LEVEL ▸</button></div>`, L.color, { go: () => { G.li++; brief(); } });
   paintBots();
@@ -763,7 +832,8 @@ function finale() {
   const acc = G.asked ? Math.round(100 * G.firstTry / G.asked) : 0;
   show(`<div class="eyebrow">FIELD TEST PASSED</div>
     <h2>BOLT IS A COMPLETE ROBOT</h2>
-    <div class="bots">${botCanvas(G.parts)}<p>Every robot, from a robot vacuum to a Mars rover, is built from the same six systems working in one loop: <b>sense → think → act</b>.</p></div>
+    ${diagram(G.parts, '')}
+    <p>Every robot, from a robot vacuum to a Mars rover, is built from the same six systems working in one loop: <b>sense → think → act</b>.</p>
     <div class="stats">
       <div class="stat"><div>SCORE</div><div>${G.score}</div></div>
       <div class="stat"><div>BEST</div><div>${best}</div></div>
