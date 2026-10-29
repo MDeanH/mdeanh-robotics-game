@@ -149,3 +149,8 @@
 - Completed Sequence sprint via held WASD/E and dock return in the new environment: win2050 with5/5 integrity and visible Install upgrade button. Existing physics/mission rules unchanged.
 - Phone390x844: character-first view, HUD and touch controls visible, no horizontal overflow. Held forward, jump, pulse, camera drag and pause exercised. Browser warning/error logs empty. Viewport override reset after checks.
 - All44 existing functional tests pass; source checks now cover13 modules. New geometry construction uses shared geometries/instanced plant/tool details and registered cleanup resources. No image backdrop or pixel-font conversion was used.
+
+## 2026-10-28 — instanced prop cleanup regression
+- Independent functional review of52ecb90 confirmed InstancedMesh instanceMatrix/instanceColor buffers lacked explicit mesh disposal when closing a workshop. Shared geometry/material disposal alone does not emit Three's per-instance disposal event.
+- Added shared disposeRenderedScene path used by arena and optional preview. Named regression nested workshop instances release their buffers before shared resources and renderer cleanup failed before the fix: observed only geometry/material/renderer events, missing leaves/tools instance disposal.
+- Traverse instanced meshes and dispose them before shared kit resources and renderer. Same test now passes;45 total tests and13-module source checks pass. Browser close/reopen through garage, Velocity trial and Energy relay completed without warning/error logs.

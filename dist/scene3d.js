@@ -10,6 +10,11 @@ const PALETTE = {
 };
 const world = (x, y, height = 0) => new THREE.Vector3(x - ARENA.width / 2, height, y - ARENA.height / 2);
 
+export function disposeRenderedScene(scene, kit, base) {
+  scene.traverse(object => { if (object.isInstancedMesh) object.dispose(); });
+  kit.dispose(); base.dispose(); scene.clear();
+}
+
 function createKit() {
   const geometries = new Set(), materials = new Set(), textures = new Set(), cache = new Map(), labels = new Map();
   const geometry = value => (geometries.add(value), value);
@@ -387,7 +392,7 @@ export function createArenaRenderer(canvas, { reducedMotion = false } = {}) {
       const x = intersection.x + ARENA.width / 2, y = intersection.z + ARENA.height / 2;
       return x >= 0 && x <= ARENA.width && y >= 0 && y <= ARENA.height ? { x, y } : null;
     },
-    dispose() { if (disposed) return; disposed = true; kit.dispose(); base.dispose(); scene.clear(); },
+    dispose() { if (disposed) return; disposed = true; disposeRenderedScene(scene, kit, base); },
   };
 }
 
@@ -423,5 +428,5 @@ export function mountLabPreview(canvas, { reducedMotion = false, getSelectedPart
     renderer.render(scene, camera); frame = requestAnimationFrame(draw);
   }
   frame = requestAnimationFrame(draw);
-  return () => { if (disposed) return; disposed = true; controller.abort(); cancelAnimationFrame(frame); kit.dispose(); base.dispose(); scene.clear(); };
+  return () => { if (disposed) return; disposed = true; controller.abort(); cancelAnimationFrame(frame); disposeRenderedScene(scene, kit, base); };
 }
