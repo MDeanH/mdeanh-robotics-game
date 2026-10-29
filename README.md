@@ -1,38 +1,74 @@
-# Build-a-Bot Lab — mdeanh Robotics
+# mdeanh Robotics game
 
-A retro, 8-bit style browser game that teaches **the six core hardware parts of a robot** to college students with no robotics background. About 15–20 minutes per playthrough.
+**Retro game (preserved):** https://mdeanh-robotics-workshop.netlify.app/
 
-## Play
+**New third-person game:** https://mdeanh-codex-luka-3d.netlify.app — published and verified.
 
-**Live:** https://mdeanh-robotics-game.netlify.app
+**Codex-named retro copy:** https://mdeanh-codex-retro.netlify.app — published and byte-verified. Original retro URL remains preserved.
 
-Or open `index.html` in any modern browser (desktop or phone). No install or build step.
+A third-person 3D robotics adventure for students, set in a sunlit robotics workshop. The game puts the camera behind Luka and includes direct movement, jumping, sprinting, and system abilities. Students explore **sensors, motors, controllers, and power** through the game.
 
-```bash
-python3 -m http.server 8765
+**Release status:** published third-person 3D game. All 45 functional tests and source checks pass. Real browser play completed an ordered mission, saved its score, and exercised keyboard/touch movement, jump, sprint, ability, and camera look. All 28 deployed files match local SHA-256 hashes.
+
+The room follows the user-supplied workshop image: warm sunlight, wood benches with green work mats, pegboard tools, blue parts bins, plants, task lamps and display robots, all rendered as 3D geometry. The neutral-gray humanoid and optional model studio retain the Luka identity reference. See [visual direction](docs/visual-direction.md). The earlier pixel-art concept is archived as a baseline. It runs in the browser with HTML, CSS, and JavaScript; there is no install or student account required to play.
+
+## Run locally
+
+Requires a current Node.js release. There are no package dependencies to install.
+
+```sh
+npm start
 ```
-then visit http://localhost:8765.
 
-## How it works
+Open the local URL printed by the server.
 
-You drive **BOLT**, a robot that starts as a bare circuit board. Each level, you collect the parts for one system, return to the workbench, read a short lesson, and answer two questions to install the part. Every installed part gives BOLT a new in-game ability, so students *feel* what the part does:
+```sh
+npm test
+npm run check
+```
 
-| Level | Part | Role | Ability unlocked |
-|---|---|---|---|
-| 1 | Chassis | skeleton | +2 HP (armor) |
-| 2 | Actuators (motors) | muscles | faster driving |
-| 3 | Power | energy supply | SPACE boost + energy bar |
-| 4 | Sensors | senses | see far through the dark lab |
-| 5 | Controller | brain | arrow points to the next target |
-| 6 | End effector | hands | grab parts from a distance |
-| 7 | Field Test | everything together | final 4-question inspection |
+`npm test` runs the deterministic gameplay rules harness. `npm run check` checks the project source. The independently runnable minimal parts explorer lives in `baseline/index.html`.
 
-Grabbing a part briefly pauses the game on a pickup card (name, what it does, and its body analogy, e.g. ACTUATORS = MUSCLES); tap or press Enter to skip. A labeled diagram of BOLT appears before each level, after each install, and at the end, with not-yet-learned parts shown as ???. Every part is drawn as a 12×12 pixel-art icon of the real component (a LiPo pack with its wires, a servo with its horn, the two-eyed ultrasonic sensor…) with a pulsing glow, and the same icons appear in the level briefing ("find these parts"), pickup cards, lesson cards, parts tray, and manual. Every part you grab is a real component (servo motor, LiDAR, suction cup…) and its one-line explanation appears under the screen; a BIG IDEA bar keeps the level's lesson visible the whole time. Glitches (red) chase you. Once you have Power, boost into them to zap them. Chain quick pickups for combos, and grab the repair kit to heal. Get hit too often and the level restarts. Lessons stay unlocked in the **Parts Manual** for review.
+## Play the third-person adventure
 
-**For instructors:** students type their name on the title screen. The final screen shows a report card (name, date, score, first-try accuracy, time, crashes, and every question with what they picked when they missed) that they can screenshot or copy as text to hand in.
+The game opens directly on Luka in the sunlit workshop, without a startup popup. Move or use a control to begin; training bots wait while you look around. Jump and sprint around obstacles, follow the waypoint and navigator, discover components, and return to the home dock. System-learning goals and saved components are retained.
 
-Controls: arrows / WASD to drive, SPACE boost, P pause, M sound, 1–4 answer quizzes. Touch controls appear on phones.
+- **Sensor sweep:** discover hidden components using perception.
+- **Velocity trial:** explore motion and actuation.
+- **Sequence sprint:** follow ordered instructions and checkpoints.
+- **Energy relay:** explore power through energy-cell deliveries.
 
-## Project layout
+**Controls:** WASD moves; Space jumps; Shift sprints; E activates the system ability; Q/R and dragging control the camera. Touch controls provide movement, jump, sprint, abilities, and drag camera look.
 
-Single file: `index.html` (HTML + CSS + JS, no dependencies besides two Google Fonts). Lesson and quiz content lives in the `LEVELS` array at the top of the script; edit it to change what is taught.
+The optional **Simulation lab** keeps the deeper hands-on puzzles: scan an obstacle course, experiment with wheel speeds, program a route, and close a complete battery–load–return circuit. The Components panel explains what each component does.
+
+Earned components and progress are saved only in the current browser; they do not follow a student between devices. Replaying a completed mission does not award duplicate component XP.
+
+## Educational scope
+
+The lab and its robot are illustrative game models. The arcade’s scan, dash, hearts, score, and pickups are playful mechanics rather than measurements of a real robot. The game does not connect to physical hardware, test a particular component, or guarantee real-world motion. The Simulation lab’s motor model simplifies real wheel behavior; its controller commands represent signals sent through a motor driver. Its circuit puzzle models a complete electrical path.
+
+Lesson descriptions were checked against primary documentation; see [learning sources](docs/learning-sources.md). Documentation review is distinct from hardware verification.
+
+## Project map
+
+- `dist/`: the playable browser game with vendored Three.js and a vector fallback.
+- `baseline/`: kept minimal parts explorer.
+- `games/retro/`: all 16 files from the original published retro game, retained separately.
+- `docs/game-sites.json`: explicit source, site ID, URL, and deployment map for each game.
+- `tests/`: functional rules tests.
+- `AGENTS.md`: build invariants and operating instructions.
+- `agent/memory/`: current project state and settled decisions.
+- `RESEARCH_LOG.md`: append-only evidence record.
+
+Expanded grade-specific curriculum, more robots, and teacher reporting are future decisions.
+
+The repository's original single-file starter is preserved at the repository root as `index.html`. The Robot Lab lives in `dist/` and is served by `npm start`. This version is developed on `codex/pixel-workshop` to preserve the existing `main` version.
+
+The recent starter updates from main are retained in the root `index.html`. Its original notes are preserved in `docs/original-starter-README.md` and original deployment configuration in `baseline/starter-netlify.toml`. That separately hosted starter remains at https://mdeanh-robotics-game.netlify.app. The retro game keeps https://mdeanh-robotics-workshop.netlify.app/; the third-person game has its own Codex site and link above.
+
+The public A2 visual model is an **estimated T2D0 model**, not calibrated to Michael’s physical Luka. Its Mulan PSL v2 license and provenance notice are included in dist/assets/luka/. No robot connection or robot command transport is part of this game. The prior retro build remains available at https://6ae289b8b05a2208ace788a2--mdeanh-robotics-workshop.netlify.app/.
+
+## Game link preservation
+
+Every new game gets a new Netlify site and public link containing `codex`. Never replace an existing game with a new game at its old URL. The retro game remains at its canonical workshop URL above. The new third-person site is `mdeanh-codex-luka-3d`, ID `431dd23f-eab9-465d-8714-ae5720b481e4`; its published deploy is `6ae29e81354edf44359d4d47`. The unchanged Codex-named retro copy is also verified at its separate link above. Its exact preserved source is in `games/retro/`; `docs/game-sites.json` maps each game source to its own site, link, and deploy. Do not deploy the third-person game using the retro site ID or an inherited Netlify binding.

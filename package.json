@@ -1,0 +1,12 @@
+{
+  "name": "mdeanh-robotics-game",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A third-person 3D robotics learning adventure inspired by the owned Luka app",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node scripts/check.mjs"
+  }
+}

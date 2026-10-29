@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eae4d8">
+  <meta name="description" content="Explore a warm, sunlit 3D robotics workshop as Luka. Run, jump, scan, and discover sensors, motors, controllers, and power through hands-on adventures.">
+  <title>Luka: Systems Online · 3D Workshop Adventure</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="game.css">
+  <link rel="stylesheet" href="arcade.css">
+  <script>if(location.protocol === "file:") location.replace("https://mdeanh-codex-luka-3d.netlify.app/");</script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#mission-title">Skip to your mission</a>
+  <div class="app-shell">
+    <header class="topbar">
+      <a href="./" class="brand" aria-label="mdeanh Robotics Workshop"><span class="brand-bot" aria-hidden="true"></span><span><b>mdeanh<span class="brand-dot">.</span></b><span class="brand-sub">Robotics workshop</span></span></a>
+      <div class="workshop-title">Build a little curiosity</div>
+      <div class="top-actions"><button class="icon-button" id="sound-button" aria-pressed="false" aria-label="Turn sound on" title="Turn sound on"><span id="sound-icon" aria-hidden="true">♪</span><span class="sound-text">OFF</span></button><button class="icon-button help-button" id="help-button" aria-label="How to play" title="How to play">?</button></div>
+    </header>
+    <nav class="toolbar" aria-label="Workshop navigation">
+      <div class="tabs"><button class="tab active" id="workshop-tab" aria-current="page"><span aria-hidden="true">▦</span> Workshop garage</button><button class="tab" id="notebook-button"><span aria-hidden="true">▤</span> Components <span class="tab-count" id="notebook-count">0/4</span></button></div>
+      <div class="player-rank"><span class="rank-star" aria-hidden="true">✦</span><span id="rank-name">Rookie engineer</span><span class="xp-bar" aria-hidden="true"><i id="xp-fill"></i></span><span id="xp-label">0 XP</span></div>
+    </nav>
+    <nav class="system-nav" aria-label="Learning systems"><div class="module-list system-tabs" id="module-list" role="group" aria-label="Choose a robot part"></div></nav>
+    <main class="workshop-layout">
+      <section class="scene" aria-label="Luka model in the robotics workshop">
+        <canvas id="lab-preview" class="lab-preview" aria-label="Estimated A2 humanoid visual model in the robotics workshop"></canvas><div class="scene-fallback" id="scene-fallback" hidden></div>
+        <div class="scene-shade" aria-hidden="true"></div>
+        <div class="scene-top"><span class="scene-label"><span class="live-dot" aria-hidden="true"></span> Model studio</span><span class="scene-label scene-save" id="save-status">Progress saved</span></div>
+        <div class="robot-name"><span class="tiny-bot" aria-hidden="true">▣</span> Luka <span class="robot-status" id="robot-status">Simulation ready</span></div>
+        <div class="scene-headline"><span class="eyebrow">Workshop model explorer</span><h2>Estimated A2 model</h2><p>Estimated model · educational simulation</p></div>
+        <div class="hotspots" id="hotspots" hidden></div>
+        <button class="scene-play" id="scene-play"><span aria-hidden="true">▶</span><span>Your next discovery awaits<small>Explore the 3D workshop</small></span><span aria-hidden="true">→</span></button>
+        <div class="scene-spark" aria-hidden="true"></div>
+        <div class="mentor-box"><span class="mentor-avatar" aria-hidden="true"><span></span></span><div><span class="mentor-name">Byte <span>Your workshop guide</span></span><p id="mentor-message">Your next breakthrough starts with a little curiosity.</p><span id="mentor-detail">Choose a system. Explore the workshop. Bring Luka to life.</span></div><button class="mentor-help" id="mentor-help" aria-label="Read how to play">?</button></div>
+        <div class="scene-caption"><span aria-hidden="true">⌘</span> Explore a system to learn what it does. <span class="scene-caption-right">Model appearance is not hardware calibration.</span></div>
+      </section>
+      <aside class="mission-panel" aria-labelledby="mission-title">
+        <div class="mission-heading"><span class="clipboard" aria-hidden="true">▤</span><span>Field trial</span><span class="mission-counter" id="mission-counter">01 / 04</span></div>
+        <div class="mission-intro"><span class="eyebrow" id="mission-eyebrow">Sense your surroundings</span><h1 id="mission-title" tabindex="-1">Discover your robot’s potential.</h1><p id="mission-description">Help your robot discover the world around it.</p></div>
+        <div class="part-detail" id="part-detail"><div class="part-icon" id="part-icon" aria-hidden="true"></div><div><span class="eyebrow">Component spotlight</span><h2 id="part-name">Distance sensor</h2><p id="part-description"></p></div></div>
+        <div class="controls-card"><h2>Adventure controls</h2><div><span>Move</span><kbd>W A S D</kbd></div><div><span>Jump</span><kbd>Space</kbd></div><div><span>System ability</span><kbd>E</kbd></div><div><span>Sprint</span><kbd>Shift</kbd></div><div><span>Look around</span><kbd>Drag / Q R</kbd></div><div><span>Pause</span><kbd>P</kbd></div></div>
+        <div class="challenge-meta"><span><span class="difficulty-bars" aria-hidden="true">▮▮▯</span> Explorer difficulty</span><span id="reward-label">+100 XP</span></div>
+        <button class="play-button" id="play-button"><span class="play-triangle" aria-hidden="true">▶</span><span id="play-label">Launch sensor mission</span><span aria-hidden="true">→</span></button>
+        <p class="mission-footnote" id="mission-footnote">Explore. Discover. Upgrade.</p>
+        <div class="mission-mode-row"><span>Explore the science</span><button id="tinker-button">Open simulation lab <span aria-hidden="true">↗</span></button></div>
+      </aside>
+    </main>
+    <footer class="statusbar"><div class="status-motto"><span class="trophy" aria-hidden="true">✦</span><span id="footer-message">Small robot. <b>Limitless possibilities.</b></span></div><div class="build-progress"><span id="progress-label">Your first build</span><div class="progress-parts" id="progress-parts" aria-label="0 of 4 parts earned"></div><span id="parts-count">0 / 4 systems</span></div><button class="footer-how" id="footer-help">How to play <span aria-hidden="true">↗</span></button></footer>
+  </div>
+  <dialog id="challenge-dialog" class="challenge-dialog" aria-labelledby="challenge-title"><div class="dialog-top"><span class="eyebrow" id="challenge-kicker">Workshop adventure</span><button class="close-button" id="challenge-close" aria-label="Close challenge">✕</button></div><h2 id="challenge-title"></h2><div id="challenge-content"></div></dialog>
+  <dialog id="info-dialog" class="info-dialog" aria-labelledby="info-title"><div class="dialog-top"><span class="eyebrow">mdeanh Robotics</span><button class="close-button" id="info-close" aria-label="Close panel">✕</button></div><h2 id="info-title"></h2><div id="info-content"></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <noscript><div class="noscript">Please enable JavaScript to play the robotics challenges.</div></noscript>
+</body>
+</html>
