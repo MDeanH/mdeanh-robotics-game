@@ -34,3 +34,6 @@ GitHub repo: https://github.com/MDeanH/mdeanh-robotics-game. Work branch `codex/
 `npm start` serves dist on4173. `npm test` and `npm run check` verify software. Only deploy this 3D game to `431dd23f-eab9-465d-8714-ae5720b481e4` with `--dir dist --no-build --prod`. Retro source must remain unchanged unless the user requests a retro edit. Earlier Sites registration remains unpublished.
 
 Further work follows user play feedback. Open product decisions: student age band, deeper in-world lessons, more levels/robots, and teacher reporting.
+
+## Current room-art update — 2026-10-28
+User selected the supplied warm workshop image as the 3D room reference (docs/visual-direction.md). Source now replaces the orbital room with real3D sunlit windows, tiled floor, wood/green benches, tool pegboards, blue parts bins, plants, task lamps and display rovers. Character-first opening and game rules remain intact. Local WebGL/full mission win2050 and phone390x844 touch/layout checks passed;44 tests and13-module source checks passed. New artwork public deployment is pending; earlier deploy ID above still describes the prior room until final publication metadata is recorded.

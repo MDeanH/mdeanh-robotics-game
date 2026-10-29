@@ -16,3 +16,5 @@
 - Latest user directive: every new game gets its own new Netlify site/link containing codex. Preserve old games and URLs. Retro is kept in games/retro and at both mdeanh-robotics-workshop.netlify.app and mdeanh-codex-retro.netlify.app. The third-person game is separate at mdeanh-codex-luka-3d.netlify.app; docs/game-sites.json is the source/site map.
 
 - 2026-10-28: user wants the3D game to open directly on the character, without a startup popup. Hazards wait for first control input; controls are available immediately.
+
+- 2026-10-28: user explicitly selected the attached workshop image as the visual reference for the existing3D workshop. Room direction is warm sunlight, wood benches/green mats, pegboard tools, blue parts bins, plants and task lamps; smooth3D and character-first entry remain. See docs/visual-direction.md.

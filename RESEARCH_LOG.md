@@ -138,3 +138,14 @@
 - User requested opening on the character instead of the popup. Removed the startup card and enter playing presentation on mount; app focuses the canvas after opening. Simulation waits for the first game-control input, with no automatic sound or pre-interaction pause overlay.
 - All44 existing functional tests and source checks pass. Actual local fresh visit showed playing mode, hidden overlay, zero start buttons, canvas focus and stable idle enemies. Held W, Space jump and P pause still worked. Independent functional review found no blocking issue.
 - Published only to existing3D site431dd23f-eab9-465d-8714-ae5720b481e4, deploy6ae2999ca0a702a8b398ffb2. Fresh public visit shows character directly, overlayHidden=true, zero start buttons, canvas focus, full integrity and no warning/error logs. Both changed JS filesHTTP200/SHA256-match local. Screenshot output/direct-character-public.jpg. Retro files/sites unchanged.
+
+## 2026-10-28 — user workshop image becomes room-art reference
+- User selected "Use it as the visual reference for the3D workshop" after attaching ChatGPT Image Oct28,2026,08_53_49PM.png. Inspected supplied image directly. Reference SHA256 recorded in docs/visual-direction.md.
+- Implementing real3D room geometry and props based on warm sunlight, wood/green benches, creamtiles, mustard toolboards, bluebins, plants and tasklamps. Existing character-first opening, mission model, saves and controls retained. This is an update to existing3Dgame; retro sources/sites remain untouched.
+
+## 2026-10-28 — workshop local verification
+- Real browser renderer=webgl, data-environment=sunlit-robotics-workshop, third-person-perspective camera. First frame shows the character directly with overlayHidden=true and no horizontal overflow.
+- Inspected actual 3D wood benches/green mats, cream tiled floor, sunlit window/garden, pegboard handtools, blue-bin racks, red drawer cabinet, plants, tasklamps and cosmetic display rovers. Render counter740drawcalls in the initial view. Raised one plant to cabinet-top height69 after detecting a placement overlap.
+- Completed Sequence sprint via held WASD/E and dock return in the new environment: win2050 with5/5 integrity and visible Install upgrade button. Existing physics/mission rules unchanged.
+- Phone390x844: character-first view, HUD and touch controls visible, no horizontal overflow. Held forward, jump, pulse, camera drag and pause exercised. Browser warning/error logs empty. Viewport override reset after checks.
+- All44 existing functional tests pass; source checks now cover13 modules. New geometry construction uses shared geometries/instanced plant/tool details and registered cleanup resources. No image backdrop or pixel-font conversion was used.

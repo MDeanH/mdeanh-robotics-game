@@ -1,11 +1,12 @@
 import * as THREE from './vendor/three.module.js';
 import { ARENA, BENCHES, objectiveComplete } from './arcade-model.js';
 import { loadLukaVisual } from './luka-visual.js';
+import { createWorkshopEnvironment } from './workshop-scene.js';
 
 const PALETTE = {
-  ink: 0x162638, navy: 0x263c51, floor: 0x111b28, edge: 0x34465a,
-  white: 0xc8cdd3, steel: 0x8196a7, teal: 0x68a1ff, blue: 0x779ef4,
-  gold: 0xf6b14c, red: 0xef7665,
+  ink: 0x2f3d40, navy: 0x465b5b, floor: 0xc3af92, edge: 0x6b7167,
+  white: 0xc8cdd3, steel: 0x81968e, teal: 0x4d9b7b, blue: 0x4386af,
+  gold: 0xe4a03a, red: 0xcc6c50,
 };
 const world = (x, y, height = 0) => new THREE.Vector3(x - ARENA.width / 2, height, y - ARENA.height / 2);
 
@@ -84,18 +85,18 @@ function rendererBase(canvas, { preview = false } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: preview, powerPreference: 'default' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.13;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.06;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(preview ? 0x0b0d10 : 0x0a111a);
+  scene.background = new THREE.Color(preview ? 0x0b0d10 : 0xe6cfab);
   const camera = preview ? new THREE.OrthographicCamera(-520, 520, 292.5, -292.5, 1, 2200) : new THREE.PerspectiveCamera(62, 16 / 9, 1, 2800);
-  scene.add(new THREE.HemisphereLight(0xdfe8ff, 0x1a1d22, 1.6));
-  const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(250, 500, 375); key.castShadow = true;
+  scene.add(new THREE.HemisphereLight(preview ? 0xdfe8ff : 0xffebcc, preview ? 0x1a1d22 : 0x756345, preview ? 1.6 : 1.55));
+  const key = new THREE.DirectionalLight(preview ? 0xffffff : 0xffe2ac, preview ? 2.2 : 2.7); key.position.set(preview ? 250 : -850, preview ? 500 : 400, preview ? 375 : 150); key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024); key.shadow.camera.left = -650; key.shadow.camera.right = 650;
-  key.shadow.camera.top = 500; key.shadow.camera.bottom = -500; key.shadow.camera.near = 1; key.shadow.camera.far = 1500;
+  key.shadow.camera.top = 650; key.shadow.camera.bottom = -650; key.shadow.camera.near = 1; key.shadow.camera.far = 2100;
   key.shadow.normalBias = 1.3; key.shadow.bias = -.00015; key.shadow.radius = 4; scene.add(key);
-  const fill = new THREE.DirectionalLight(0x8aaeff, .4); fill.position.set(420, 250, 400); scene.add(fill);
-  const rim = new THREE.DirectionalLight(0x88aaff, .9); rim.position.set(-375, 250, -250); scene.add(rim);
+  const fill = new THREE.DirectionalLight(preview ? 0x8aaeff : 0xf4f3e5, .65); fill.position.set(420, 250, 400); scene.add(fill);
+  const rim = new THREE.DirectionalLight(preview ? 0x88aaff : 0xffdc9c, .55); rim.position.set(-375, 250, -250); scene.add(rim);
   let lastWidth = 0, lastHeight = 0;
   function resize() {
     const width = Math.round(canvas.clientWidth || canvas.getBoundingClientRect().width || 960);
@@ -203,87 +204,6 @@ function createHumanoid(kit) {
   return group;
 }
 
-function createFloor(kit, scene) {
-  const floor = kit.box(962, 12, 542, 16, kit.standard(PALETTE.floor, .75, .06), scene, 0, -7, 0); floor.receiveShadow = true;
-  kit.box(990, 11, 570, 20, kit.standard(0x172638, .42, .3), scene, 0, -16, 0);
-  const points = [];
-  for (let x = -450; x <= 450; x += 45) { points.push(x, .1, -235, x, .1, 235); }
-  for (let z = -225; z <= 225; z += 45) { points.push(-445, .1, z, 445, .1, z); }
-  const grid = new THREE.LineSegments(kit.geometry(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(points, 3))), kit.material(new THREE.LineBasicMaterial({ color: 0x4a647c, transparent: true, opacity: .22 })));
-  scene.add(grid);
-  for (const x of [-470, 470]) {
-    kit.box(9, 11, 485, 4, kit.standard(0x2c4156, .3, .38), scene, x, 3, 2);
-    kit.box(2, 1.4, 445, 1, kit.glow(0x99c4ee, .35), scene, x - Math.sign(x) * 5.5, 7.5, 2);
-  }
-  for (const z of [-251, 252]) kit.box(940, 11, 9, 4, kit.standard(0x2c4156, .3, .38), scene, 0, 3, z);
-  // Decorative supply lockers sit outside all model collision space.
-  for (const x of [-375, -260, 265, 380]) {
-    kit.box(86, 24, 20, 5, kit.standard(0x344d65, .48, .25), scene, x, 10, -266);
-    kit.box(66, 2, 14, 3, kit.standard(0x7391a4, .35, .4), scene, x, 23.5, -266);
-  }
-  for (const bench of BENCHES) {
-    const group = new THREE.Group(); group.position.copy(world(bench.x + bench.w / 2, bench.y + bench.h / 2)); scene.add(group);
-    kit.contact(group, bench.w + 45, bench.h + 35);
-    kit.box(bench.w - 18, 21, bench.h - 9, 8, kit.standard(0x5c7083, .43, .3), group, 0, 11, 0);
-    kit.box(bench.w, 7, bench.h, 7, kit.standard(0x4b6073, .28, .25), group, 0, 25, 0);
-    kit.box(bench.w - 16, 1.5, bench.h - 10, 4, kit.standard(0x233d51, .3, .25), group, 0, 29.5, 0);
-    kit.box(40, 1.5, 24, 3, kit.standard(0x3b8e91, .5, .05), group, -bench.w * .24, 31, 0);
-    kit.box(24, 7, 16, 3, kit.standard(0x294357, .26, .4), group, bench.w * .24, 34, -3);
-    kit.box(17, 1, 10, 1, kit.glow(0x8ddccd, .3), group, bench.w * .24, 38, -3);
-    kit.box(bench.w - 24, 2, 2, 1, kit.glow(PALETTE.blue, .4), group, 0, 18, bench.h / 2 - 1);
-  }
-}
-
-/** The training floor sits inside a larger room so the chase camera stays indoors. */
-function createAdventureRoom(kit, scene) {
-  const colliders = [];
-  kit.box(1320, 10, 940, 20, kit.standard(0x131c28, .72, .12), scene, 0, -23, 0);
-  const wall = kit.standard(0x263547, .62, .14), trim = kit.standard(0x465a70, .38, .38);
-  const light = kit.glow(0x9abbff, .65), screen = kit.glow(0x456b9d, .38);
-  for (const x of [-650, 650]) {
-    colliders.push(kit.box(18, 300, 920, 4, wall, scene, x, 135, 0));
-    for (const z of [-300, 20, 330]) {
-      const rack = kit.box(44, 144, 110, 5, kit.standard(0x172638, .4, .32), scene, x - Math.sign(x) * 30, 56, z); colliders.push(rack);
-      for (const y of [14, 36, 58, 80, 102]) {
-        kit.box(3, 10, 76, 1, kit.standard(0x526b84, .32, .4), scene, x - Math.sign(x) * 54, y, z);
-        kit.box(3.5, 2, 35, .5, light, scene, x - Math.sign(x) * 56, y + 5, z - 15);
-      }
-    }
-    kit.box(4, 3, 850, 1, light, scene, x - Math.sign(x) * 10, 188, 0);
-  }
-  // Observation window and its structural frame, with a distant orbital vista.
-  colliders.push(kit.box(1300, 48, 20, 3, wall, scene, 0, 9, -450));
-  colliders.push(kit.box(1300, 84, 20, 3, wall, scene, 0, 258, -450));
-  for (const x of [-635, -400, 400, 635]) colliders.push(kit.box(28, 225, 30, 4, trim, scene, x, 121, -448));
-  const glass = kit.box(770, 190, 4, 1, kit.material(new THREE.MeshBasicMaterial({ color: 0x658eb8, transparent: true, opacity: .1, depthWrite: false, side: THREE.DoubleSide })), scene, 0, 126, -453); colliders.push(glass);
-  for (const x of [-392, 392]) kit.box(3, 194, 6, 1, light, scene, x, 126, -438);
-  kit.box(792, 3, 5, 1, light, scene, 0, 222, -438);
-  const skyCanvas = document.createElement('canvas'); skyCanvas.width = 1024; skyCanvas.height = 512;
-  const sky = skyCanvas.getContext('2d'), fade = sky.createLinearGradient(0, 0, 0, 512);
-  fade.addColorStop(0, '#02050d'); fade.addColorStop(.62, '#132941'); fade.addColorStop(1, '#6b8ca5'); sky.fillStyle = fade; sky.fillRect(0, 0, 1024, 512);
-  for (let i = 0; i < 180; i++) { const x = (i * 137.508) % 1024, y = (i * 83.19) % 340; sky.fillStyle = i % 4 ? '#b7d3ed99' : '#f1f7ff'; sky.beginPath(); sky.arc(x, y, i % 5 ? .75 : 1.25, 0, Math.PI * 2); sky.fill(); }
-  const skyTexture = kit.texture(new THREE.CanvasTexture(skyCanvas)); skyTexture.colorSpace = THREE.SRGBColorSpace;
-  kit.mesh(kit.geometry(new THREE.PlaneGeometry(2100, 1000)), kit.material(new THREE.MeshBasicMaterial({ map: skyTexture })), scene, 0, 230, -1450, false);
-  const planet = kit.mesh(kit.geometry(new THREE.SphereGeometry(150, 48, 32)), kit.standard(0x7196b2, .94, .03), scene, -270, 235, -1040, false);
-  planet.rotation.z = -.2;
-  kit.mesh(kit.geometry(new THREE.SphereGeometry(155, 40, 24)), kit.material(new THREE.MeshBasicMaterial({ color: 0x75b7ef, transparent: true, opacity: .1, side: THREE.BackSide, depthWrite: false })), scene, -270, 235, -1040, false);
-  const moon = kit.mesh(kit.geometry(new THREE.SphereGeometry(44, 28, 18)), kit.standard(0xb6bfcb, .95, .02), scene, 370, 275, -1120, false); moon.rotation.y = .3;
-  // Rear wall, doorway, information screens and high ceiling light rails.
-  colliders.push(kit.box(1300, 300, 18, 4, wall, scene, 0, 135, 450));
-  kit.box(150, 145, 7, 3, kit.standard(0x172331, .4, .32), scene, 0, 57, 437);
-  kit.box(3, 125, 3, .6, light, scene, 0, 57, 432);
-  for (const x of [-220, 220]) {
-    kit.box(125, 82, 8, 6, kit.standard(0x0e1722, .3, .32), scene, x, 112, 432);
-    kit.box(105, 60, 1.5, 2, screen, scene, x, 112, 426.5);
-  }
-  for (const z of [-290, 0, 290]) {
-    kit.box(1250, 15, 18, 3, trim, scene, 0, 340, z);
-    kit.box(690, 3, 14, 1, light, scene, 0, 330, z);
-  }
-  const title = kit.label('ROBOTICS FIELD LAB', '#c2d4e6', '#263b51', 230, 30); title.position.set(0, 256, -428); scene.add(title);
-  return colliders;
-}
-
 function makePickup(kit, id, index) {
   const group = new THREE.Group(), item = new THREE.Group(); group.add(item);
   const ring = kit.ring(18, 1.1, kit.glow(id === 'controllers' ? PALETTE.blue : PALETTE.teal, .45), group, 0, 1.5, 0);
@@ -311,10 +231,10 @@ function makePickup(kit, id, index) {
 export function createArenaRenderer(canvas, { reducedMotion = false } = {}) {
   const base = rendererBase(canvas), { scene, renderer, camera } = base, kit = createKit();
   camera.position.set(0, 96, 205); camera.lookAt(0, 55, 0);
-  createFloor(kit, scene);
-  const cameraColliders = createAdventureRoom(kit, scene);
+  const cameraColliders = createWorkshopEnvironment(THREE, kit, scene, { BENCHES });
   scene.updateMatrixWorld(true);
   canvas.dataset.camera = 'third-person-perspective';
+  canvas.dataset.environment = 'sunlit-robotics-workshop';
   let cameraYaw = 0, cameraPitch = .2, cameraInitialized = false;
   const lookTarget = new THREE.Vector3(), desiredLook = new THREE.Vector3(), desiredCamera = new THREE.Vector3(), cameraDirection = new THREE.Vector3();
   const cameraRay = new THREE.Raycaster();
@@ -341,7 +261,7 @@ export function createArenaRenderer(canvas, { reducedMotion = false } = {}) {
   const dock = new THREE.Group(); dock.position.copy(world(ARENA.dock.x, ARENA.dock.y)); scene.add(dock);
   kit.disk(43, kit.basic(PALETTE.teal, .16), dock);
   const dockRing = kit.ring(39, 2, kit.glow(PALETTE.teal, .8), dock);
-  const dockLabel = kit.label('HOME DOCK', '#d6eaff', '#1c4062', 60, 15); dockLabel.position.set(0, 130, 0); dock.add(dockLabel);
+  const dockLabel = kit.label('HOME BASE', '#30443b', '#f3d9a2', 60, 15); dockLabel.position.set(0, 130, 0); dock.add(dockLabel);
   kit.mesh(kit.geometry(new THREE.CylinderGeometry(1.6, 1.6, 80, 12)), kit.basic(0x88bbff, .25), dock, 0, 40, 0, false);
   const player = createHumanoid(kit); player.scale.setScalar(.68); scene.add(player);
   const enemyObjects = [];
@@ -353,7 +273,7 @@ export function createArenaRenderer(canvas, { reducedMotion = false } = {}) {
   const pulse = kit.ring(1, .008, kit.basic(0x76b0ff, .7), scene); pulse.visible = false;
   const destination = kit.ring(9, 1, kit.basic(0x97b5ff, .55), scene); destination.visible = false;
   const radar = kit.ring(65, .65, kit.basic(PALETTE.teal, .15), scene);
-  const sensorLight = new THREE.PointLight(0xa7c5ff, 5000, 430, 1.5); sensorLight.visible = false; scene.add(sensorLight);
+  const sensorLight = new THREE.PointLight(0xffd99c, 1800, 300, 1.5); sensorLight.visible = false; scene.add(sensorLight);
   const particlesPool = [], floatersPool = [], labelTextures = new Map();
   function setupMission(state) {
     [...targetObjects, ...sparkObjects, ...stationObjects].forEach(object => scene.remove(object));
@@ -361,7 +281,7 @@ export function createArenaRenderer(canvas, { reducedMotion = false } = {}) {
     state.targets.forEach((target, i) => {
       const object = makePickup(kit, state.id, i); object.position.copy(world(target.x, target.y)); scene.add(object);
       const beam = kit.mesh(kit.geometry(new THREE.CylinderGeometry(1.1, 1.1, 100, 12)), kit.basic(state.id === 'motors' ? 0xffce82 : 0x85b4ff, .22), object, 0, 50, 0, false);
-      const tag = kit.label(state.id === 'controllers' ? `CHECKPOINT ${i + 1}` : state.id === 'power' ? 'ENERGY CELL' : state.id === 'motors' ? 'ACTUATOR' : 'SCAN SIGNAL', '#d4e8ff', '#233f5b', 65, 17); tag.position.set(0, 112, 0); object.add(tag);
+      const tag = kit.label(state.id === 'controllers' ? `CHECKPOINT ${i + 1}` : state.id === 'power' ? 'ENERGY CELL' : state.id === 'motors' ? 'ACTUATOR' : 'SCAN SIGNAL', '#30443b', '#f3dfb9', 65, 17); tag.position.set(0, 112, 0); object.add(tag);
       object.userData.beam = beam; object.userData.tag = tag; targetObjects.push(object);
     });
     state.sparks.forEach(spark => { const group = new THREE.Group(); group.position.copy(world(spark.x, spark.y)); kit.mesh(kit.geometry(new THREE.OctahedronGeometry(4.5, 1)), kit.glow(PALETTE.gold, .5), group, 0, 13, 0); scene.add(group); sparkObjects.push(group); });
@@ -370,7 +290,7 @@ export function createArenaRenderer(canvas, { reducedMotion = false } = {}) {
       kit.contact(group, 62, 54); kit.box(37, 22, 30, 7, kit.standard(0x51697d, .4, .35), group, 0, 11, 0);
       kit.box(31, 5, 26, 5, kit.standard(0xc6d6df, .35, .3), group, 0, 25, 0);
       const light = kit.box(23, 2, 16, 3, kit.glow(0xf1b568, .45), group, 0, 28.5, 0);
-      const label = kit.label(`STATION ${i + 1}`, '#c5dbec', '#263f58', 72, 18); label.position.set(0, 82, 0); group.add(label);
+      const label = kit.label(`STATION ${i + 1}`, '#30443b', '#f3dfb9', 72, 18); label.position.set(0, 82, 0); group.add(label);
       group.userData.light = light; stationObjects.push(group);
     });
     currentMission = state.id;
@@ -421,8 +341,7 @@ export function createArenaRenderer(canvas, { reducedMotion = false } = {}) {
     destination.visible = Boolean(state.navigationTarget);
     if (state.navigationTarget) destination.position.copy(world(state.navigationTarget.x, state.navigationTarget.y, 1.5));
     sensorLight.visible = state.id === 'sensors'; sensorLight.position.copy(world(state.player.x, state.player.y, elevation + 78));
-    // A cooler ambient palette hints at the sensor mission without concealing hazards.
-    scene.background.setHex(state.id === 'sensors' ? 0x07101a : 0x0a131d);
+    scene.background.setHex(0xe6cfab);
     particles.slice(0, 100).forEach((particle, i) => {
       if (!particlesPool[i]) { const object = kit.mesh(kit.geometry(new THREE.SphereGeometry(1, 8, 6)), kit.basic(0x9cf3d0), scene, 0, 0, 0, false); particlesPool.push(object); }
       const object = particlesPool[i]; object.visible = true; object.position.copy(world(particle.x, particle.y, 15 + (particle.life || .1) * 25)); object.scale.setScalar(Math.max(1, (particle.size || 3) * .55)); object.material.color.set(particle.color || '#9cf3d0');
@@ -436,6 +355,7 @@ export function createArenaRenderer(canvas, { reducedMotion = false } = {}) {
     });
     for (let i = Math.min(floaters.length, 12); i < floatersPool.length; i++) floatersPool[i].visible = false;
     updateCamera(state); scene.updateMatrixWorld(true); kit.constrainLabels(camera); renderer.render(scene, camera);
+    canvas.dataset.drawCalls = String(renderer.info.render.calls);
   }
   const raycaster = new THREE.Raycaster(), pointer = new THREE.Vector2(), floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), intersection = new THREE.Vector3();
   return {

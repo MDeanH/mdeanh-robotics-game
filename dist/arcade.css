@@ -1,119 +1,119 @@
-/* Full-window third-person adventure. The world is the interface's foundation. */
-.arcade-dialog { width: calc(100vw - 20px); height: calc(100svh - 20px); max-width: none; max-height: none; padding: 0; margin: auto; overflow: hidden; border: 1px solid #28394a; border-radius: 15px; background: #08121c; color: #edf4fb; box-shadow: 0 25px 100px #0008; }
-.arcade-dialog::backdrop { background: #050a12dd; backdrop-filter: blur(8px); }
+/* Full-window 3D workshop. Warm glass HUD surfaces leave the character and room in view. */
+.arcade-dialog { width: calc(100vw - 20px); height: calc(100svh - 20px); max-width: none; max-height: none; padding: 0; margin: auto; overflow: hidden; border: 1px solid #d0c4b0; border-radius: 15px; background: #c8b695; color: #2d3a3e; box-shadow: 0 25px 100px #45332160; border-color: #8d795b; }
+.arcade-dialog::backdrop { background: #373b2db3; backdrop-filter: blur(8px); }
 .arcade-dialog > .dialog-top { display: flex; justify-content: flex-end; position: absolute; top: 13px; left: 18px; right: 15px; z-index: 40; min-height: 36px; pointer-events: none; }
 .arcade-dialog > .dialog-top > .eyebrow { display: none; }
-.arcade-dialog .close-button { pointer-events: auto; width: 35px; height: 35px; background: #0d2030ba; color: #a4b9cf; border: 1px solid #bdd6ed20; border-radius: 11px; backdrop-filter: blur(10px); }
-.arcade-dialog .close-button:hover { background: #24435f; color: #fff; }
-.arcade-dialog > h2 { position: absolute; top: 20px; left: 23px; z-index: 35; margin: 0; max-width: calc(100% - 88px); color: #dceaf6; font-size: 17px; font-weight: 650; line-height: 1.3; letter-spacing: -.25px; text-shadow: 0 2px 10px #0007; pointer-events: none; }
+.arcade-dialog .close-button { pointer-events: auto; width: 35px; height: 35px; background: #fbf3e6eb; color: #4b5a51; border: 1px solid #d0c4b0; border-radius: 11px; backdrop-filter: blur(10px); border-color: #cab897aa; }
+.arcade-dialog .close-button:hover { background: #fff9ec; color: #263b33; }
+.arcade-dialog > h2 { position: absolute; top: 20px; left: 23px; z-index: 35; margin: 0; max-width: calc(100% - 88px); color: #34413c; font-size: 17px; font-weight: 650; line-height: 1.3; letter-spacing: -.25px; text-shadow: none; pointer-events: none; background: #fbf4e6e8; border: 1px solid #d4c4a899; border-radius: 8px; padding: 6px 10px; backdrop-filter: blur(10px); }
 .arcade-dialog #challenge-content { height: 100%; width: 100%; }
-.arcade-shell { position: relative; width: 100%; height: 100%; max-width: none; margin: 0; overflow: hidden; isolation: isolate; font-family: var(--body,system-ui,sans-serif); color: #e3effa; background: #08121c; touch-action: none; }
+.arcade-shell { position: relative; width: 100%; height: 100%; max-width: none; margin: 0; overflow: hidden; isolation: isolate; font-family: var(--body,system-ui,sans-serif); color: #2d3a3e; background: #c8b695; touch-action: none; color-scheme: light; }
 .arcade-shell button { cursor: pointer; touch-action: manipulation; font-family: inherit; }
 .arcade-shell button:disabled { cursor: default; }
-.arcade-shell button:focus-visible, .arcade-canvas:focus-visible { outline: 2px solid #79baff; outline-offset: 3px; }
-.arcade-stage { position: absolute; inset: 0; overflow: hidden; background: #101b28; }
+.arcade-shell button:focus-visible, .arcade-canvas:focus-visible { outline: 2px solid #2f6e92; outline-offset: 3px; }
+.arcade-stage { position: absolute; inset: 0; overflow: hidden; background: #d8c8a8; }
 .arcade-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; aspect-ratio: auto; outline: none; image-rendering: auto; cursor: grab; touch-action: none; }
 .arcade-canvas.adventure-looking { cursor: grabbing; }
-.adventure-vignette { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(180deg,#06142475,transparent 28%,transparent 63%,#07182ba3); }
-.arcade-hud { position: absolute; top: 58px; left: 22px; z-index: 3; display: flex; align-items: center; gap: 23px; height: 55px; max-width: calc(100% - 235px); padding: 8px 14px; border: 1px solid #b9d1e81f; border-radius: 13px; background: #0d2032c9; backdrop-filter: blur(14px); box-shadow: 0 6px 24px #03112015; }
-.arcade-hud small { display: block; margin-bottom: 3px; color: #7f9bb6; font-size: 8px; font-weight: 550; letter-spacing: .5px; }
+.adventure-vignette { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(180deg,#fff1cc0a,transparent 35%,transparent 70%,#4b4b2a24); }
+.arcade-hud { position: absolute; top: 58px; left: 22px; z-index: 3; display: flex; align-items: center; gap: 23px; height: 55px; max-width: calc(100% - 235px); padding: 8px 14px; border: 1px solid #d0c4b0; border-radius: 13px; background: #fbf4e6eb; backdrop-filter: blur(14px); box-shadow: 0 6px 24px #644a2420; border-color: #d1bc97aa; }
+.arcade-hud small { display: block; margin-bottom: 3px; color: #657063; font-size: 8px; font-weight: 550; letter-spacing: .5px; }
 .arcade-health-block { min-width: 89px; }
-.arcade-health { display: block; color: #f2acaa; font-size: 22px; font-weight: 500; letter-spacing: 1.6px; line-height: 1; white-space: nowrap; }
+.arcade-health { display: block; color: #a75842; font-size: 22px; font-weight: 500; letter-spacing: 1.6px; line-height: 1; white-space: nowrap; }
 .arcade-score-block { min-width: 64px; }
-.arcade-score { display: block; color: #e7f4ff; font-size: 23px; font-weight: 700; line-height: 1; letter-spacing: -.4px; font-variant-numeric: tabular-nums; }
-.arcade-combo { color: #83a5c0; font-size: 10px; font-weight: 550; white-space: nowrap; }
-.arcade-combo-hot { color: #f3c994; }
-.arcade-pause-button { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 31px; padding: 6px 10px; border: 1px solid #88b0d137; border-radius: 8px; color: #a5c1da; background: #24435da6; font-size: 12px; }
+.arcade-score { display: block; color: #31433d; font-size: 23px; font-weight: 700; line-height: 1; letter-spacing: -.4px; font-variant-numeric: tabular-nums; }
+.arcade-combo { color: #63745f; font-size: 10px; font-weight: 550; white-space: nowrap; }
+.arcade-combo-hot { color: #9c6c23; }
+.arcade-pause-button { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 31px; padding: 6px 10px; border: 1px solid #d0c4b0; border-radius: 8px; color: #4b6259; background: #e6e3d6; font-size: 12px; border-color: #c5bda5; }
 .arcade-pause-button span { font-size: 9px; }
-.arcade-pause-button:hover { background: #345e80; color: #f0f8ff; }
+.arcade-pause-button:hover { background: #d2dfd5; color: #2d5346; }
 .arcade-pause-button:disabled { opacity: .4; }
-.adventure-objective { position: absolute; top: 136px; left: 24px; z-index: 3; max-width: 365px; text-shadow: 0 2px 9px #041526c9; }
-.adventure-mission-tag { display: block; color: #7ca7c9; font-size: 9px; font-weight: 650; letter-spacing: 1px; text-transform: uppercase; }
-.arcade-goal { display: block; margin-top: 5px; color: #e1edf8; font-size: 17px; font-weight: 650; line-height: 1.4; letter-spacing: -.2px; }
-.arcade-return-goal { color: #9edbbc; }
-.adventure-guidance { display: flex; align-items: center; gap: 8px; margin-top: 10px; color: #9ab9d1; font-size: 11px; }
-.adventure-waypoint-arrow { display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid #e9ca8066; border-radius: 50%; color: #f2d58e; background: #342c1c99; font-size: 17px; font-weight: 600; transform-origin: center; }
-.adventure-waypoint-label { color: #c8dbe9; }
-.adventure-waypoint-range { color: #617f99; font-size: 9px; }
-.adventure-navigation { position: absolute; top: 59px; right: 23px; z-index: 3; width: 170px; padding: 10px; border: 1px solid #a4c2e02b; border-radius: 12px; background: #0c2034c2; backdrop-filter: blur(14px); box-shadow: 0 8px 25px #06132622; }
-.adventure-map-title { display: flex; justify-content: space-between; align-items: center; padding: 0 1px 7px; color: #7296b5; font-size: 8px; letter-spacing: .6px; }
-.adventure-map-title span:last-child { color: #456b8d; }
+.adventure-objective { position: absolute; top: 136px; left: 24px; z-index: 3; max-width: 365px; text-shadow: none; background: #fbf4e6e8; border: 1px solid #d4c4a899; border-radius: 10px; padding: 10px 12px; backdrop-filter: blur(10px); box-shadow: 0 5px 20px #60452312; }
+.adventure-mission-tag { display: block; color: #8a7045; font-size: 9px; font-weight: 650; letter-spacing: .3px; text-transform: none; }
+.arcade-goal { display: block; margin-top: 5px; color: #34463d; font-size: 17px; font-weight: 650; line-height: 1.4; letter-spacing: -.2px; }
+.arcade-return-goal { color: #39724e; }
+.adventure-guidance { display: flex; align-items: center; gap: 8px; margin-top: 10px; color: #66735f; font-size: 11px; }
+.adventure-waypoint-arrow { display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid #d4bf99; border-radius: 50%; color: #9a6627; background: #efdfbde8; font-size: 17px; font-weight: 600; transform-origin: center; border-color: #c69f63; }
+.adventure-waypoint-label { color: #52644f; }
+.adventure-waypoint-range { color: #6a7563; font-size: 9px; }
+.adventure-navigation { position: absolute; top: 59px; right: 23px; z-index: 3; width: 170px; padding: 10px; border: 1px solid #d0c4b0; border-radius: 12px; background: #fbf4e6eb; backdrop-filter: blur(14px); box-shadow: 0 8px 25px #6045231a; border-color: #d1bc97aa; }
+.adventure-map-title { display: flex; justify-content: space-between; align-items: center; padding: 0 1px 7px; color: #606f5c; font-size: 8px; letter-spacing: .6px; }
+.adventure-map-title span:last-child { color: #7b775f; }
 .adventure-minimap { display: block; width: 100%; height: auto; overflow: visible; }
-.adventure-minimap .map-floor { fill: #102b41; stroke: #35546d; stroke-width: 5; }
-.adventure-minimap .map-obstacle { fill: #3c5062; stroke: #627184; stroke-width: 3; }
-.adventure-minimap .map-dock { fill: #225a4e; stroke: #73bca8; stroke-width: 5; }
-.adventure-minimap .map-target { fill: #a3bfd9; }
-.adventure-minimap .map-enemy { fill: #e3837e; }
-.adventure-minimap .map-station { fill: #646a57; stroke: #b2b990; stroke-width: 4; }
-.adventure-minimap .map-station-charged { fill: #4d8b70; stroke: #9bd3b3; }
-.adventure-minimap .map-objective { fill: #d6b76e22; stroke: #efd295; stroke-width: 7; }
-.adventure-minimap .map-guide-line { fill: none; stroke: #d8bb7d; stroke-width: 4; stroke-dasharray: 13 13; }
-.adventure-minimap .map-player circle { fill: #5bb2f1; stroke: #d7eeff; stroke-width: 4; }
-.adventure-minimap .map-player path { fill: #e2f3ff; }
-.adventure-view-label { display: block; margin-top: 6px; text-align: center; color: #426886; font-size: 8px; }
-.adventure-crosshair { position: absolute; left: 50%; top: 45%; z-index: 2; width: 9px; height: 9px; border: 1px solid #c3e4ff55; border-radius: 50%; transform: translate(-50%,-50%); pointer-events: none; }
-.adventure-crosshair i { display: block; margin: 3px; width: 1px; height: 1px; border-radius: 50%; background: #dfedff66; }
-.arcade-mission-bar { position: absolute; right: 23px; bottom: 23px; z-index: 4; display: flex; align-items: center; gap: 8px; padding: 9px; border: 1px solid #95b8d42b; border-radius: 13px; background: #0e2338cf; backdrop-filter: blur(14px); }
-.adventure-jump, .arcade-special { display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 37px; min-width: 113px; padding: 7px 11px; border: 1px solid #5d89b04d; border-radius: 9px; color: #b6d6f0; background: #234c719e; font-size: 11px; font-weight: 600; }
-.adventure-jump > span { color: #c4d9e9; font-size: 18px; line-height: 1; }
-.arcade-special { background: #275d8a; border-color: #5d9cc7; }
-.adventure-jump:hover:not(:disabled), .arcade-special:hover:not(:disabled) { color: #f3f9ff; background: #3676a6; }
-.adventure-jump:disabled, .arcade-special:disabled { color: #476987; background: #1b354b; border-color: #345570; }
+.adventure-minimap .map-floor { fill: #d8c9ab; stroke: #b29e79; stroke-width: 5; }
+.adventure-minimap .map-obstacle { fill: #a77c4f; stroke: #785638; stroke-width: 3; }
+.adventure-minimap .map-dock { fill: #b8c9a1; stroke: #52815a; stroke-width: 5; }
+.adventure-minimap .map-target { fill: #82633d; }
+.adventure-minimap .map-enemy { fill: #b65c42; }
+.adventure-minimap .map-station { fill: #b5aa79; stroke: #857140; stroke-width: 4; }
+.adventure-minimap .map-station-charged { fill: #7caa71; stroke: #3c744c; }
+.adventure-minimap .map-objective { fill: #fff0b15c; stroke: #ac7827; stroke-width: 7; }
+.adventure-minimap .map-guide-line { fill: none; stroke: #9f6a23; stroke-width: 4; stroke-dasharray: 13 13; }
+.adventure-minimap .map-player circle { fill: #377d9d; stroke: #f9f5e9; stroke-width: 4; }
+.adventure-minimap .map-player path { fill: #f9f5e9; }
+.adventure-view-label { display: block; margin-top: 6px; text-align: center; color: #747b67; font-size: 8px; }
+.adventure-crosshair { position: absolute; left: 50%; top: 45%; z-index: 2; width: 9px; height: 9px; border: 1px solid #d0c4b0; border-radius: 50%; transform: translate(-50%,-50%); pointer-events: none; border-color: #37473b66; }
+.adventure-crosshair i { display: block; margin: 3px; width: 1px; height: 1px; border-radius: 50%; background: #344e3b66; }
+.arcade-mission-bar { position: absolute; right: 23px; bottom: 23px; z-index: 4; display: flex; align-items: center; gap: 8px; padding: 9px; border: 1px solid #d0c4b0; border-radius: 13px; background: #fbf4e6eb; backdrop-filter: blur(14px); border-color: #d1bc97aa; }
+.adventure-jump, .arcade-special { display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 37px; min-width: 113px; padding: 7px 11px; border: 1px solid #d0c4b0; border-radius: 9px; color: #455c4c; background: #e5e7d9; font-size: 11px; font-weight: 600; border-color: #b6c2a8; }
+.adventure-jump > span { color: #557457; font-size: 18px; line-height: 1; }
+.arcade-special { background: #326e85; border-color: #326e85; color: #fff7e9; }
+.adventure-jump:hover:not(:disabled), .arcade-special:hover:not(:disabled) { color: #fff9eb; background: #285b70; }
+.adventure-jump:disabled, .arcade-special:disabled { color: #8b8e7b; background: #e2ddcf; border-color: #cec4ad; }
 .arcade-special-icon { font-size: 18px; line-height: 1; }
-.arcade-mission-bar kbd { padding: 2px 4px; color: #739abd; background: #153d61; border: 1px solid #477397; border-radius: 4px; font-size: 8px; font-family: inherit; }
-.adventure-reset-camera { color: #627f98; background: none; border: 0; padding: 8px; font-size: 9px; }
-.adventure-reset-camera:hover { color: #b3cde2; }
-.arcade-status { position: absolute; left: 24px; bottom: 68px; z-index: 3; max-width: min(480px,55%); margin: 0; padding: 8px 11px; border-left: 2px solid #6fa3ce6b; border-radius: 0 5px 5px 0; background: #0b1e308c; color: #9ab5cc; font-size: 11px; line-height: 1.6; backdrop-filter: blur(8px); }
-.arcade-footer { display: flex; gap: 12px; justify-content: space-between; position: absolute; left: 24px; bottom: 23px; z-index: 3; max-width: calc(100% - 455px); color: #577993; font-size: 8px; line-height: 1.9; text-shadow: 0 2px 6px #0007; }
-.arcade-footer kbd { font: inherit; color: #8eabc3; padding: 2px 4px; border: 1px solid #466a8550; border-radius: 4px; background: #0b2438b3; white-space: nowrap; }
-.arcade-footer b { color: #3f627e; padding: 0 2px; font-weight: 400; }
+.arcade-mission-bar kbd { padding: 2px 4px; color: #536a5a; background: #f5f1e6; border: 1px solid #d0c4b0; border-radius: 4px; font-size: 8px; font-family: inherit; border-color: #b9bca4; }
+.adventure-reset-camera { color: #64715f; background: none; border: 0; padding: 8px; font-size: 9px; }
+.adventure-reset-camera:hover { color: #2c5d4c; }
+.arcade-status { position: absolute; left: 24px; bottom: 68px; z-index: 3; max-width: min(480px,55%); margin: 0; padding: 8px 11px; border-left: 2px solid #b68d44; border-radius: 0 5px 5px 0; background: #fbf4e6e8; color: #52614e; font-size: 11px; line-height: 1.6; backdrop-filter: blur(8px); }
+.arcade-footer { display: flex; gap: 12px; justify-content: space-between; position: absolute; left: 24px; bottom: 23px; z-index: 3; max-width: calc(100% - 455px); color: #53614f; font-size: 8px; line-height: 1.9; text-shadow: 0 1px 4px #fff6df; background: #fbf4e6d9; padding: 5px 8px; border-radius: 6px; }
+.arcade-footer kbd { font: inherit; color: #4f6655; padding: 2px 4px; border: 1px solid #d0c4b0; border-radius: 4px; background: #f8f2e5e0; white-space: nowrap; border-color: #a8b19a99; }
+.arcade-footer b { color: #8f967e; padding: 0 2px; font-weight: 400; }
 .arcade-footer > span:last-child { display: none; }
 .arcade-touch-controls { display: none; position: absolute; left: 16px; right: 16px; bottom: 19px; z-index: 6; align-items: flex-end; justify-content: space-between; gap: 12px; pointer-events: none; }
 .arcade-touch-controls button { pointer-events: auto; }
 .arcade-dpad { display: grid; grid-template: repeat(2,44px)/repeat(3,44px); gap: 4px; touch-action: none; pointer-events: none; }
-.arcade-pad-button { padding: 0; color: #bed8ed; background: #1f4667c9; border: 1px solid #91b3cd52; border-radius: 12px; backdrop-filter: blur(12px); font-size: 22px; user-select: none; -webkit-user-select: none; touch-action: none; box-shadow: 0 5px 15px #04132322; }
+.arcade-pad-button { padding: 0; color: #425f50; background: #fbf4e6ed; border: 1px solid #d0c4b0; border-radius: 12px; backdrop-filter: blur(12px); font-size: 22px; user-select: none; -webkit-user-select: none; touch-action: none; box-shadow: 0 5px 15px #49371c20; border-color: #c2b18eee; }
 .arcade-pad-up { grid-column: 2; grid-row: 1; }
 .arcade-pad-left { grid-column: 1; grid-row: 2; }
 .arcade-pad-down { grid-column: 2; grid-row: 2; }
 .arcade-pad-right { grid-column: 3; grid-row: 2; }
-.arcade-pad-pressed { color: #eef8ff; background: #397faacb; border-color: #b5dcf5; }
-.adventure-touch-look { flex: 1; margin-bottom: 11px; color: #5a839f; text-align: center; font-size: 8px; line-height: 1.6; text-shadow: 0 2px 5px #000; pointer-events: none; }
+.arcade-pad-pressed { color: #fff6e5; background: #376f80ee; border-color: #afcac1; }
+.adventure-touch-look { flex: 1; margin-bottom: 11px; color: #4e654e; text-align: center; font-size: 8px; line-height: 1.6; text-shadow: 0 1px 5px #fff8e7; pointer-events: none; }
 .adventure-touch-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
 .adventure-touch-actions > div { display: flex; gap: 9px; }
-.adventure-touch-jump, .arcade-touch-special { width: 59px; height: 59px; flex-shrink: 0; margin: 0; color: #c6e4fb; background: #285a80dd; border: 1px solid #76abce; border-radius: 50%; backdrop-filter: blur(12px); font-size: 10px; font-weight: 650; user-select: none; -webkit-user-select: none; box-shadow: 0 5px 18px #03121e33; }
-.arcade-touch-special { background: #347cafdd; border-color: #9bc4df; }
-.adventure-touch-sprint { min-height: 27px; padding: 5px 10px; color: #7ea2bd; background: #10283cbd; border: 1px solid #4b769b6b; border-radius: 8px; font-size: 9px; }
-.adventure-sprint-active { color: #b6eadb; border-color: #7bb2a0; background: #1a5045d9; }
-.arcade-overlay { position: absolute; inset: 0; z-index: 25; display: flex; align-items: center; justify-content: center; padding: 25px; background: linear-gradient(90deg,#06111a70,#06111a33 45%,#06111a70); backdrop-filter: blur(2px); line-height: 1.5; }
+.adventure-touch-jump, .arcade-touch-special { width: 59px; height: 59px; flex-shrink: 0; margin: 0; color: #425e4d; background: #f8f0e2f0; border: 1px solid #d0c4b0; border-radius: 50%; backdrop-filter: blur(12px); font-size: 10px; font-weight: 650; user-select: none; -webkit-user-select: none; box-shadow: 0 5px 18px #49371c26; border-color: #bac2a7; }
+.arcade-touch-special { background: #326e85ed; border-color: #80a5a6; color: #fff7e9; }
+.adventure-touch-sprint { min-height: 27px; padding: 5px 10px; color: #4f6c52; background: #fbf4e6eb; border: 1px solid #d0c4b0; border-radius: 8px; font-size: 9px; border-color: #bac2a7; }
+.adventure-sprint-active { color: #f5f3dc; border-color: #b7c899; background: #3d7555ed; }
+.arcade-overlay { position: absolute; inset: 0; z-index: 25; display: flex; align-items: center; justify-content: center; padding: 25px; background: linear-gradient(90deg,#2b37294d,#2b372920 45%,#2b37294d); backdrop-filter: blur(2px); line-height: 1.5; }
 .arcade-overlay[hidden] { display: none; }
-.arcade-overlay-card { width: 100%; max-width: 485px; max-height: 100%; overflow: auto; scrollbar-width: thin; padding: 27px 32px; border: 1px solid #b5d4ee22; border-radius: 21px; background: #102234db; box-shadow: 0 25px 85px #03111c55, inset 0 1px 0 #ffffff08; backdrop-filter: blur(18px); text-align: center; }
-.arcade-eyebrow { display: block; color: #8cb7d5; font-size: 10px; font-weight: 600; letter-spacing: 1.2px; }
-.arcade-hero-robot { width: 79px; height: 79px; margin: 15px auto 10px; filter: drop-shadow(0 9px 18px #03132066); }
+.arcade-overlay-card { width: 100%; max-width: 485px; max-height: 100%; overflow: auto; scrollbar-width: thin; padding: 27px 32px; border: 1px solid #d0c4b0; border-radius: 21px; background: #fbf4e6f2; box-shadow: 0 25px 85px #4b3b2840, inset 0 1px 0 #fffaf0; backdrop-filter: blur(18px); text-align: center; border-color: #cfb991; }
+.arcade-eyebrow { display: block; color: #8c7045; font-size: 10px; font-weight: 600; letter-spacing: 1.2px; }
+.arcade-hero-robot { width: 79px; height: 79px; margin: 15px auto 10px; filter: drop-shadow(0 9px 18px #61472c20); }
 .arcade-shell svg { display: block; width: 100%; height: 100%; }
-.arcade-overlay h3 { margin: 8px 0 13px; color: #eaf5ff; font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 1.1; }
-.arcade-overlay p { max-width: 415px; margin: 0 auto 13px; color: #9db4c8; font-size: 13px; line-height: 1.8; }
-.arcade-overlay .adventure-start-hint { color: #6788a5; font-size: 11px; line-height: 1.7; margin-bottom: 17px; }
+.arcade-overlay h3 { margin: 8px 0 13px; color: #34453c; font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 1.1; }
+.arcade-overlay p { max-width: 415px; margin: 0 auto 13px; color: #606e5c; font-size: 13px; line-height: 1.8; }
+.arcade-overlay .adventure-start-hint { color: #6a765f; font-size: 11px; line-height: 1.7; margin-bottom: 17px; }
 .arcade-start-controls { display: flex; align-items: flex-start; justify-content: center; gap: 22px; margin: 17px 0; }
 .arcade-start-controls > span { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.arcade-start-controls kbd { padding: 4px 7px; border: 1px solid #769bb95e; border-radius: 6px; color: #b3d0e6; background: #294c6899; font-size: 10px; font-family: inherit; min-width: 31px; }
-.arcade-start-controls small { color: #537797; font-size: 8px; }
-.arcade-main-button { display: flex; align-items: center; justify-content: center; gap: 23px; min-height: 47px; min-width: 220px; padding: 12px 22px; margin: 17px auto 0; color: #071c2d; background: #77bcf7; border: 1px solid #b5dbfa; border-radius: 12px; box-shadow: 0 8px 25px #08264833; font-size: 12px; font-weight: 700; }
-.arcade-main-button:hover { background: #a1d2fa; transform: translateY(-1px); }
+.arcade-start-controls kbd { padding: 4px 7px; border: 1px solid #d0c4b0; border-radius: 6px; color: #52694f; background: #e9e3d4; font-size: 10px; font-family: inherit; min-width: 31px; border-color: #c2ba9d; }
+.arcade-start-controls small { color: #728064; font-size: 8px; }
+.arcade-main-button { display: flex; align-items: center; justify-content: center; gap: 23px; min-height: 47px; min-width: 220px; padding: 12px 22px; margin: 17px auto 0; color: #fff8e9; background: #326e85; border: 1px solid #d0c4b0; border-radius: 12px; box-shadow: 0 8px 25px #405a3e22; font-size: 12px; font-weight: 700; border-color: #3c7b8b; }
+.arcade-main-button:hover { background: #285c6f; transform: translateY(-1px); }
 .arcade-main-button:active { transform: translateY(1px); }
 .arcade-main-button span { font-size: 16px; }
-.arcade-overlay-card > small { display: block; margin-top: 13px; color: #4f718f; font-size: 9px; line-height: 1.6; }
-.arcade-plain-button { display: block; margin: 8px auto 0; padding: 7px 10px; min-height: 31px; border: 0; background: none; color: #7598b4; font-size: 10px; text-decoration: underline; text-underline-offset: 4px; }
-.arcade-plain-button:hover { color: #c2ddf0; }
+.arcade-overlay-card > small { display: block; margin-top: 13px; color: #71795f; font-size: 9px; line-height: 1.6; }
+.arcade-plain-button { display: block; margin: 8px auto 0; padding: 7px 10px; min-height: 31px; border: 0; background: none; color: #617251; font-size: 10px; text-decoration: underline; text-underline-offset: 4px; }
+.arcade-plain-button:hover { color: #355a3f; }
 .arcade-upgrade-list { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 12px 0; }
-.arcade-upgrade-list > span { padding: 4px 7px; color: #8cbda9; border: 1px solid #416d626b; border-radius: 20px; background: #1c403b96; font-size: 8px; }
+.arcade-upgrade-list > span { padding: 4px 7px; color: #46754c; border: 1px solid #acc29e; border-radius: 20px; background: #e1ebd3; font-size: 8px; border-color: #afc49e; }
 .arcade-small-card { max-width: 410px; padding: 30px; }
 .arcade-small-card h3 { font-size: 28px; }
 .arcade-small-card .arcade-hero-robot { width: 62px; height: 62px; margin: 10px auto; }
 .arcade-final-score { margin: 16px auto; }
-.arcade-final-score small { display: block; color: #7091ac; font-size: 9px; }
-.arcade-final-score strong { display: block; margin-top: 6px; color: #e9f5ff; font-size: 45px; font-weight: 750; line-height: 1.1; letter-spacing: -1.3px; font-variant-numeric: tabular-nums; }
-.arcade-earned { margin: 14px auto 0; max-width: 300px; padding: 12px; color: #6caa98; border: 1px solid #416c6159; border-radius: 11px; background: #1b3e3699; font-size: 9px; }
-.arcade-earned strong { display: block; margin-top: 5px; color: #9cd8c1; font-size: 14px; font-weight: 600; }
+.arcade-final-score small { display: block; color: #7a7c60; font-size: 9px; }
+.arcade-final-score strong { display: block; margin-top: 6px; color: #3c5143; font-size: 45px; font-weight: 750; line-height: 1.1; letter-spacing: -1.3px; font-variant-numeric: tabular-nums; }
+.arcade-earned { margin: 14px auto 0; max-width: 300px; padding: 12px; color: #51764d; border: 1px solid #acc29e; border-radius: 11px; background: #e4ecd7; font-size: 9px; border-color: #b7c89f; }
+.arcade-earned strong { display: block; margin-top: 5px; color: #366642; font-size: 14px; font-weight: 600; }
 .arcade-win-card .arcade-hero-robot { display: none; }
 .arcade-win-card h3 { font-size: 29px; }
 .arcade-win-card p { font-size: 12px; }
