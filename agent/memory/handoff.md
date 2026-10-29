@@ -1,50 +1,36 @@
-# Handoff — mdeanh Robotics game
-Updated 2026-10-28. Current objective: third-person 3D robotics adventure. Implementation and verification of that new direction are pending.
+# Handoff — Codex robotics games
+Updated 2026-10-28. The third-person 3D game is published and verified. The original retro game is preserved separately.
 
-## Game link invariant — latest user directive
-KEEP THE RETRO GAME. EVERY NEW GAME GETS A NEW LINK. New public game links must contain codex. Create a separate Netlify site for each new game; never overwrite an existing game or reuse its canonical URL for a new game.
+## Non-negotiable game links
+Every NEW GAME gets a NEW Netlify site and public link containing `codex`. Never deploy a different game over an existing game. Preserve existing game URLs. Use explicit site IDs; do not infer a target from a parent or old Netlify binding.
 
-Retro canonical: https://mdeanh-robotics-workshop.netlify.app/ (site 52fa8bfb-3b0f-4627-94c4-be935970fb69). Root restored retro deploy 6ae289b8b05a2208ace788a2 and verified the canonical live URL returns HTTP 200 with its pixel-game title. Preserve this site for retro only.
+- Third-person game: https://mdeanh-codex-luka-3d.netlify.app — source `dist/`, site `431dd23f-eab9-465d-8714-ae5720b481e4`, deploy `6ae297c0a2e6a58e53d9d88c`.
+- Unchanged retro game: https://mdeanh-codex-retro.netlify.app — source `games/retro/`, site `e46a19a3-cfe9-4241-99dc-f3c5bfae5ca3`, deploy `6ae295e0e9e677336c2719e5`.
+- Original retro URL remains https://mdeanh-robotics-workshop.netlify.app — retro-only site `52fa8bfb-3b0f-4627-94c4-be935970fb69`, restored original deploy `6ae289b8b05a2208ace788a2`.
+- Explicit mapping: `docs/game-sites.json`. Local ignored `.netlify/state.json` points to the third-person site.
 
-The new third-person site is created and renamed mdeanh-codex-luka-3d: ID 431dd23f-eab9-465d-8714-ae5720b481e4, URL https://mdeanh-codex-luka-3d.netlify.app. Third-person game deployment/verification remain PENDING. Use this fresh site ID explicitly, never the retro ID or an inferred local/parent .netlify binding. An unchanged Codex-named retro copy is published at https://mdeanh-codex-retro.netlify.app, site e46a19a3-cfe9-4241-99dc-f3c5bfae5ca3, deploy 6ae295e0e9e677336c2719e5. Root final byte verification is pending. Original retro URL remains preserved.
+## Current product
+Luka: Systems Online is a third-person 3D adventure. Camera behind the humanoid, explorable orbital lab, solid benches, jump/gravity/landing, sprint, enemies, pickups, waypoint and navigator. Four missions teach sensors, joint actuators, controllers, and power. Fresh visits open the 3D ready screen; closing it opens the garage and module selector.
 
-## Current user direction
-Put the camera behind Luka in an explorable lab. Add jumping, sprinting, direct movement, and camera look. Target controls are WASD movement, Space jump, Shift sprint, E system ability, Q/R camera look, and drag to look. These are implementation targets, not yet verified results. Root owns model/tests; renderer work is in scene3d.js; arcade/UI work is in arcade.js and CSS.
+WASD/arrows move relative to camera; Space jumps; Shift sprints; E uses mission ability; Q/R and drag turn the camera; P pauses. Phone controls include movement, jump, sprint toggle, ability and drag look. Reward gating, 400 XP campaign, version-1 saves and high scores remain compatible.
 
-The visual reference is the user's owned Luka Remote View at https://luka-a2.netlify.app, with local frontend /Users/friday/Claude/code/luka-web/site/public, and public MDeanH/luka-a2-ultra-model geometry. Use a neutral gray humanoid with blue-accent modern styling. The earlier Steadwell reference was rejected. Public T2D0 geometry remains estimated, not calibrated to the physical Luka. No robot connection or command transport belongs in this educational game.
+Correct reference is the user's owned Luka Remote View at https://luka-a2.netlify.app, not Steadwell. Public estimated A2 geometry is used in the optional garage preview with its license/provenance; the active game avatar is an illustrative animated humanoid. No robot connection or command transport exists. Game physics and model/FK checks are software evidence, not hardware calibration or verification.
 
-## Existing architecture
-- dist/index.html + style.css: learning hub.
-- dist/app.js: browser save and modal orchestration.
-- dist/arcade.js + arcade.css: game input, HUD, lifecycle.
-- dist/scene3d.js: Three.js arena and model presentation; camera conversion in progress.
-- dist/luka-visual.js + assets/luka/: public licensed estimated A2 geometry.
-- dist/arena2d.js: vector compatibility fallback from the previous release.
-- dist/arcade-model.js: deterministic game rules; third-person changes in progress.
-- dist/game.js + model.js + game.css: optional Simulation lab puzzles.
-- dist/progress.js: existing version-1 local save and high scores.
-- baseline/: kept explorer and historical visual assets.
-- games/retro/: all 16 exact original published retro files, preserved separately from dist/.
-- docs/game-sites.json: explicit game-source/site-ID/URL/deploy map. Ignored local .netlify/state.json points to the new 3D site, but every deploy still requires an explicit ID.
-- root index.html: preserved separate starter from main.
+## Verification
+- 44 tests pass: original gameplay/save contracts plus jump, no double-jump, pause freeze, bench landing/walk-off, sprint normalization/boundaries, airborne rover clearance and grounded dock gating. Source checks pass for 11 modules, assets and baseline.
+- Browser: actual WebGL with data-camera=third-person-perspective. Full Sequence sprint through held WASD and E pulse won2050 with5/5 integrity; claim completed; reload retained best2050 and400XP without duplicate XP.
+- Visible Space jump, Q/R look and Shift+W camera-relative sprint exercised. At1280x720 the game fills the viewport without horizontal overflow.
+- Phone390x844: Start visible y534.5–584.5, no horizontal overflow. Held forward, sprint toggle, jump, pulse, camera drag and pause exercised; navigator advanced100,450→100,159.3.
+- Reproduced near-camera billboard covering the view during a turn/sprint/jump; view-depth label scaling fixes it. Same actual input sequence now keeps robot/room visible. Fresh browser warning/error logs empty.
+- New public game: all26 filesHTTP200 and SHA256-identical to local dist (24,440,844bytes). Actual public scanner mission, camera turning, sprint, two revealed chips, pause and modern title verified; logs empty.
+- Retro copy: all16 filesHTTP200 and SHA256-identical to games/retro; original and Codex retro URLs both return pixel-game title. Retro browser screenshot captured.
+- Forced WebGL fallback and reduced-motion preference were reviewed in source, not forced in browser. No hardware test was performed.
 
-## Current third-person model review
-44 automated tests pass, including five adventure tests for jump/landing, pause, sprint, collision, and airborne dock gating. An additional source-model probe landed on the bench at elevation 32 and then walked off each of four edges to elevation 0 with grounded=true. No confirmed physics defect found. These are software/model checks; third-person browser and publication checks remain pending.
+Evidence artifacts are in ignored `output/`: third-person-deploy-verification.json, retro-codex-verification.json, third-person-mission-win.jpg, codex-luka-3d-public.jpg, codex-retro-preserved.jpg.
 
-## Historical verified modern release
-Before this third-person request, 39 automated tests and source checks passed. Root browser QA observed the WebGL arena; the public hub loaded all 47 estimated A2 meshes with data-visual=luka-estimated-a2; a complete Sequence sprint keyboard run won at score 1380 with 3/4 integrity and a visible claim button. At 1280x720 the dialog client/scroll height was 662. At 390x844 there was no horizontal overflow; an energy-cell state at score 220, held Move up, shield action, and pause/resume were observed. These checks describe the prior modern release, not the new third-person implementation. Forced fallback, reduced-motion mode, and hardware behavior were not browser/hardware-tested.
+## Source and commands
+GitHub repo: https://github.com/MDeanH/mdeanh-robotics-game. Work branch `codex/pixel-workshop`, PR1. Source snapshot `0fafb46`; merged current main `78a91d8` as `ef05fce`, preserving its separate root starter and saving its README in docs/original-starter-README.md. Do not merge the PR into main without a user request. Main/root starter is a separate concurrent workflow/site.
 
-## Hosting and source
-- Preserved retro canonical URL: https://mdeanh-robotics-workshop.netlify.app/; retro-only site ID 52fa8bfb-3b0f-4627-94c4-be935970fb69.
-- New third-person site: mdeanh-codex-luka-3d, confirmed ID 431dd23f-eab9-465d-8714-ae5720b481e4, URL https://mdeanh-codex-luka-3d.netlify.app. Third-person game deploy and live verification: PENDING.
-- Codex-named unchanged retro copy: https://mdeanh-codex-retro.netlify.app; site e46a19a3-cfe9-4241-99dc-f3c5bfae5ca3, published deploy 6ae295e0e9e677336c2719e5. Root final byte verification PENDING. Preserve the original retro canonical URL too.
-- Previous modern deploy 6ae2946060d6e5857ff3ac02 is a historical artifact, superseded by the current third-person direction and the new-link requirement. Root verified that previous artifact's 26 files (24,418,199 bytes) anonymously returned HTTP 200 and matched local SHA-256, with live WebGL movement/turbo and no warning/error logs. Those results do not verify the third-person game.
-- GitHub: MDeanH/mdeanh-robotics-game, branch codex/pixel-workshop, PR https://github.com/MDeanH/mdeanh-robotics-game/pull/1. Preserve concurrent changes on main; root is handling its merge.
-- Prior immutable retro permalink remains https://6ae289b8b05a2208ace788a2--mdeanh-robotics-workshop.netlify.app/; canonical retro URL above must remain retro too.
-- Earlier Sites registration remains unpublished; do not publish it.
+`npm start` serves dist on4173. `npm test` and `npm run check` verify software. Only deploy this 3D game to `431dd23f-eab9-465d-8714-ae5720b481e4` with `--dir dist --no-build --prod`. Retro source must remain unchanged unless the user requests a retro edit. Earlier Sites registration remains unpublished.
 
-## Run and verify
-npm start serves the local preview on 4173. npm test checks game/save/model contracts. npm run check checks source and assets. After final third-person checks, deploy only to the confirmed new site: netlify deploy --site 431dd23f-eab9-465d-8714-ae5720b481e4 --dir dist --no-build --prod. No third-person deployment targeting the retro site is authorized.
-
-## Next
-Complete the behind-character camera and third-person movement, run the updated harness, verify actual browser movement/jump/sprint/ability/look and touch behavior, then publish to the confirmed NEW third-person Netlify site and record its NEW public link. Verify the retro canonical still serves the retro game. Record the new deploy ID and distinguish fresh checks from historical evidence. Preserve saves and the kept baseline. Further curriculum depth, age band, more robots, and teacher features remain user decisions.
+Further work follows user play feedback. Open product decisions: student age band, deeper in-world lessons, more levels/robots, and teacher reporting.

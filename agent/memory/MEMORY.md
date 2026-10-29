@@ -12,3 +12,5 @@
 - 2026-10-28: user explicitly changed direction to a current/modern game, not retro. Earlier pixel choice is historical. Modern 3D game replaces that visual style, preserving gameplay and saves. Prior artwork/font assets are archived in baseline/retro-assets.
 
 - User corrected the reference: use their own Netlify/GitHub projects, not Steadwell. Verified user-owned Luka Remote View at https://luka-a2.netlify.app; live index.html, app.css, figure.js match /Users/friday/Claude/code/luka-web/site/public bytes. User public model repo is MDeanH/luka-a2-ultra-model (9490d0a); private iPad data repo is separate and its onboard model is not licensed for redistribution.
+
+- Latest user directive: every new game gets its own new Netlify site/link containing codex. Preserve old games and URLs. Retro is kept in games/retro and at both mdeanh-robotics-workshop.netlify.app and mdeanh-codex-retro.netlify.app. The third-person game is separate at mdeanh-codex-luka-3d.netlify.app; docs/game-sites.json is the source/site map.
