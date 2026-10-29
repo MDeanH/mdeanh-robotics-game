@@ -8,3 +8,7 @@
 - User explicitly requested PUBLIC Netlify hosting. Earlier private Sites registration remains unpublished and is superseded.
 - Existing GitHub main contains another concurrent starter; preserved root index.html and main history; workshop changes are on codex/pixel-workshop.
 - Artwork provenance: docs/artwork.md. Browser proof and phone regression: docs/browser-qa.md.
+
+- 2026-10-28: user explicitly changed direction to a current/modern game, not retro. Earlier pixel choice is historical. Modern 3D game replaces that visual style, preserving gameplay and saves. Prior artwork/font assets are archived in baseline/retro-assets.
+
+- User corrected the reference: use their own Netlify/GitHub projects, not Steadwell. Verified user-owned Luka Remote View at https://luka-a2.netlify.app; live index.html, app.css, figure.js match /Users/friday/Claude/code/luka-web/site/public bytes. User public model repo is MDeanH/luka-a2-ultra-model (9490d0a); private iPad data repo is separate and its onboard model is not licensed for redistribution.

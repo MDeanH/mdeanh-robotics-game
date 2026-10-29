@@ -55,3 +55,36 @@
 - PR reported conflicts because main advanced to 6049fda (starter lesson/arcade improvements and separate Netlify hosting).
 - Merged main into codex/pixel-workshop, preserved its updated root index.html, retained its README/config as reference artifacts, and resolved workshop publish path to dist/. No change to remote main or the separately hosted starter.
 - Removed machine-local .netlify/state.json from tracked source; preserved ignored local binding to workshop site 52fa8bfb-3b0f-4627-94c4-be935970fb69. Explicit deployment ID remains required. Rechecked source and functional harness after merge.
+
+## 2026-10-28 — contemporary game direction
+- User instruction: Create a current game, not retro. This supersedes the prior visual direction.
+- Implementation: real Three.js 3D arena and studio rover; smooth vector fallback, modern HUD/menus/icons, pointer steering plus keyboard/touch, contemporary sound envelope. Missions, success rules, IDs, save key and saved progress stay compatible.
+- Archived first-concept raster/font assets under baseline/retro-assets; no longer included in the deployable game. Direct file:// launch now redirects to the live game because browser ES modules need an HTTP origin.
+- Three.js pinned package and source are being verified against official npm metadata; no actual robot or hardware capability is asserted by this illustrative game.
+- Initial browser/source verification pending renderer integration.
+
+## 2026-10-28 — modernization integration regression
+- Browser initialization failed at app.js navigation binding: lab-tab did not exist after a copy rename. No modules or preview initialized.
+- Recorded red test: lab_navigation_bindings_match_real_document_or_panel_elements failed with missing lab-tab (exit 1). Corrected binding to preserved workshop-tab ID; named contract test passes. Source model tests were unaffected, demonstrating why browser integration is necessary.
+
+## 2026-10-28 — latest Luka app as the visual reference
+- User asked to base this on the most recent Luka app. Consulted status-gated wiki luka-web and a2-remote-ipad-app; those are dated source records, with hardware/model claims carrying their documented limits.
+- Most recent user-referenced browser app found in today's Codex chat Review site for A2 Ultra training: https://luka.steadwell.cc (Steadwell · Luka A2 Ultra Cockpit), repository agr-labs/luka-cockpit, pushed 2026-10-28T13:25:49Z.
+- Inspected its live UI and presentation CSS only. Observed black three-column cockpit, central color-coded humanoid, compact dark panels, thin borders, teal/blue/amber system colors, system typography, mono labels. Did not use any hardware or robot controls.
+- Adapting the game to those presentation ideas. Gameplay remains an educational simulation with no robot connection.
+- Reviewed AGR Labs MIT LICENSE and third-party NOTICE. Public A2 T2D0 visual model is distributed under Mulan PSL v2; fetched its model/mesh pack and included license/notice. This is an estimated visual model, not physically calibrated to Luka. No joint recordings, camera, mapping, or live telemetry are copied.
+- Retro version remains at immutable public deploy https://6ae289b8b05a2208ace788a2--mdeanh-robotics-workshop.netlify.app/ (HTTP 200, retro title checked).
+
+## 2026-10-28 — correct the reference to the user's owned projects
+- User explicitly rejected the Steadwell reference and requested checking their own Netlify and GitHub projects. Stopped further changes while identifying those projects.
+- Live Netlify account inventory confirms user's Luka site: luka-a2, site f4805163-24ad-4369-a52a-bd1f925ae591, latest published 2026-10-23T06:26:29Z. Public frontend index.html, app.css, and figure.js match the local /Users/friday/Claude/code/luka-web/site/public bytes exactly.
+- Correct reference is Luka · Remote View: #0b0d10 background, #14171c cards, blue #5aa9ff accent, system typography, tab strip, two-column figure/status layout, and neutral gray humanoid. Earlier Steadwell styling is superseded and is not used as the product reference.
+- GitHub checked directly: MDeanH/luka-a2-ultra-model main 9490d0a (public estimated T2D0/Mulan assets), plus separate private luka-a2-ultra-ipad-data metadata/README. The latter says onboard/iPad meshes lack redistribution licensing; those private assets are not copied or published.
+- Public game geometry stays an estimated A2 teaching visual with its license/provenance, never physical Luka calibration or control. Correct owned-site styling and model presentation are now being applied.
+
+## 2026-10-28 — modern gameplay and visual checks
+- Actual WebGL initialized in browser (DOM renderer=webgl). Completed the four-checkpoint humanoid mission via held WASD and pulse, returning to dock with score 1380 and 3/4 integrity. Upgrade claim button was fully inside the overlay at 1280x720. Existing sensor upgrade and 980 best score carried over.
+- Gray public A2 hub model loaded all 47 drawable meshes (DOM data-visual=luka-estimated-a2); no browser warnings/errors in the fresh corrected-reference tab.
+- Laptop arena: dialog clientHeight=662, scrollHeight=662, Start fully visible; input and turbo exercised in actual 3D scene. Hub at1280px had no horizontal overflow.
+- Visual regression: expanding torus pulse had tube/radius 1.5/1 and became a filled white disk. Changed tube/radius to .008/1 (thin ring); decorative pulse hidden for reduced-motion preference. Gameplay rules unchanged.
+- Source and asset/model contracts: 39 tests pass before the final visual adjustment; full ES module checks pass. No hardware test or model calibration is claimed.

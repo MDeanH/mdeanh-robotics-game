@@ -1,10 +1,11 @@
 import { SENSOR_ROUNDS, checkSensorRoute, checkMotorTarget, runProgram, CONTROLLER_GRID, INITIAL_POWER_TILES, rotatePowerTile, tileConnections, isPowerCircuitClosed } from './model.js';
 
-const robot = `<svg viewBox="0 0 80 80" aria-hidden="true"><path fill="#243445" d="M17 39h46v27H17zM8 50h12v24H8zM60 50h12v24H60zM21 10h38v30H21zM38 2h4v10h-4z"/><path fill="#eaa83c" d="M24 13h32v23H24zM21 43h38v19H21z"/><path fill="#fff0ce" d="M29 19h8v9h-8zM44 19h8v9h-8z"/><path fill="#138c84" d="M29 48h23v6H29z"/><path fill="#667b83" d="M11 54h6v15h-6zM63 54h6v15h-6z"/></svg>`;
+import { partIcon } from './icons.js';
+const robot = partIcon('robot');
 const facts = {
-  sensors: { name: 'Distance sensor', line: 'Sensors measure the world. A controller uses those readings to decide what the robot does next.', part: 'A new set of senses' },
-  motors: { name: 'Wheel motors', line: 'Motors create movement. Different speeds at the left and right wheels can steer a two-wheel robot.', part: 'Ready to roll' },
-  controllers: { name: 'Controller board', line: 'A controller follows a program, step by step, to tell a robot what to do.', part: 'A little robot brain' },
+  sensors: { name: 'Perception sensors', line: 'Sensors measure the world. A controller uses those readings to decide what the robot does next.', part: 'A new set of senses' },
+  motors: { name: 'Joint actuators', line: 'Motors create movement. Different speeds at the left and right wheels can steer a two-wheel robot.', part: 'Ready to roll' },
+  controllers: { name: 'Robot controller', line: 'A controller follows a program, step by step, to tell a robot what to do.', part: 'A little robot brain' },
   power: { name: 'Battery pack', line: 'A battery supplies electrical energy. Current needs a complete conducting path through the load and back to the battery.', part: 'Powered by possibility' },
 };
 
@@ -36,14 +37,14 @@ export function mountChallenge(id, container, { onComplete = () => {}, playSound
   }
 
   function frame(content) {
-    return `<div class="game-content">${content}<p class="game-model-note">CLASSROOM MODEL · Try, observe, improve. No timer. No lost lives.</p></div>`;
+    return `<div class="game-content">${content}<p class="game-model-note">Interactive learning model · Experiment freely. Take your time.</p></div>`;
   }
 
   function win() {
     completed = true;
     playSound('success');
     const fact = facts[id];
-    paint(frame(`<section class="game-win"><span class="game-eyebrow">CHALLENGE COMPLETE</span><div class="game-win-robot">${robot}</div><h3>${fact.part}</h3><p>${fact.line}</p><div class="game-part-earned"><span>PART EARNED</span><strong>${fact.name}</strong></div><button class="game-primary" data-action="claim" data-focus="claim">Add to my robot <span aria-hidden="true">→</span></button><small>Back to workshop</small></section>`), 'claim');
+    paint(frame(`<section class="game-win"><span class="game-eyebrow">CHALLENGE COMPLETE</span><div class="game-win-robot">${robot}</div><h3>${fact.part}</h3><p>${fact.line}</p><div class="game-part-earned"><span>PART EARNED</span><strong>${fact.name}</strong></div><button class="game-primary" data-action="claim" data-focus="claim">Add to my robot <span aria-hidden="true">→</span></button><small>Back to the lab</small></section>`), 'claim');
   }
 
   function renderSensors() {

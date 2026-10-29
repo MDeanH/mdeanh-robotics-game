@@ -1,5 +1,6 @@
 import { MODULES, getModule } from './content.js';
 import { partIcon } from './icons.js';
+import { mountLabPreview } from './scene3d.js';
 import { mountChallenge } from './game.js';
 import { mountArcade } from './arcade.js';
 import { loadProgress, saveProgress, awardPart, freshProgress, progressXP, recordScore } from './progress.js';
@@ -15,11 +16,20 @@ let audio;
 let gameCleanup;
 let toastTimer;
 let dialogOpener;
+let previewCleanup;
+const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
+function startPreview() {
+  if (previewCleanup || document.hidden || challengeDialog.open) return;
+  const canvas = $('lab-preview');
+  try { previewCleanup = mountLabPreview(canvas, { reducedMotion, getSelectedPart: () => progress.selected }); }
+  catch { canvas.hidden = true; $('scene-fallback').hidden = false; $('scene-fallback').innerHTML = partIcon('robot'); }
+}
+function stopPreview() { previewCleanup?.(); previewCleanup = null; }
 const challengeDialog = $('challenge-dialog');
 const infoDialog = $('info-dialog');
 const startLabels = { sensors: 'START WITH THE SENSES', motors: 'MAKE YOUR NEXT MOVE', controllers: 'A LITTLE LOGIC GOES FAR', power: 'THE FINAL SPARK' };
-const shortFacts = { sensors: 'Measures how far away an object is.', motors: 'Turns electrical energy into movement.', controllers: 'Runs the instructions that guide your robot.', power: 'Supplies energy to the robot’s circuit.' };
-const playLabels = { sensors: 'START LOOT RUN', motors: 'START TURBO RUN', controllers: 'START CHECKPOINT RUSH', power: 'START BATTERY BLITZ' };
+const shortFacts = { sensors: 'Measures the environment so the controller can respond.', motors: 'Turns electrical energy into movement at a joint or wheel.', controllers: 'Runs the instructions that guide your robot.', power: 'Supplies energy to the robot’s circuit.' };
+const playLabels = { sensors: 'Launch sensor sweep', motors: 'Launch actuator trial', controllers: 'Launch sequence sprint', power: 'Launch energy relay' };
 const labTitles = { sensors: 'Scan & steer', motors: 'Wheel work', controllers: 'Code the course', power: 'Close the loop' };
 const unlocks = { sensors: 'WIDE SCAN + RADAR', motors: 'FASTER WHEELS', controllers: 'FASTER ABILITIES + BONUS SCORE', power: 'AN EXTRA HEART' };
 
@@ -32,7 +42,7 @@ function playSound(kind = 'click') {
     notes.forEach((frequency, index) => {
       const oscillator = audio.createOscillator();
       const gain = audio.createGain();
-      oscillator.type = 'square';
+      oscillator.type = 'triangle';
       oscillator.frequency.value = frequency;
       gain.gain.setValueAtTime(.035, audio.currentTime + index * .11);
       gain.gain.exponentialRampToValueAtTime(.001, audio.currentTime + index * .11 + .11);
@@ -65,43 +75,45 @@ function render() {
   $('module-list').innerHTML = MODULES.map((item, index) => `<button class="module-button${item.id === selected.id ? ' selected' : ''}${progress.completed.includes(item.id) ? ' completed' : ''}" data-part="${item.id}" aria-pressed="${item.id === selected.id}"><span class="module-icon" aria-hidden="true">${partIcon(item.id)}</span><span><span class="module-title">${item.name.toUpperCase()}</span><span class="module-sub">${item.skill}</span></span><span class="module-status" aria-label="${progress.completed.includes(item.id) ? 'Part earned' : 'Part not yet earned'}">${progress.completed.includes(item.id) ? '✓' : `0${index + 1}`}</span></button>`).join('');
   $('hotspots').innerHTML = MODULES.map((item, index) => `<button class="hotspot${item.id === selected.id ? ' selected' : ''}${progress.completed.includes(item.id) ? ' earned' : ''}" data-module="${item.id}" data-label="${item.part.toUpperCase()}" aria-label="Explore ${item.part}" aria-pressed="${item.id === selected.id}">${progress.completed.includes(item.id) ? '✓' : index + 1}</button>`).join('');
   $('mission-counter').textContent = `0${MODULES.indexOf(selected) + 1} / 04`;
-  $('mission-eyebrow').textContent = earned ? 'PART EARNED · KEEP EXPLORING' : startLabels[selected.id];
+  $('mission-eyebrow').textContent = earned ? 'Upgrade installed · ready for another trial' : startLabels[selected.id];
   $('mission-title').textContent = selected.tagline + '.';
   $('mission-description').textContent = selected.description;
   $('part-icon').innerHTML = partIcon(selected.id);
   $('part-name').textContent = selected.part;
   $('part-description').textContent = shortFacts[selected.id];
-  $('play-label').textContent = earned ? 'REPLAY · BEAT YOUR BEST' : playLabels[selected.id];
+  $('play-label').textContent = earned ? 'Replay field trial' : playLabels[selected.id];
   $('reward-label').textContent = progress.bestScores[selected.id] ? `BEST: ${progress.bestScores[selected.id].toLocaleString()}` : `+${selected.xp} XP`;
   $('mission-footnote').textContent = 'ARROWS / WASD TO DRIVE · SPACE FOR YOUR ABILITY';
   $('part-description').innerHTML = `${shortFacts[selected.id]}<span class="unlocks-note">${earned ? 'UNLOCKED' : 'UNLOCK'}: ${unlocks[selected.id]}</span>`;
   $('xp-label').textContent = `${progressXP(progress)} XP`;
   $('xp-fill').style.width = `${count * 25}%`;
-  $('rank-name').textContent = count === 4 ? 'ROBOT BUILDER' : count >= 2 ? 'BOT APPRENTICE' : 'ROOKIE BUILDER';
+  $('rank-name').textContent = count === 4 ? 'Robotics engineer' : count >= 2 ? 'Systems explorer' : 'Rookie engineer';
   $('notebook-count').textContent = `${count}/4`;
-  $('parts-count').textContent = `${count} / 4 PARTS`;
+  $('parts-count').textContent = `${count} / 4 systems`;
   $('progress-parts').setAttribute('aria-label', `${count} of 4 parts earned`);
   $('progress-parts').innerHTML = MODULES.map(item => `<span class="progress-part${progress.completed.includes(item.id) ? ' earned' : ''}" title="${item.name}${progress.completed.includes(item.id) ? ' earned' : ''}" aria-hidden="true"></span>`).join('');
-  $('robot-status').textContent = count === 4 ? 'BUILD COMPLETE' : 'IN THE MAKING';
-  $('mentor-message').textContent = count === 4 ? 'All systems go! How high can you push that score?' : count > 0 ? `${count} ${count === 1 ? 'upgrade' : 'upgrades'} installed. Time to take ${count === 1 ? 'it' : 'them'} for a spin!` : 'Lost parts. Mischievous scrap-bots. One little hero.';
-  $('mentor-detail').textContent = 'Grab the parts. Dodge trouble. Bring it all back to the dock.';
-  $('footer-message').innerHTML = count === 4 ? 'First robot built. <b>Next stop: big things.</b>' : 'Small robots. <b>Big ideas.</b>';
+  $('robot-status').textContent = count === 4 ? 'All systems online' : 'Build in progress';
+  $('mentor-message').textContent = count === 4 ? 'All systems go! How high can you push that score?' : count > 0 ? `${count} ${count === 1 ? 'upgrade' : 'upgrades'} installed. Time to take ${count === 1 ? 'it' : 'them'} for a spin!` : 'Explore the systems behind the humanoid.';
+  $('mentor-detail').textContent = 'Drive the arena. Discover the systems. Bring your upgrades home.';
+  $('footer-message').innerHTML = count === 4 ? 'All systems online. <b>Keep exploring.</b>' : 'Small robot. <b>Limitless possibilities.</b>';
   document.querySelector('.scene').classList.toggle('victory-running', count === 4);
 }
 
 function closeChallenge() { challengeDialog.close(); }
 challengeDialog.addEventListener('close', () => {
   gameCleanup?.(); gameCleanup = null; $('challenge-content').replaceChildren();
+  startPreview();
   dialogOpener?.focus();
 });
 function launchSession(id, mode = 'arcade') {
   const item = getModule(id);
   if (!item) return;
   dialogOpener = document.activeElement;
+  stopPreview();
   const arcade = mode === 'arcade';
   challengeDialog.classList.toggle('arcade-dialog', arcade);
   $('challenge-title').textContent = arcade ? item.challenge : labTitles[id];
-  $('challenge-kicker').textContent = `${item.name.toUpperCase()} / ${arcade ? 'ARCADE MISSION' : 'TINKER LAB'}`;
+  $('challenge-kicker').textContent = `${item.name.toUpperCase()} / ${arcade ? 'FIELD TRIAL' : 'SIMULATION LAB'}`;
   gameCleanup?.();
   gameCleanup = (arcade ? mountArcade : mountChallenge)(id, $('challenge-content'), {
     playSound,
@@ -135,11 +147,11 @@ function openInfo(title, content) {
 }
 infoDialog.addEventListener('close', () => dialogOpener?.focus());
 function showHelp() {
-  openInfo('Tiny robot. Big adventure.', `<p class="info-copy">The workshop’s lost its parts, and the scrap-bots are causing chaos. BOT–01 needs a brave driver. That’s you.</p><ol class="help-steps"><li><div><b>Drive, dodge, and discover</b><p>Use WASD or the arrow keys to steer. Grab parts and bonus sparks, dodge the red scrap-bots, and chain pickups for a bigger combo. Touch controls work too.</p></div></li><li><div><b>Put your parts to work</b><p>Press Space for your mission ability: scan the dark, burst into turbo, or make a power delivery. Protect your hearts! Pause whenever you need a breather.</p></div></li><li><div><b>Bring your loot home</b><p>Finish the objective and return to the glowing dock. Each new part adds an upgrade. Build the full robot, then replay to beat your high scores!</p></div></li></ol><p class="info-note">The Tinker lab has extra self-paced puzzles if you want to explore the science. Tab moves between buttons, Enter or Space activates them, and Escape closes panels. Progress and high scores save in this browser. All gameplay uses simplified educational models.</p><button class="play-button" id="help-start"><span>LET’S GO!</span><span aria-hidden="true">→</span></button>`);
+  openInfo('Welcome to Robot Lab.', `<p class="info-copy">Meet your humanoid, your training rover. Discover how four core systems work together through hands-on arena missions.</p><ol class="help-steps"><li><div><b>Drive, dodge, and discover</b><p>Use WASD or the arrow keys to steer. Grab parts and bonus sparks, avoid rogue training bots, and chain pickups for a bigger combo. Touch controls work too.</p></div></li><li><div><b>Put your parts to work</b><p>Press Space for your mission ability: scan the dark, burst into turbo, or make a power delivery. Protect your hearts! Pause whenever you need a breather.</p></div></li><li><div><b>Bring your loot home</b><p>Finish the objective and return to the glowing dock. Each new part adds an upgrade. Build the full robot, then replay to beat your high scores!</p></div></li></ol><p class="info-note">The Simulation lab has extra self-paced puzzles if you want to explore the science. Tab moves between buttons, Enter or Space activates them, and Escape closes panels. Progress and high scores save in this browser. All gameplay uses simplified educational models.</p><button class="play-button" id="help-start"><span>Launch your discovery</span><span aria-hidden="true">→</span></button>`);
   $('help-start').addEventListener('click', () => { infoDialog.close(); $('play-button').focus(); });
 }
 function showNotebook() {
-  openInfo('Your parts notebook.', `<p class="info-copy">Four little parts. Four big upgrades. Earn them, install them, and put them to work.</p><div class="notebook-grid">${MODULES.map(item => `<article class="notebook-card${progress.completed.includes(item.id) ? ' earned' : ''}"><span class="module-icon">${partIcon(item.id)}</span><span class="notebook-state">${progress.completed.includes(item.id) ? '✓ INSTALLED' : 'TO DISCOVER'}</span><h3>${item.part}</h3><span class="unlocks-note">${unlocks[item.id]}</span><ul>${item.notebook.map(fact => `<li>${fact}</li>`).join('')}</ul><button class="small-button" data-replay="${item.id}">${progress.completed.includes(item.id) ? 'REPLAY MISSION' : 'PLAY MISSION'}</button><button class="lab-replay-link" data-lab="${item.id}">Try the Tinker lab ↗</button></article>`).join('')}</div><div class="notebook-footer"><span>Saved on this device · ${progressXP(progress)} / 400 XP</span><button class="text-button" id="reset-button">Start a new build</button></div><div id="reset-confirm-slot"></div>`);
+  openInfo('Your component guide.', `<p class="info-copy">Four little parts. Four big upgrades. Earn them, install them, and put them to work.</p><div class="notebook-grid">${MODULES.map(item => `<article class="notebook-card${progress.completed.includes(item.id) ? ' earned' : ''}"><span class="module-icon">${partIcon(item.id)}</span><span class="notebook-state">${progress.completed.includes(item.id) ? '✓ INSTALLED' : 'TO DISCOVER'}</span><h3>${item.part}</h3><span class="unlocks-note">${unlocks[item.id]}</span><ul>${item.notebook.map(fact => `<li>${fact}</li>`).join('')}</ul><button class="small-button" data-replay="${item.id}">${progress.completed.includes(item.id) ? 'REPLAY MISSION' : 'PLAY MISSION'}</button><button class="lab-replay-link" data-lab="${item.id}">Try the Simulation lab ↗</button></article>`).join('')}</div><div class="notebook-footer"><span>Saved on this device · ${progressXP(progress)} / 400 XP</span><button class="text-button" id="reset-button">Start a new build</button></div><div id="reset-confirm-slot"></div>`);
   $('info-content').querySelectorAll('[data-replay]').forEach(button => button.addEventListener('click', () => { infoDialog.close(); launchArcade(button.dataset.replay); }));
   $('info-content').querySelectorAll('[data-lab]').forEach(button => button.addEventListener('click', () => { infoDialog.close(); launchChallenge(button.dataset.lab); }));
   $('reset-button').addEventListener('click', () => {
@@ -150,7 +162,7 @@ function showNotebook() {
   });
 }
 function showCompletion() {
-  openInfo('Meet your first robot.', `<div class="completion-art">${partIcon('robot')}<h3>BOT–01 · BUILD COMPLETE</h3><p>You earned every component and 400 XP. Your robot has the parts it needs to sense its surroundings, follow a plan, and get moving.</p><div class="completion-loop"><span>SENSE</span><span>DECIDE</span><span>ACT</span><span>POWER</span></div></div><p class="info-note">Want another lap? Replay any challenge from the Parts notebook. You can always experiment, make mistakes, and try a new approach.</p><button class="play-button" id="victory-close"><span>BACK TO MY WORKSHOP</span><span aria-hidden="true">→</span></button>`);
+  openInfo('Your systems are online.', `<div class="completion-art">${partIcon('robot')}<h3>your humanoid · BUILD COMPLETE</h3><p>You earned every component and 400 XP. You explored how sensing, actuation, control, and power work together in a robot.</p><div class="completion-loop"><span>SENSE</span><span>DECIDE</span><span>ACT</span><span>POWER</span></div></div><p class="info-note">Want another lap? Replay any challenge from the Components panel. You can always experiment, make mistakes, and try a new approach.</p><button class="play-button" id="victory-close"><span>BACK TO MY WORKSHOP</span><span aria-hidden="true">→</span></button>`);
   $('victory-close').addEventListener('click', () => infoDialog.close());
 }
 
@@ -184,5 +196,8 @@ $('sound-button').addEventListener('click', () => {
 });
 render();
 $('save-status').textContent = storageAvailable ? 'PROGRESS SAVED LOCALLY' : 'PROGRESS SAVED THIS SESSION';
-// A new player lands on the first arcade mission's start screen.
-if (!progress.completed.length) launchArcade(progress.selected);
+// The cockpit opens on the model explorer; missions launch from the selected system.
+startPreview();
+document.addEventListener('visibilitychange', () => document.hidden ? stopPreview() : startPreview());
+window.addEventListener('pagehide', () => { stopPreview(); gameCleanup?.(); });
+window.addEventListener('pageshow', event => { if (event.persisted) location.reload(); });

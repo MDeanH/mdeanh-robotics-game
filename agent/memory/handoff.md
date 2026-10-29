@@ -1,7 +1,9 @@
 # Handoff — mdeanh Robotics game
-Updated 2026-10-28. Browser game is implemented and locally verified. Public Netlify deployment is live and verified.
+Updated 2026-10-28. Modernization is in progress: user asked for a current game, not retro. The prior release remains publicly hosted until the modern version passes verification.
 
 ## Product and decisions
+Current direction, 2026-10-28: contemporary 3D robotics lab with smooth geometry, lighting, modern HUD and controls. This supersedes the earlier pixel-art visual direction below. Preserve all four missions and existing browser saves.
+
 User chose Pixel Workshop concept 2, then requested more fun action and public Netlify hosting. The workshop hub launches four real-time action missions teaching sensors, motors, controllers, and power. WASD/arrows, touch controls, Space specials, enemies, pickups, health, scoring, combos, upgrades, pause/retry. Optional Tinker labs teach sensing, differential wheels, programs, and circuits.
 
 ## Architecture

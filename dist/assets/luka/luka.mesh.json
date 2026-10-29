@@ -1,0 +1,289 @@
+{
+ "vertexStride": 6,
+ "vertexCount": 918390,
+ "linkCount": 47,
+ "ranges": [
+  {
+   "link": "base_link",
+   "first": 0,
+   "count": 87822,
+   "tris": 29274
+  },
+  {
+   "link": "left_hip_roll",
+   "first": 87822,
+   "count": 1458,
+   "tris": 486
+  },
+  {
+   "link": "left_hip_yaw",
+   "first": 89280,
+   "count": 3426,
+   "tris": 1142
+  },
+  {
+   "link": "left_hip_pitch",
+   "first": 92706,
+   "count": 11712,
+   "tris": 3904
+  },
+  {
+   "link": "left_tarsus",
+   "first": 104418,
+   "count": 22047,
+   "tris": 7349
+  },
+  {
+   "link": "left_toe_pitch",
+   "first": 126465,
+   "count": 1260,
+   "tris": 420
+  },
+  {
+   "link": "left_toe_roll",
+   "first": 127725,
+   "count": 18786,
+   "tris": 6262
+  },
+  {
+   "link": "left_toe_A",
+   "first": 146511,
+   "count": 14370,
+   "tris": 4790
+  },
+  {
+   "link": "left_toe_A_rod",
+   "first": 160881,
+   "count": 38196,
+   "tris": 12732
+  },
+  {
+   "link": "left_toe_B",
+   "first": 199077,
+   "count": 14370,
+   "tris": 4790
+  },
+  {
+   "link": "left_toe_B_rod",
+   "first": 213447,
+   "count": 34188,
+   "tris": 11396
+  },
+  {
+   "link": "right_hip_roll",
+   "first": 247635,
+   "count": 2124,
+   "tris": 708
+  },
+  {
+   "link": "right_hip_yaw",
+   "first": 249759,
+   "count": 3180,
+   "tris": 1060
+  },
+  {
+   "link": "right_hip_pitch",
+   "first": 252939,
+   "count": 10674,
+   "tris": 3558
+  },
+  {
+   "link": "right_tarsus",
+   "first": 263613,
+   "count": 19851,
+   "tris": 6617
+  },
+  {
+   "link": "right_toe_pitch",
+   "first": 283464,
+   "count": 1260,
+   "tris": 420
+  },
+  {
+   "link": "right_toe_roll",
+   "first": 284724,
+   "count": 18285,
+   "tris": 6095
+  },
+  {
+   "link": "right_toe_A",
+   "first": 303009,
+   "count": 14370,
+   "tris": 4790
+  },
+  {
+   "link": "right_toe_A_rod",
+   "first": 317379,
+   "count": 38196,
+   "tris": 12732
+  },
+  {
+   "link": "right_toe_B",
+   "first": 355575,
+   "count": 14370,
+   "tris": 4790
+  },
+  {
+   "link": "right_toe_B_rod",
+   "first": 369945,
+   "count": 34188,
+   "tris": 11396
+  },
+  {
+   "link": "left_arm_link01",
+   "first": 404133,
+   "count": 1824,
+   "tris": 608
+  },
+  {
+   "link": "left_arm_link02",
+   "first": 405957,
+   "count": 10968,
+   "tris": 3656
+  },
+  {
+   "link": "left_arm_link03",
+   "first": 416925,
+   "count": 15915,
+   "tris": 5305
+  },
+  {
+   "link": "left_arm_link04",
+   "first": 432840,
+   "count": 9810,
+   "tris": 3270
+  },
+  {
+   "link": "left_arm_link05",
+   "first": 442650,
+   "count": 9321,
+   "tris": 3107
+  },
+  {
+   "link": "left_arm_link06",
+   "first": 451971,
+   "count": 5628,
+   "tris": 1876
+  },
+  {
+   "link": "left_arm_link07",
+   "first": 457599,
+   "count": 6612,
+   "tris": 2204
+  },
+  {
+   "link": "left_hand",
+   "first": 464211,
+   "count": 150024,
+   "tris": 50008
+  },
+  {
+   "link": "left_wrist_motor_A",
+   "first": 614235,
+   "count": 2430,
+   "tris": 810
+  },
+  {
+   "link": "left_wrist_rod_A",
+   "first": 616665,
+   "count": 8214,
+   "tris": 2738
+  },
+  {
+   "link": "left_wrist_motor_B",
+   "first": 624879,
+   "count": 2406,
+   "tris": 802
+  },
+  {
+   "link": "left_wrist_rod_B",
+   "first": 627285,
+   "count": 8214,
+   "tris": 2738
+  },
+  {
+   "link": "right_arm_link01",
+   "first": 635499,
+   "count": 2658,
+   "tris": 886
+  },
+  {
+   "link": "right_arm_link02",
+   "first": 638157,
+   "count": 10962,
+   "tris": 3654
+  },
+  {
+   "link": "right_arm_link03",
+   "first": 649119,
+   "count": 17067,
+   "tris": 5689
+  },
+  {
+   "link": "right_arm_link04",
+   "first": 666186,
+   "count": 9978,
+   "tris": 3326
+  },
+  {
+   "link": "right_arm_link05",
+   "first": 676164,
+   "count": 9138,
+   "tris": 3046
+  },
+  {
+   "link": "right_arm_link06",
+   "first": 685302,
+   "count": 5628,
+   "tris": 1876
+  },
+  {
+   "link": "right_arm_link07",
+   "first": 690930,
+   "count": 6612,
+   "tris": 2204
+  },
+  {
+   "link": "right_hand",
+   "first": 697542,
+   "count": 150096,
+   "tris": 50032
+  },
+  {
+   "link": "right_wrist_motor_A",
+   "first": 847638,
+   "count": 2424,
+   "tris": 808
+  },
+  {
+   "link": "right_wrist_rod_A",
+   "first": 850062,
+   "count": 8226,
+   "tris": 2742
+  },
+  {
+   "link": "right_wrist_motor_B",
+   "first": 858288,
+   "count": 2436,
+   "tris": 812
+  },
+  {
+   "link": "right_wrist_rod_B",
+   "first": 860724,
+   "count": 8226,
+   "tris": 2742
+  },
+  {
+   "link": "head_link01",
+   "first": 868950,
+   "count": 36258,
+   "tris": 12086
+  },
+  {
+   "link": "head_link02",
+   "first": 905208,
+   "count": 13182,
+   "tris": 4394
+  }
+ ]
+}

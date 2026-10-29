@@ -1,6 +1,6 @@
 # mdeanh Robotics game
 
-Student robotics arcade in a warm 16-bit pixel workshop. User chose concept 2 on 2026-10-28. Read `agent/memory/MEMORY.md`, then `agent/memory/handoff.md` at session start. Preserve the append-only `RESEARCH_LOG.md`.
+Contemporary 3D robotics game for students. On 2026-10-28 the user explicitly replaced the earlier retro direction with a modern game. Use smooth 3D geometry, modern typography, and a current game interface. The authoritative visual reference is the user-owned Luka Remote View at https://luka-a2.netlify.app (local source /Users/friday/Claude/code/luka-web/site/public), verified against the live frontend. Use its neutral gray figure, blue tabs, dark two-column figure/status cards. Steadwell is not the requested reference. Read `agent/memory/MEMORY.md`, then `agent/memory/handoff.md` at session start. Preserve the append-only `RESEARCH_LOG.md`.
 
 ## Spine
 - All four modules (sensors, motors, controllers, power) have a completable interactive challenge with instructional feedback.
@@ -17,7 +17,9 @@ Buildless HTML/CSS/ES modules; no accounts, multiplayer, student data collection
 - `dist/index.html`: accessible workshop shell.
 - `dist/style.css`: visual presentation.
 - `dist/app.js`: workshop orchestration.
-- `dist/arcade.js`: animated action-game interface.
+- `dist/arcade.js`: action-game input and lifecycle.
+- `dist/scene3d.js`: Three.js arena and robot studio rendering.
+- `dist/arena2d.js`: smooth vector fallback for devices without WebGL.
 - `dist/arcade-model.js`: deterministic action-game rules.
 - `dist/game.js`: optional Tinker lab interface.
 - `dist/model.js`: deterministic challenge rules.
